@@ -1,0 +1,4 @@
+[[redirects]]
+  from = "/r/:code"
+  to = "/.netlify/functions/redirect?code=:code"
+  status = 200

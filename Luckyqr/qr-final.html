@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lucky QR — Generador de Códigos QR Gratis y Personalizado</title>
+<meta name="description" content="Creá códigos QR gratis, sin marcas de agua y al instante. URL, WiFi, WhatsApp, vCard, ubicación y más. El mejor generador de QR gratuito en español."/>
+<meta name="keywords" content="generador qr, codigo qr gratis, crear qr, qr personalizado, qr wifi, qr whatsapp"/>
+<meta name="author" content="Lucky QR"/>
+<meta name="robots" content="index, follow"/>
+<meta property="og:title" content="Lucky QR — Generador de Códigos QR Gratis"/>
+<meta property="og:description" content="Creá QR personalizados gratis. Sin marcas de agua, sin servidores, 100% privado."/>
+<meta property="og:type" content="website"/>
+<link rel="canonical" href="https://qrstudio.com"/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231d6b4a'/><rect x='6' y='6' width='8' height='8' rx='1' fill='white'/><rect x='7' y='7' width='6' height='6' rx='0.5' fill='%231d6b4a'/><rect x='8' y='8' width='4' height='4' fill='white'/><rect x='18' y='6' width='8' height='8' rx='1' fill='white'/><rect x='19' y='7' width='6' height='6' rx='0.5' fill='%231d6b4a'/><rect x='20' y='8' width='4' height='4' fill='white'/><rect x='6' y='18' width='8' height='8' rx='1' fill='white'/><rect x='7' y='19' width='6' height='6' rx='0.5' fill='%231d6b4a'/><rect x='8' y='20' width='4' height='4' fill='white'/><rect x='18' y='18' width='4' height='4' fill='white'/><rect x='24' y='18' width='2' height='2' fill='white'/><rect x='18' y='22' width='2' height='2' fill='white'/><rect x='22' y='22' width='4' height='4' fill='white'/></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<!--
+  ADSENSE: cuando tengas aprobación de Google, reemplazá esta línea con tu código:
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+-->
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#faf9f7;--bg2:#f3f1ed;--surface:#fff;
+  --border:#e8e4de;--border2:#d6d0c8;
+  --text:#18160f;--muted:#7a756c;--muted2:#b0a99e;
+  --accent:#1d6b4a;--accent-h:#155638;
+  --accent-l:#eaf4ee;--accent-l2:#d2eadb;
+  --danger:#b83232;--gold:#b45309;
+  --serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;
+  --r:12px;--rl:18px;
+  --sh:0 2px 16px rgba(0,0,0,.07),0 1px 3px rgba(0,0,0,.04);
+  --shl:0 8px 32px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh;overflow-x:hidden}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:200;background:rgba(250,249,247,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 clamp(1rem,5vw,3rem);height:60px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:blink 2.5s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.nav-right{display:flex;align-items:center;gap:8px;position:relative}
+.nav-hint{font-size:.72rem;color:var(--muted)}
+.btn-nav-reg{padding:6px 16px;background:var(--accent);color:#fff;border:none;border-radius:100px;font-family:var(--sans);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .18s}
+.btn-nav-reg:hover{background:var(--accent-h)}
+.btn-nav-log{padding:6px 14px;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:100px;font-family:var(--sans);font-size:.78rem;font-weight:500;cursor:pointer;transition:all .18s}
+.btn-nav-log:hover{border-color:var(--border2);background:var(--bg2)}
+.nav-user{display:none;align-items:center;gap:8px}
+.nav-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent-l);border:2px solid var(--accent-l2);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;color:var(--accent);cursor:pointer;user-select:none}
+.nav-avatar:hover{border-color:var(--accent)}
+.nav-uname{font-size:.82rem;font-weight:500}
+.btn-logout-nav{font-size:.72rem;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--sans);padding:4px 6px}
+.btn-logout-nav:hover{color:var(--danger)}
+
+/* ── USER PANEL ── */
+.user-panel{display:none;position:absolute;top:calc(100% + 10px);right:0;width:300px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);box-shadow:var(--shl);z-index:400}
+.up-head{padding:1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.up-av{width:46px;height:46px;border-radius:50%;background:var(--accent-l);border:2px solid var(--accent-l2);display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:600;color:var(--accent);flex-shrink:0}
+.up-meta h4{font-size:.9rem;font-weight:500;margin-bottom:2px}
+.up-meta p{font-size:.72rem;color:var(--muted)}
+.up-tabs{display:flex;border-bottom:1px solid var(--border)}
+.up-tab{flex:1;padding:.65rem;font-family:var(--sans);font-size:.75rem;font-weight:500;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.up-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.up-section{padding:1.25rem;display:none}
+.up-section.active{display:block}
+.up-field{margin-bottom:.85rem}
+.up-field label{display:block;font-size:.7rem;font-weight:500;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.up-field input,.up-field textarea{width:100%;padding:.5rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:var(--sans);font-size:.82rem;color:var(--text);outline:none;transition:border-color .2s;resize:none}
+.up-field input:focus,.up-field textarea:focus{border-color:var(--accent)}
+.up-field input[readonly]{opacity:.55;cursor:not-allowed}
+.up-field textarea{min-height:56px}
+.up-stat-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.up-stat{background:var(--bg2);border-radius:9px;padding:.75rem;text-align:center}
+.up-stat-n{font-family:var(--serif);font-size:1.6rem;font-weight:600;color:var(--accent);line-height:1}
+.up-stat-l{font-size:.68rem;color:var(--muted);margin-top:2px}
+.btn-save{width:100%;padding:.62rem;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:.82rem;font-weight:500;cursor:pointer;transition:background .18s}
+.btn-save:hover{background:var(--accent-h)}
+.up-foot{padding:.75rem 1.25rem;border-top:1px solid var(--border);display:flex;justify-content:flex-end}
+.btn-logout-full{font-size:.75rem;color:var(--danger);background:none;border:1px solid var(--danger);border-radius:8px;padding:5px 14px;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.btn-logout-full:hover{background:var(--danger);color:#fff}
+
+/* ── HERO ── */
+.hero{text-align:center;padding:clamp(3rem,7vw,6rem) clamp(1rem,5vw,3rem) clamp(2rem,4vw,4rem);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;width:600px;height:400px;background:radial-gradient(circle,var(--accent-l) 0%,transparent 70%);top:-150px;left:50%;transform:translateX(-50%);pointer-events:none}
+.hero>*{position:relative;z-index:1}
+.hero-chip{display:inline-flex;align-items:center;gap:7px;font-size:.72rem;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--accent);background:var(--accent-l);border:1px solid var(--accent-l2);padding:5px 14px;border-radius:100px;margin-bottom:1.5rem}
+.chip-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:blink 2s ease-in-out infinite}
+.hero h1{font-family:var(--serif);font-size:clamp(2.4rem,5.5vw,4.8rem);font-weight:600;line-height:1.08;letter-spacing:-1.5px;margin-bottom:1rem;max-width:660px;margin-left:auto;margin-right:auto}
+.hero h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+.hero-sub{font-size:1rem;color:var(--muted);font-weight:300;max-width:440px;margin:0 auto 2rem;line-height:1.8}
+.hero-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:1.5rem}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:.7rem 1.4rem;font-family:var(--sans);font-size:.88rem;font-weight:500;border-radius:var(--r);border:none;cursor:pointer;text-decoration:none;transition:all .2s}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{background:var(--accent-h);transform:translateY(-1px)}
+.btn-g{background:var(--surface);color:var(--text);border:1px solid var(--border)}.btn-g:hover{border-color:var(--border2);background:var(--bg2)}
+.reg-banner{display:flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;color:var(--muted);background:var(--accent-l);border:1px solid var(--accent-l2);border-radius:100px;padding:8px 18px;max-width:420px;margin:0 auto}
+.reg-banner a{color:var(--accent);font-weight:500;text-decoration:none;cursor:pointer}
+
+/* ── ADSENSE PLACEHOLDER ── */
+.ad-banner{width:100%;max-width:1020px;margin:0 auto;padding:0 clamp(1rem,5vw,2rem);text-align:center}
+.ad-banner-inner{background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--r);padding:1rem;font-size:.7rem;color:var(--muted2);min-height:90px;display:flex;align-items:center;justify-content:center}
+
+/* ── MAIN ── */
+.main{max-width:1020px;margin:2rem auto;padding:0 clamp(1rem,5vw,2rem);display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start}
+
+/* ── PANEL ── */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);box-shadow:var(--sh);overflow:hidden}
+.panel-hdr{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:.7rem;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.panel-body{padding:1.5rem}
+.field{margin-bottom:1rem}.field:last-child{margin-bottom:0}
+label{display:block;font-size:.78rem;font-weight:500;color:var(--text);margin-bottom:5px}
+.sublabel{font-size:.7rem;color:var(--muted2);font-weight:400;margin-left:4px}
+input[type=text],input[type=url],input[type=email],input[type=tel],input[type=password],textarea,select{width:100%;padding:.6rem .9rem;background:var(--bg);border:1px solid var(--border);border-radius:9px;font-family:var(--sans);font-size:.88rem;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;resize:none}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(29,107,74,.1)}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a756c' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:2rem;cursor:pointer}
+
+/* TABS */
+.type-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:1.25rem}
+.tab{padding:5px 11px;font-size:.73rem;font-family:var(--sans);font-weight:500;border:1px solid var(--border);border-radius:100px;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.tab:hover{border-color:var(--border2);color:var(--text)}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* SHAPES */
+.shape-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.shape-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 6px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--bg);cursor:pointer;transition:all .15s;font-family:var(--sans);font-size:.63rem;color:var(--muted);line-height:1}
+.shape-btn:hover{border-color:var(--border2);color:var(--text)}
+.shape-btn.active{border-color:var(--accent);background:var(--accent-l);color:var(--accent)}
+
+/* COLORS */
+.color-section{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:.75rem}
+.color-picker-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
+.color-picker-wrap label{font-size:.72rem;font-weight:500;color:var(--muted)}
+.color-wheel-btn{width:54px;height:54px;border-radius:50%;border:3px solid var(--border);cursor:pointer;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:border-color .2s}
+.color-wheel-btn:hover{border-color:var(--border2)}
+.color-wheel-btn input[type=color]{position:absolute;inset:-8px;width:calc(100%+16px);height:calc(100%+16px);border:none;padding:0;cursor:pointer;opacity:0}
+.color-hex-label{font-size:.68rem;color:var(--muted2);font-family:monospace}
+.color-warning{font-size:.68rem;color:var(--gold);background:#fdf3e7;border:1px solid #fde68a;border-radius:6px;padding:4px 8px;text-align:center;display:none;margin-top:4px}
+.color-warning.show{display:block}
+
+/* SLIDER */
+.slider-wrap{display:flex;align-items:center;gap:12px}
+input[type=range]{flex:1;height:4px;appearance:none;background:var(--border);border-radius:100px;outline:none;cursor:pointer;border:none;padding:0;box-shadow:none}
+input[type=range]::-webkit-slider-thumb{appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);cursor:pointer;transition:transform .15s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15)}
+.slider-val{font-size:.78rem;font-weight:500;min-width:48px;text-align:right}
+
+/* GENERATE */
+.btn-gen{width:100%;padding:.85rem;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:.9rem;font-weight:500;cursor:pointer;transition:all .2s;margin-top:1.25rem;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 2px 8px rgba(29,107,74,.2)}
+.btn-gen:hover{background:var(--accent-h);transform:translateY(-1px)}
+.spinner{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-gen.loading .spinner{display:block}
+.btn-gen.loading .btn-text{display:none}
+.progress{height:3px;background:var(--accent-l2);border-radius:100px;overflow:hidden;margin-top:1rem}
+.progress-bar{height:100%;background:var(--accent);border-radius:100px;width:0%;transition:width .4s ease}
+
+/* PREVIEW */
+.preview-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);box-shadow:var(--sh);position:sticky;top:74px}
+.qr-display{padding:2rem 2rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:1.25rem;min-height:280px;justify-content:center}
+.qr-frame{position:relative;padding:1.25rem;background:#fff;border-radius:var(--r);box-shadow:var(--shl);border:1px solid var(--border)}
+.qr-frame::before,.qr-frame::after,.c1,.c2{content:'';position:absolute;width:18px;height:18px;border-style:solid;border-color:var(--accent)}
+.qr-frame::before{top:-4px;left:-4px;border-width:2px 0 0 2px;border-radius:3px 0 0 0}
+.qr-frame::after{bottom:-4px;right:-4px;border-width:0 2px 2px 0;border-radius:0 0 3px 0}
+.c1{top:-4px;right:-4px;border-width:2px 2px 0 0;border-radius:0 3px 0 0}
+.c2{bottom:-4px;left:-4px;border-width:0 0 2px 2px;border-radius:0 0 0 3px}
+#qr-output{display:flex;align-items:center;justify-content:center}
+#qr-output canvas,#qr-output img{display:block;border-radius:3px}
+.qr-empty{text-align:center;padding:1.5rem}
+.qr-empty-icon{width:52px;height:52px;margin:0 auto 1rem;opacity:.1}
+.qr-empty p{font-size:.82rem;color:var(--muted);line-height:1.8}
+.qr-info{text-align:center;width:100%}
+.qr-info-text{font-size:.75rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px;margin:0 auto 3px}
+.qr-info-meta{font-size:.68rem;color:var(--muted2)}
+.dl-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 1.5rem 1rem;width:100%}
+.btn-dl{padding:.6rem;font-family:var(--sans);font-size:.76rem;font-weight:500;border-radius:9px;cursor:pointer;transition:all .18s;border:1px solid var(--border);background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-dl:hover{background:var(--bg2);border-color:var(--border2)}
+.btn-dl.p{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-dl.p:hover{background:var(--accent-h)}
+.btn-dl:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+.share-row{display:flex;gap:6px;padding:0 1.5rem 1.5rem;width:100%}
+.btn-sh{flex:1;padding:.48rem;font-size:.7rem;font-family:var(--sans);font-weight:500;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--muted);cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center}
+.btn-sh:hover{background:var(--bg2);color:var(--text)}
+.btn-sh:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+
+/* ── REVIEWS SECTION ── */
+.reviews-section{max-width:1020px;margin:0 auto;padding:0 clamp(1rem,5vw,2rem) 4rem}
+.reviews-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem}
+.reviews-title-wrap h2{font-family:var(--serif);font-size:1.8rem;font-weight:600;letter-spacing:-.5px}
+.reviews-title-wrap h2 em{font-style:italic;font-weight:400;color:var(--accent)}
+.reviews-avg-wrap{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.75rem 1.25rem;box-shadow:var(--sh)}
+.reviews-avg-num{font-family:var(--serif);font-size:2rem;font-weight:600;color:var(--accent);line-height:1}
+.reviews-avg-stars{font-size:1rem;color:#f59e0b}
+.reviews-avg-count{font-size:.72rem;color:var(--muted)}
+.btn-write-review{padding:.65rem 1.25rem;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .18s}
+.btn-write-review:hover{background:var(--accent-h);transform:translateY(-1px)}
+
+/* Write review form */
+.write-review-form{display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;margin-bottom:1.5rem;box-shadow:var(--sh)}
+.write-review-form.open{display:block}
+.write-review-form h3{font-size:.95rem;font-weight:500;margin-bottom:1rem}
+.stars-row{display:flex;gap:6px;margin-bottom:1rem}
+.star-btn{font-size:1.6rem;cursor:pointer;color:var(--border2);transition:color .15s;line-height:1;background:none;border:none;padding:0}
+.star-btn.on{color:#f59e0b}
+.star-btn:hover{color:#f59e0b}
+.write-review-form textarea{width:100%;padding:.7rem .9rem;background:var(--bg);border:1px solid var(--border);border-radius:9px;font-family:var(--sans);font-size:.85rem;color:var(--text);outline:none;resize:none;min-height:80px;transition:border-color .2s;margin-bottom:1rem}
+.write-review-form textarea:focus{border-color:var(--accent)}
+.btn-send-review{padding:.65rem 1.5rem;background:var(--accent);color:#fff;border:none;border-radius:9px;font-family:var(--sans);font-size:.85rem;font-weight:500;cursor:pointer;transition:background .18s}
+.btn-send-review:hover{background:var(--accent-h)}
+
+/* Reviews grid */
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.rev-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem;box-shadow:var(--sh);transition:transform .2s}
+.rev-card:hover{transform:translateY(-2px)}
+.rev-head{display:flex;align-items:center;gap:10px;margin-bottom:.75rem}
+.rev-av{width:36px;height:36px;border-radius:50%;background:var(--accent-l);border:1.5px solid var(--accent-l2);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;color:var(--accent);flex-shrink:0}
+.rev-name{font-size:.82rem;font-weight:500}
+.rev-date{font-size:.68rem;color:var(--muted2)}
+.rev-stars{font-size:.85rem;color:#f59e0b;margin-left:auto;flex-shrink:0}
+.rev-text{font-size:.78rem;color:var(--muted);line-height:1.7}
+.reviews-empty{text-align:center;padding:2.5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);color:var(--muted2);font-size:.85rem}
+
+/* ── INFO ── */
+.info-section{background:var(--bg2);border-top:1px solid var(--border);padding:clamp(3rem,6vw,5rem) clamp(1rem,5vw,3rem)}
+.info-inner{max-width:1020px;margin:0 auto}
+.section-tag{font-size:.68rem;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:.75rem}
+.section-h{font-family:var(--serif);font-size:clamp(1.8rem,3vw,2.5rem);font-weight:600;letter-spacing:-.5px;margin-bottom:2.5rem;line-height:1.2}
+.section-h em{font-style:italic;font-weight:400}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;transition:box-shadow .2s,transform .2s}
+.info-card:hover{box-shadow:var(--sh);transform:translateY(-2px)}
+.info-icon{width:40px;height:40px;background:var(--accent-l);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+.info-icon svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.info-card h3{font-size:.95rem;font-weight:500;margin-bottom:.4rem}
+.info-card p{font-size:.78rem;color:var(--muted);line-height:1.8}
+
+/* ── WHY SECTION ── */
+.why-section{background:var(--bg2);border-top:1px solid var(--border);padding:clamp(3rem,6vw,5rem) clamp(1rem,5vw,3rem)}
+.why-inner{max-width:1020px;margin:0 auto}
+.why-sub{font-size:.95rem;color:var(--muted);max-width:560px;line-height:1.8;margin-bottom:3rem;font-weight:300}
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:3rem}
+.why-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.5rem;transition:box-shadow .2s,transform .2s;position:relative}
+.why-card:hover{box-shadow:var(--sh);transform:translateY(-2px)}
+.why-card--highlight{border-color:var(--accent-l2);background:linear-gradient(135deg,var(--accent-l) 0%,var(--surface) 60%)}
+.why-card-icon{font-size:1.6rem;margin-bottom:.75rem;line-height:1}
+.why-card h3{font-size:.95rem;font-weight:500;margin-bottom:.5rem;line-height:1.4}
+.why-card p{font-size:.78rem;color:var(--muted);line-height:1.8}
+.why-tag{display:inline-block;margin-top:1rem;font-size:.65rem;font-weight:500;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;background:var(--accent-l);color:var(--accent);border-radius:100px;border:1px solid var(--accent-l2)}
+
+/* COMPARE WRAP */
+.compare-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh)}
+.compare-title{font-family:var(--serif);font-size:1.2rem;font-weight:600;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);letter-spacing:-.3px}
+.compare-scroll{overflow-x:auto}
+.compare-table{width:100%;border-collapse:collapse;min-width:600px}
+.compare-table th{background:var(--bg2);color:var(--muted);font-size:.72rem;font-weight:500;padding:.85rem 1.1rem;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.compare-table th.col-us{background:var(--accent-l);color:var(--accent)}
+.compare-table td{padding:.8rem 1.1rem;font-size:.78rem;border-bottom:1px solid var(--border);color:var(--muted);vertical-align:middle}
+.compare-table tr:last-child td{border-bottom:none}
+.compare-table td.col-us{background:rgba(234,244,238,.35);font-weight:500}
+.c-yes{color:var(--accent)!important;font-weight:500!important}
+.c-no{color:var(--muted2)!important}
+.c-mid{color:var(--gold)!important}
+.compare-note{font-size:.68rem;color:var(--muted2);padding:.75rem 1.5rem;border-top:1px solid var(--border);font-style:italic}
+
+/* HOW SECTION */
+.how-section{padding:clamp(3rem,6vw,5rem) clamp(1rem,5vw,3rem);background:var(--surface);border-top:1px solid var(--border)}
+.how-inner{max-width:1020px;margin:0 auto}
+.how-steps{display:flex;align-items:flex-start;gap:0;margin-top:2rem}
+.how-step{flex:1;display:flex;gap:1rem;align-items:flex-start}
+.how-num{font-family:var(--serif);font-size:2.5rem;font-weight:600;color:var(--accent-l2);line-height:1;flex-shrink:0;margin-top:.1rem}
+.how-content h3{font-size:.95rem;font-weight:500;margin-bottom:.4rem}
+.how-content p{font-size:.78rem;color:var(--muted);line-height:1.8}
+.how-connector{width:40px;flex-shrink:0;height:1px;background:var(--border);margin-top:1.4rem;align-self:flex-start}
+
+/* FAQ SECTION */
+.faq-section{padding:clamp(3rem,6vw,5rem) clamp(1rem,5vw,3rem);border-top:1px solid var(--border)}
+.faq-inner{max-width:720px;margin:0 auto}
+.faq-list{display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-top:2rem}
+.faq-item{background:var(--surface)}
+.faq-q{width:100%;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;font-size:.88rem;font-weight:500;text-align:left;background:none;border:none;color:var(--text);cursor:pointer;font-family:var(--sans);gap:1rem;transition:background .15s}
+.faq-q:hover{background:var(--bg2)}
+.faq-icon{font-size:1.2rem;color:var(--accent);flex-shrink:0;transition:transform .25s;line-height:1}
+.faq-item.open .faq-icon{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .3s;font-size:.82rem;color:var(--muted);line-height:1.9;padding:0 1.25rem}
+.faq-item.open .faq-a{max-height:200px;padding:.25rem 1.25rem 1.1rem}
+
+@media(max-width:768px){
+  .why-grid{grid-template-columns:1fr}
+  .how-steps{flex-direction:column;gap:1.5rem}
+  .how-connector{display:none}
+}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
+.footer-inner{max-width:1020px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.footer-brand{font-family:var(--serif);font-size:1.05rem;font-weight:600}
+.footer-brand span{color:var(--accent);font-style:italic}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{font-size:.75rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:.72rem;color:var(--muted2)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);box-shadow:var(--shl);width:100%;max-width:420px;overflow:hidden;transform:translateY(12px) scale(.98);transition:transform .25s}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-hdr{padding:1.5rem 1.5rem 0;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.modal-logo{font-family:var(--serif);font-size:1.1rem;font-weight:600;display:flex;align-items:center;gap:7px}
+.modal-logo-dot{width:7px;height:7px;background:var(--accent);border-radius:50%}
+.btn-close{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:1rem;line-height:1;flex-shrink:0}
+.btn-close:hover{background:var(--bg2);color:var(--text)}
+.modal-body{padding:1.25rem 1.5rem 1.5rem}
+.modal-title{font-family:var(--serif);font-size:1.45rem;font-weight:600;letter-spacing:-.5px;margin-bottom:.3rem}
+.modal-sub{font-size:.8rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.6}
+.modal-sub strong{color:var(--accent)}
+.auth-tabs{display:flex;margin-bottom:1.5rem;border:1px solid var(--border);border-radius:9px;overflow:hidden}
+.auth-tab{flex:1;padding:.6rem;font-family:var(--sans);font-size:.82rem;font-weight:500;border:none;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
+.auth-tab.active{background:var(--accent);color:#fff}
+.modal-field{margin-bottom:1rem}
+.modal-field label{font-size:.78rem;font-weight:500;display:block;margin-bottom:5px;color:var(--text)}
+.input-icon-wrap{position:relative;display:flex;align-items:center}
+.input-icon-wrap .field-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:15px;height:15px;stroke:var(--muted2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;z-index:1;flex-shrink:0}
+.input-icon-wrap input{width:100%;padding:.65rem .9rem .65rem 2.2rem;background:var(--bg);border:1px solid var(--border);border-radius:9px;font-family:var(--sans);font-size:.88rem;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s}
+.input-icon-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(29,107,74,.1)}
+.modal-error{font-size:.75rem;color:var(--danger);background:#fdf0f0;border:1px solid #f5c6c6;border-radius:8px;padding:8px 12px;margin-bottom:1rem;display:none}
+.modal-error.show{display:block}
+.btn-auth{width:100%;padding:.8rem;background:var(--accent);color:#fff;border:none;border-radius:9px;font-family:var(--sans);font-size:.88rem;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-auth:hover{background:var(--accent-h)}
+.btn-auth .spinner{display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+.btn-auth.loading .spinner{display:block}
+.btn-auth.loading .btn-text{display:none}
+.modal-div{display:flex;align-items:center;gap:10px;margin:1rem 0;color:var(--muted2);font-size:.72rem}
+.modal-div::before,.modal-div::after{content:'';flex:1;height:1px;background:var(--border)}
+.modal-ft{font-size:.72rem;color:var(--muted2);text-align:center;margin-top:1rem;line-height:1.7}
+.modal-ft a{color:var(--accent);text-decoration:none;font-weight:500;cursor:pointer}
+.modal-sec{display:flex;align-items:center;gap:6px;justify-content:center;font-size:.68rem;color:var(--muted2);margin-top:.75rem}
+.modal-sec svg{width:11px;height:11px;stroke:var(--muted2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* TOAST */
+.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(8px);background:var(--text);color:var(--bg);padding:.7rem 1.4rem;border-radius:100px;font-size:.82rem;font-weight:500;opacity:0;pointer-events:none;transition:all .25s;z-index:600;white-space:nowrap;box-shadow:var(--shl)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .main{grid-template-columns:1fr}
+  .preview-panel{position:static}
+  .info-grid,.reviews-grid{grid-template-columns:1fr}
+  .nav-hint{display:none}
+  .user-panel{width:270px;right:-1rem}
+}
+@media(max-width:480px){
+  .hero-btns{flex-direction:column;align-items:center}
+  .shape-grid{grid-template-columns:repeat(4,1fr)}
+  .compare-table td,.compare-table th{padding:.65rem .75rem;font-size:.72rem}
+}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-brand"><div class="nav-dot"></div>Lucky QR</a>
+  <div class="nav-right">
+    <div class="nav-hint" id="nav-auth-hint">Registrate para generar QR</div>
+    <button class="btn-nav-log" id="btn-nav-login" onclick="openModal('login')">Iniciar sesión</button>
+    <button class="btn-nav-reg" id="btn-nav-register" onclick="openModal('register')">Registrarse gratis</button>
+    <div class="nav-user" id="nav-user">
+      <div class="nav-avatar" id="nav-avatar" onclick="toggleUserPanel()">?</div>
+      <span class="nav-uname" id="nav-username"></span>
+      <button class="btn-logout-nav" onclick="logout()">Salir</button>
+    </div>
+    <div class="user-panel" id="user-panel">
+      <div class="up-head">
+        <div class="up-av" id="up-av">?</div>
+        <div class="up-meta"><h4 id="up-dname">Usuario</h4><p id="up-demail"></p></div>
+      </div>
+      <div class="up-tabs">
+        <button class="up-tab active" onclick="switchUpTab('info',this)">Mi perfil</button>
+        <button class="up-tab" onclick="switchUpTab('stats',this)">Actividad</button>
+      </div>
+      <div class="up-section active" id="up-tab-info">
+        <div class="up-field"><label>Nombre</label><input type="text" id="up-name" placeholder="Tu nombre"/></div>
+        <div class="up-field"><label>Email</label><input type="email" id="up-email" readonly/></div>
+        <div class="up-field"><label>Sitio web</label><input type="url" id="up-web" placeholder="https://mi-sitio.com"/></div>
+        <div class="up-field"><label>Bio</label><textarea id="up-bio" placeholder="Contá algo sobre vos..."></textarea></div>
+        <button class="btn-save" onclick="saveProfile()">Guardar cambios</button>
+      </div>
+      <div class="up-section" id="up-tab-stats">
+        <div class="up-stat-row">
+          <div class="up-stat"><div class="up-stat-n" id="up-qr-count">0</div><div class="up-stat-l">QR generados</div></div>
+          <div class="up-stat"><div class="up-stat-n" id="up-review-count">0</div><div class="up-stat-l">Reseñas dadas</div></div>
+        </div>
+        <div id="up-history-list"></div>
+      </div>
+      <div class="up-foot"><button class="btn-logout-full" onclick="logout()">Cerrar sesión</button></div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-chip"><span class="chip-dot"></span>Generador online — Sin costo</div>
+  <h1>Creá tu código QR<br><em>perfecto</em> en segundos</h1>
+  <p class="hero-sub">URL, WiFi, WhatsApp, contacto, ubicación y más. Personalizá la forma, los colores y el tamaño.</p>
+  <div class="hero-btns" id="hero-btns">
+    <button class="btn btn-p" onclick="openModal('register')">Crear cuenta gratis</button>
+    <button class="btn btn-g" onclick="openModal('login')">Ya tengo cuenta</button>
+  </div>
+  <div class="reg-banner" id="register-banner">
+    Necesitás una cuenta para generar QR — <a onclick="openModal('register')">Registrarse es gratis</a>
+  </div>
+</section>
+
+<!-- GENERATOR -->
+<main class="main" id="generator">
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Configuración</span>
+      <span id="char-count" style="font-size:.68rem;color:var(--muted2)">0 caracteres</span>
+    </div>
+    <div class="panel-body">
+
+      <div class="field">
+        <label>Tipo de QR</label>
+        <div class="type-tabs">
+          <button class="tab active" onclick="setType('url',this)">URL</button>
+          <button class="tab" onclick="setType('text',this)">Texto</button>
+          <button class="tab" onclick="setType('email',this)">Email</button>
+          <button class="tab" onclick="setType('tel',this)">Teléfono</button>
+          <button class="tab" onclick="setType('wifi',this)">WiFi</button>
+          <button class="tab" onclick="setType('sms',this)">SMS</button>
+          <button class="tab" onclick="setType('vcard',this)">vCard</button>
+          <button class="tab" onclick="setType('geo',this)">Ubicación</button>
+          <button class="tab" onclick="setType('whatsapp',this)">WhatsApp</button>
+          <button class="tab" onclick="setType('youtube',this)">YouTube</button>
+          <button class="tab" onclick="setType('instagram',this)">Instagram</button>
+          <button class="tab" onclick="setType('pdf',this)">PDF/Archivo</button>
+        </div>
+      </div>
+
+      <div id="input-area" class="field">
+        <label for="qr-input">URL <span class="sublabel">ej: https://mi-sitio.com</span></label>
+        <input type="url" id="qr-input" placeholder="https://" autocomplete="off" oninput="onInputChange()"/>
+      </div>
+      <div id="wifi-fields" style="display:none">
+        <div class="field"><label>Nombre de red</label><input type="text" id="wifi-ssid" placeholder="Mi Red WiFi"/></div>
+        <div class="field"><label>Contraseña</label><input type="text" id="wifi-pass" placeholder="contraseña123"/></div>
+        <div class="field"><label>Seguridad</label><select id="wifi-sec"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="">Sin contraseña</option></select></div>
+      </div>
+      <div id="sms-fields" style="display:none">
+        <div class="field"><label>Número</label><input type="tel" id="sms-tel" placeholder="+54 9 11 1234 5678"/></div>
+        <div class="field"><label>Mensaje <span class="sublabel">opcional</span></label><textarea id="sms-msg" placeholder="Hola!" style="min-height:56px"></textarea></div>
+      </div>
+      <div id="vcard-fields" style="display:none">
+        <div class="field"><label>Nombre completo</label><input type="text" id="vc-name" placeholder="Juan García"/></div>
+        <div class="field"><label>Teléfono</label><input type="tel" id="vc-phone" placeholder="+54 9 11 1234 5678"/></div>
+        <div class="field"><label>Email</label><input type="email" id="vc-email" placeholder="juan@email.com"/></div>
+        <div class="field"><label>Empresa</label><input type="text" id="vc-company" placeholder="Mi Empresa SA"/></div>
+        <div class="field"><label>Sitio web</label><input type="url" id="vc-web" placeholder="https://mi-sitio.com"/></div>
+      </div>
+      <div id="geo-fields" style="display:none">
+        <div class="field"><label>Link de Google Maps o coordenadas</label><input type="text" id="geo-input" placeholder="https://maps.google.com/... o -34.6037, -58.3816" oninput="parseGeoInput()"/></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="field"><label>Latitud</label><input type="text" id="geo-lat" placeholder="-34.6037" oninput="updateCharCount()"/></div>
+          <div class="field"><label>Longitud</label><input type="text" id="geo-lng" placeholder="-58.3816" oninput="updateCharCount()"/></div>
+        </div>
+      </div>
+      <div id="whatsapp-fields" style="display:none">
+        <div class="field"><label>Número de WhatsApp</label><input type="tel" id="wa-phone" placeholder="+54 9 11 1234 5678"/></div>
+        <div class="field"><label>Mensaje predefinido <span class="sublabel">opcional</span></label><textarea id="wa-msg" placeholder="Hola! Me comunico porque..." style="min-height:56px"></textarea></div>
+      </div>
+      <div id="youtube-fields" style="display:none">
+        <div class="field"><label>Link de YouTube</label><input type="url" id="yt-url" placeholder="https://youtube.com/watch?v=..." oninput="onInputChange()"/></div>
+      </div>
+      <div id="instagram-fields" style="display:none">
+        <div class="field"><label>Usuario o link de Instagram</label><input type="text" id="ig-user" placeholder="@mi_usuario" oninput="onInputChange()"/></div>
+      </div>
+      <div id="pdf-fields" style="display:none">
+        <div class="field"><label>Link del archivo <span class="sublabel">Google Drive, Dropbox, etc.</span></label><input type="url" id="pdf-url" placeholder="https://drive.google.com/..." oninput="onInputChange()"/></div>
+      </div>
+
+      <!-- sin selector de forma — módulos siempre cuadrados con trébol central -->
+
+      <div class="field">
+        <label>Colores</label>
+        <div class="color-section">
+          <div class="color-picker-wrap">
+            <label>Módulos</label>
+            <div class="color-wheel-btn" id="swatch-dark" style="background:#18160f"><input type="color" id="c-dark" value="#18160f" oninput="onColorChange()"/></div>
+            <span class="color-hex-label" id="hex-dark">#18160f</span>
+          </div>
+          <div class="color-picker-wrap">
+            <label>Fondo</label>
+            <div class="color-wheel-btn" id="swatch-light" style="background:#ffffff"><input type="color" id="c-light" value="#ffffff" oninput="onColorChange()"/></div>
+            <span class="color-hex-label" id="hex-light">#ffffff</span>
+          </div>
+        </div>
+        <div class="color-warning" id="color-warning">⚠ Los colores son muy similares — el QR puede no leerse correctamente</div>
+      </div>
+
+      <div class="field">
+        <label>Tamaño</label>
+        <div class="slider-wrap">
+          <input type="range" id="qr-size" min="128" max="512" value="256" step="32" oninput="document.getElementById('sz-val').textContent=this.value+'px'"/>
+          <span class="slider-val" id="sz-val">256px</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="qr-ec">Corrección de errores</label>
+        <select id="qr-ec">
+          <option value="L">L — Bajo (7%)</option>
+          <option value="M" selected>M — Medio (15%) recomendado</option>
+          <option value="Q">Q — Alto (25%)</option>
+          <option value="H">H — Máximo (30%)</option>
+        </select>
+      </div>
+
+      <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+      <button class="btn-gen" id="gen-btn" onclick="tryGenerate()">
+        <div class="spinner"></div><span class="btn-text">Generar QR</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="preview-panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Vista previa</span>
+      <span id="qr-status" style="font-size:.7rem;color:var(--muted2)">Sin generar</span>
+    </div>
+    <div class="qr-display">
+      <div class="qr-frame">
+        <div class="c1"></div><div class="c2"></div>
+        <div id="qr-output">
+          <div class="qr-empty">
+            <svg class="qr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            <p>Completá el formulario<br>y presioná <strong>Generar QR</strong></p>
+          </div>
+        </div>
+      </div>
+      <div class="qr-info" id="qr-info" style="display:none">
+        <div class="qr-info-text" id="qr-info-text"></div>
+        <div class="qr-info-meta" id="qr-info-meta"></div>
+      </div>
+    </div>
+    <div class="dl-row">
+      <button class="btn-dl" id="btn-copy" onclick="copyQR()" disabled>Copiar</button>
+      <button class="btn-dl p" id="btn-dl" onclick="downloadQR()" disabled>Descargar PNG</button>
+    </div>
+    <div class="share-row">
+      <button class="btn-sh" id="btn-share" onclick="shareQR()" disabled>Compartir</button>
+      <button class="btn-sh" id="btn-print" onclick="printQR()" disabled>Imprimir</button>
+      <button class="btn-sh" id="btn-svg" onclick="downloadSVG()" disabled>SVG</button>
+    </div>
+  </div>
+</main>
+
+<!-- ADSENSE BANNER (activar cuando tengas aprobación) -->
+<div class="ad-banner">
+  <div class="ad-banner-inner">Espacio publicitario — Google AdSense</div>
+</div>
+
+<!-- REVIEWS SECTION -->
+<section style="padding:3rem 0 0">
+  <div class="reviews-section">
+    <div class="reviews-header">
+      <div class="reviews-title-wrap">
+        <div class="section-tag">Opiniones</div>
+        <h2>Lo que dicen<br><em>nuestros usuarios</em></h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="reviews-avg-wrap">
+          <div class="reviews-avg-num" id="reviews-avg">—</div>
+          <div>
+            <div class="reviews-avg-stars">★★★★★</div>
+            <div class="reviews-avg-count"><span id="reviews-count">0</span> reseñas</div>
+          </div>
+        </div>
+        <button class="btn-write-review" onclick="toggleWriteReview()">✍ Dejar reseña</button>
+      </div>
+    </div>
+    <div class="write-review-form" id="write-review-form">
+      <h3>Tu opinión sobre Lucky QR</h3>
+      <div class="stars-row">
+        <button class="star-btn" onclick="setStar(1)">★</button>
+        <button class="star-btn" onclick="setStar(2)">★</button>
+        <button class="star-btn" onclick="setStar(3)">★</button>
+        <button class="star-btn" onclick="setStar(4)">★</button>
+        <button class="star-btn" onclick="setStar(5)">★</button>
+      </div>
+      <textarea id="review-text-input" placeholder="Contanos qué te pareció Lucky QR, qué usaste y qué mejorarías..."></textarea>
+      <button class="btn-send-review" onclick="sendReview()">Enviar reseña</button>
+    </div>
+    <div class="reviews-grid" id="reviews-public-list">
+      <div class="reviews-empty">Todavía no hay reseñas. ¡Sé el primero en compartir tu experiencia!</div>
+    </div>
+  </div>
+</section>
+
+<!-- INFO -->
+<section class="info-section" id="info">
+  <div class="info-inner">
+    <div class="section-tag">Para qué sirve</div>
+    <h2 class="section-h">Más usos de los que <em>imaginás</em></h2>
+    <div class="info-grid">
+      <div class="info-card reveal">
+        <div class="info-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <h3>Menús y catálogos</h3>
+        <p>Poné un QR en tu mesa o mostrador. Tus clientes acceden al menú actualizado al instante, sin impresiones ni costos extra.</p>
+      </div>
+      <div class="info-card reveal">
+        <div class="info-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>Tarjetas de contacto</h3>
+        <p>Compartí tu nombre, teléfono, email y empresa con un solo escaneo usando el formato vCard. Profesional y moderno.</p>
+      </div>
+      <div class="info-card reveal">
+        <div class="info-icon"><svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg></div>
+        <h3>Acceso WiFi fácil</h3>
+        <p>Generá un QR con tu red y contraseña. Tus visitas se conectan escaneando, sin escribir nada. Ideal para negocios y hogares.</p>
+      </div>
+      <div class="info-card reveal">
+        <div class="info-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <h3>Ubicaciones y mapas</h3>
+        <p>Compartí la ubicación de tu local o evento. Pegás el link de Google Maps y extraemos las coordenadas automáticamente.</p>
+      </div>
+      <div class="info-card reveal">
+        <div class="info-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h3>WhatsApp directo</h3>
+        <p>Generá un QR que abre WhatsApp con tu número y un mensaje predefinido. Perfecto para atención al cliente.</p>
+      </div>
+      <div class="info-card reveal">
+        <div class="info-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>100% privado</h3>
+        <p>Todo el procesamiento ocurre en tu navegador. Ningún dato que ingresás sale de tu dispositivo. Sin servidores ni rastreo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POR QUÉ ELEGIRNOS — VISUAL -->
+<section class="why-section">
+  <div class="why-inner">
+    <div class="section-tag">Por qué Lucky QR</div>
+    <h2 class="section-h">No todos los generadores<br>de QR son <em>iguales</em></h2>
+    <p class="why-sub">La mayoría te pide que pagues, te llena de publicidad invasiva o guarda tus datos en sus servidores. Lucky QR nació para ser diferente desde el primer día.</p>
+
+    <!-- Diferenciadores principales -->
+    <div class="why-grid">
+      <div class="why-card why-card--highlight reveal">
+        <div class="why-card-icon">🔒</div>
+        <h3>Tu información nunca sale de tu dispositivo</h3>
+        <p>A diferencia de otros generadores, Lucky QR procesa todo en tu navegador. Nadie ve lo que escribís — ni nosotros. Tus URLs, contraseñas de WiFi y datos de contacto son solo tuyos.</p>
+        <div class="why-tag">Privacidad real</div>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-card-icon">⚡</div>
+        <h3>Instantáneo y sin registros molestos</h3>
+        <p>La mayoría de los generadores te hacen crear una cuenta antes de ver algo. En Lucky QR podés explorar todo primero, y registrarte solo cuando querés generar y guardar tu trabajo.</p>
+        <div class="why-tag">Sin fricciones</div>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-card-icon">🎨</div>
+        <h3>Personalización real, no de adorno</h3>
+        <p>Elegís el color exacto de los módulos y el fondo con una rueda de color completa. Si los colores son demasiado parecidos, te avisamos antes de que el QR sea ilegible. Diseño que funciona.</p>
+        <div class="why-tag">Control total</div>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-card-icon">📦</div>
+        <h3>Descargás lo que ves, sin sorpresas</h3>
+        <p>El QR que aparece en pantalla es exactamente el que vas a descargar. Sin marcas de agua escondidas, sin degradación de calidad, sin necesidad de pagar para obtener la versión "real".</p>
+        <div class="why-tag">Lo que ves es lo que llevás</div>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-card-icon">🌐</div>
+        <h3>12 tipos de QR en un solo lugar</h3>
+        <p>URL, WiFi, WhatsApp, vCard, geolocalización, SMS, YouTube, Instagram, PDF y más. Otros generadores gratuitos solo ofrecen URL. Acá tenés todo sin pagar un peso extra.</p>
+        <div class="why-tag">Todo incluido</div>
+      </div>
+      <div class="why-card reveal">
+        <div class="why-card-icon">📴</div>
+        <h3>Funciona sin internet</h3>
+        <p>Una vez que cargaste la página, podés generar QR aunque se corte la conexión. Ideal para presentaciones, eventos o lugares con señal mala. La mayoría de los generadores se rompen si no hay internet.</p>
+        <div class="why-tag">Offline ready</div>
+      </div>
+    </div>
+
+    <!-- Comparativa -->
+    <div class="compare-wrap reveal">
+      <h3 class="compare-title">Lucky QR vs la competencia</h3>
+      <div class="compare-scroll">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Característica</th>
+              <th class="col-us">Lucky QR 🍀</th>
+              <th>QR Code Monkey</th>
+              <th>QRCode.es</th>
+              <th>GoQR</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>100% gratis</td><td class="col-us c-yes">✓ Siempre</td><td class="c-mid">Limitado</td><td class="c-mid">Freemium</td><td class="c-yes">✓</td></tr>
+            <tr><td>Sin marcas de agua</td><td class="col-us c-yes">✓ Nunca</td><td class="c-no">Solo premium</td><td class="c-no">Solo premium</td><td class="c-yes">✓</td></tr>
+            <tr><td>Datos privados (sin servidor)</td><td class="col-us c-yes">✓ 100% local</td><td class="c-no">Pasan por servidor</td><td class="c-no">Pasan por servidor</td><td class="c-no">Pasan por servidor</td></tr>
+            <tr><td>Funciona offline</td><td class="col-us c-yes">✓ Sí</td><td class="c-no">No</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td>Exportar SVG gratis</td><td class="col-us c-yes">✓ Incluido</td><td class="c-no">Solo premium</td><td class="c-no">Solo premium</td><td class="c-no">No disponible</td></tr>
+            <tr><td>Tipos de QR gratuitos</td><td class="col-us c-yes">✓ 12 tipos</td><td class="c-mid">5 tipos</td><td class="c-mid">3 tipos</td><td class="c-mid">4 tipos</td></tr>
+            <tr><td>Colores personalizados</td><td class="col-us c-yes">✓ Rueda completa</td><td class="c-yes">✓</td><td class="c-mid">Limitado</td><td class="c-no">No</td></tr>
+            <tr><td>Registro requerido</td><td class="col-us c-yes">✓ Opcional</td><td class="c-no">Sí</td><td class="c-no">Sí</td><td class="c-yes">No</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="compare-note">* Comparativa basada en los planes gratuitos de cada servicio al momento de publicación.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CÓMO FUNCIONA -->
+<section class="how-section">
+  <div class="how-inner">
+    <div class="section-tag">Proceso simple</div>
+    <h2 class="section-h">En 3 pasos tenés<br>tu QR <em>listo para usar</em></h2>
+    <div class="how-steps">
+      <div class="how-step reveal">
+        <div class="how-num">01</div>
+        <div class="how-content">
+          <h3>Creá tu cuenta gratis</h3>
+          <p>Solo necesitás un email y una contraseña. Sin tarjeta de crédito, sin datos de más. En 30 segundos estás adentro.</p>
+        </div>
+      </div>
+      <div class="how-connector"></div>
+      <div class="how-step reveal">
+        <div class="how-num">02</div>
+        <div class="how-content">
+          <h3>Configurá tu QR</h3>
+          <p>Elegí el tipo (URL, WiFi, WhatsApp y más), personalizá los colores y ajustá el tamaño. Ves el resultado en tiempo real.</p>
+        </div>
+      </div>
+      <div class="how-connector"></div>
+      <div class="how-step reveal">
+        <div class="how-num">03</div>
+        <div class="how-content">
+          <h3>Descargá y usá</h3>
+          <p>Exportá en PNG de alta resolución o SVG vectorial. Lo que ves en pantalla es exactamente lo que descargás. Sin sorpresas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="faq-inner">
+    <div class="section-tag">Preguntas frecuentes</div>
+    <h2 class="section-h">Lo que más nos <em>preguntan</em></h2>
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Los QR generados expiran?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">No. Los QR de Lucky QR son estáticos y no expiran jamás. Una vez generado, funcionará para siempre mientras el contenido (como la URL) siga siendo válido. No dependemos de ningún servidor para que tu QR siga andando.</div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Por qué necesito registrarme para generar QR?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">El registro nos permite guardarte el historial de QR generados y ofrecerte funciones personalizadas en el futuro. Es completamente gratis, no pedimos tarjeta y en ningún momento vendemos tu información. Podés explorar toda la página antes de registrarte.</div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Qué tamaño necesito para imprimir un QR?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Para impresión recomendamos al menos 300px (o usar el formato SVG que escala sin pérdida). Para uso en pantalla o redes sociales, 256px es más que suficiente. Si vas a ponerlo en un cartel grande, usá SVG para que quede perfecto a cualquier escala.</div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Mis datos de WiFi o WhatsApp se guardan en algún servidor?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">No. Todo el procesamiento ocurre directamente en tu navegador. Tus contraseñas de WiFi, números de WhatsApp y cualquier otro dato que ingresás nunca salen de tu dispositivo ni pasan por ningún servidor nuestro.</div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Puedo usar Lucky QR para mi negocio?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Sí, sin restricciones. Podés generar QR para menús, tarjetas de contacto, redes WiFi de clientes, catálogos digitales, campañas de marketing y cualquier uso comercial. Es completamente gratis y sin límite de cantidad.</div>
+      </div>
+      <div class="faq-item reveal">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Qué nivel de corrección de errores debo usar?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Para uso general recomendamos el nivel M (Medio). Si el QR va a estar en un lugar donde puede ensuciarse o dañarse (carteles, empaques, exteriores) usá Q o H. Si vas a agregar un logo o imagen encima del QR, usá H para que siga siendo legible.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Lucky <span>QR</span></div>
+    <div class="footer-links">
+      <a href="#">Inicio</a>
+      <a href="#generator">Generador</a>
+      <a href="#info">Usos</a>
+      <a href="#" onclick="openModal('register');return false">Registrarse</a>
+    </div>
+    <div class="footer-copy">lucky-qr.netlify.app · Sin servidores · 100% privado · 2025</div>
+  </div>
+</footer>
+
+<!-- MODAL AUTH -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-logo"><div class="modal-logo-dot"></div>Lucky QR</div>
+      <button class="btn-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Iniciar sesión</button>
+        <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Registrarse</button>
+      </div>
+      <div class="modal-title" id="modal-title">Bienvenido de vuelta</div>
+      <div class="modal-sub" id="modal-sub">Ingresá para generar tus códigos QR. <strong>Es gratis.</strong></div>
+      <div class="modal-error" id="modal-error"></div>
+      <div class="modal-field" id="field-name" style="display:none">
+        <label>Nombre</label>
+        <div class="input-icon-wrap">
+          <svg class="field-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+          <input type="text" id="auth-name" placeholder="Tu nombre" autocomplete="name"/>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Email</label>
+        <div class="input-icon-wrap">
+          <svg class="field-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <input type="email" id="auth-email" placeholder="tu@email.com" autocomplete="email"/>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label>Contraseña</label>
+        <div class="input-icon-wrap">
+          <svg class="field-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="auth-pass" placeholder="Mínimo 6 caracteres" autocomplete="current-password"/>
+        </div>
+      </div>
+      <div class="modal-field" id="field-confirm" style="display:none">
+        <label>Confirmá tu contraseña</label>
+        <div class="input-icon-wrap">
+          <svg class="field-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="auth-confirm" placeholder="Repetí tu contraseña" autocomplete="new-password"/>
+        </div>
+      </div>
+      <button class="btn-auth" id="btn-auth" onclick="handleAuth()">
+        <div class="spinner"></div>
+        <span class="btn-text" id="btn-auth-text">Iniciar sesión</span>
+      </button>
+      <div class="modal-div">o</div>
+      <div class="modal-ft" id="modal-switch-text">¿No tenés cuenta? <a onclick="switchAuthTab('register')">Registrate gratis</a></div>
+      <div class="modal-sec">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Tus datos son privados y seguros
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="qr-script.js"></script>
+</body>
+</html>
