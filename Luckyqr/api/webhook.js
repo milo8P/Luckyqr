@@ -29,7 +29,8 @@ module.exports = async function handler(req, res) {
     const session = event.data.object
     const userId  = session.metadata.userId
 
-    console.log('Activando premium para:', userId)
+    console.log('Session completa:', JSON.stringify(session))
+    console.log('Activando premium para userId:', userId)
 
     await fetch(`${process.env.SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
       method: 'PATCH',
