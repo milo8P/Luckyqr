@@ -1,5 +1,63 @@
+// ── Supabase ──
+var SUPABASE_URL = 'https://mqhgqdozuilerfhisoqy.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_Owm4MnvGI5FepdV9-wTo9w_U9xI7oxH';
+var supabase = null;
+
+window.addEventListener('load', function() {
+  if (window.supabase && window.supabase.createClient) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // escuchar cambios de sesión
+    supabase.auth.onAuthStateChange(function(event, session) {
+      if (session && session.user) {
+        loadUserProfile(session.user);
+      } else {
+        currentUser = null;
+        showLoggedOut();
+      }
+    });
+    // verificar sesión existente
+    supabase.auth.getSession().then(function(res) {
+      if (res.data && res.data.session) {
+        loadUserProfile(res.data.session.user);
+      } else {
+        showLoggedOut();
+      }
+    });
+  }
+});
+
+async function loadUserProfile(authUser) {
+  // buscar perfil en tabla profiles
+  var res = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', authUser.id)
+    .single();
+
+  if (res.error || !res.data) {
+    // crear perfil si no existe
+    await supabase.from('profiles').insert({
+      id:    authUser.id,
+      email: authUser.email,
+      name:  authUser.user_metadata.name || authUser.email.split('@')[0],
+      plan:  'free'
+    });
+    currentUser = {
+      id:    authUser.id,
+      email: authUser.email,
+      name:  authUser.user_metadata.name || authUser.email.split('@')[0],
+      plan:  'free'
+    };
+  } else {
+    currentUser = res.data;
+  }
+
+  showLoggedIn();
+  checkPremiumStatus();
+}
+
 // ── Estado global ──
-var currentUser  = JSON.parse(localStorage.getItem('qr_user') || 'null');
+var currentUser  = null;
 var authMode     = 'login';
 var currentType  = 'url';
 var currentStar  = 0;
@@ -49,8 +107,8 @@ function showLoggedOut() {
 }
 
 function logout() {
+  if (supabase) supabase.auth.signOut();
   currentUser = null;
-  localStorage.removeItem('qr_user');
   showLoggedOut();
   showToast('Sesión cerrada');
 }
@@ -64,26 +122,25 @@ function toggleUserPanel() {
   loadUserPanel();
 }
 
-function loadUserPanel() {
-  if (!currentUser) return;
+async function loadUserPanel() {
+  if (!currentUser || !supabase) return;
   var n = document.getElementById('up-name'); if (n) n.value = currentUser.name || '';
   var e = document.getElementById('up-email'); if (e) e.value = currentUser.email || '';
   var b = document.getElementById('up-bio'); if (b) b.value = currentUser.bio || '';
   var w = document.getElementById('up-web'); if (w) w.value = currentUser.web || '';
-  var qrs  = JSON.parse(localStorage.getItem('qr_history_' + currentUser.email) || '[]');
-  var revs = JSON.parse(localStorage.getItem('qr_reviews') || '[]');
-  var myR  = revs.filter(function(r){ return r.email === currentUser.email; });
-  var cnt  = document.getElementById('up-qr-count');  if (cnt)  cnt.textContent  = qrs.length;
-  var rcnt = document.getElementById('up-review-count'); if (rcnt) rcnt.textContent = myR.length;
+  var qrRes  = await supabase.from('dynamic_qrs').select('id', { count:'exact' }).eq('user_id', currentUser.id);
+  var cnt  = document.getElementById('up-qr-count');  if (cnt)  cnt.textContent  = qrRes.count || 0;
+  var histRes = await supabase.from('dynamic_qrs').select('name,created_at').eq('user_id', currentUser.id).order('created_at', { ascending:false }).limit(5);
   var hl = document.getElementById('up-history-list');
   if (hl) {
-    if (qrs.length === 0) {
+    if (!histRes.data || histRes.data.length === 0) {
       hl.innerHTML = '<p style="font-size:.75rem;color:var(--muted2)">Todavía no generaste ningún QR.</p>';
     } else {
-      hl.innerHTML = '<p style="font-size:.7rem;color:var(--muted);margin-bottom:6px;font-weight:500">Últimos QR generados:</p>'
-        + qrs.slice(0,5).map(function(q){
+      hl.innerHTML = '<p style="font-size:.7rem;color:var(--muted);margin-bottom:6px;font-weight:500">Últimos QR dinámicos:</p>'
+        + histRes.data.map(function(q){
             return '<div style="font-size:.72rem;padding:5px 0;border-bottom:1px solid var(--border);color:var(--muted)">'
-              + '<span style="color:var(--accent);font-weight:500">' + q.type.toUpperCase() + '</span> · ' + q.date + '</div>';
+              + '<span style="color:var(--accent);font-weight:500">' + q.name + '</span> · '
+              + new Date(q.created_at).toLocaleDateString("es-AR") + '</div>';
           }).join('');
     }
   }
@@ -97,20 +154,15 @@ function switchUpTab(tab, btn) {
   if (tab === 'stats') loadUserPanel();
 }
 
-function saveProfile() {
+async function saveProfile() {
   var name = document.getElementById('up-name').value.trim();
   var bio  = document.getElementById('up-bio').value.trim();
   var web  = document.getElementById('up-web').value.trim();
   if (!name) { showToast('Ingresá tu nombre'); return; }
+  if (!supabase || !currentUser) return;
+  var res = await supabase.from('profiles').update({ name:name, bio:bio, web:web }).eq('id', currentUser.id);
+  if (res.error) { showToast('Error al guardar'); return; }
   currentUser.name = name; currentUser.bio = bio; currentUser.web = web;
-  localStorage.setItem('qr_user', JSON.stringify(currentUser));
-  var users = JSON.parse(localStorage.getItem('qr_users') || '{}');
-  if (users[currentUser.email]) {
-    users[currentUser.email].name = name;
-    users[currentUser.email].bio  = bio;
-    users[currentUser.email].web  = web;
-    localStorage.setItem('qr_users', JSON.stringify(users));
-  }
   document.getElementById('nav-username').textContent = name;
   document.getElementById('nav-avatar').textContent   = name.slice(0,2).toUpperCase();
   var av = document.getElementById('up-av'); if (av) av.textContent = name.slice(0,2).toUpperCase();
@@ -162,32 +214,37 @@ function handleAuth() {
   if (!email || !pass) { showModalError('Completá todos los campos.'); return; }
   if (!email.includes('@')) { showModalError('Ingresá un email válido.'); return; }
   if (pass.length < 6) { showModalError('La contraseña debe tener al menos 6 caracteres.'); return; }
+  if (!supabase) { showModalError('Error de conexión. Recargá la página.'); return; }
   btn.classList.add('loading');
-  setTimeout(function(){
-    btn.classList.remove('loading');
-    if (authMode === 'register') {
-      var name    = document.getElementById('auth-name').value.trim();
-      var confirm = document.getElementById('auth-confirm').value;
-      if (!name)           { showModalError('Ingresá tu nombre.'); return; }
-      if (pass !== confirm){ showModalError('Las contraseñas no coinciden.'); return; }
-      var users = JSON.parse(localStorage.getItem('qr_users') || '{}');
-      if (users[email])    { showModalError('Ese email ya está registrado.'); return; }
-      users[email] = { name:name, email:email, pass:pass };
-      localStorage.setItem('qr_users', JSON.stringify(users));
-      currentUser = { name:name, email:email };
-      localStorage.setItem('qr_user', JSON.stringify(currentUser));
-      showLoggedIn(); closeModal();
+
+  if (authMode === 'register') {
+    var name = document.getElementById('auth-name').value.trim();
+    var confirm = document.getElementById('auth-confirm').value;
+    if (!name) { showModalError('Ingresá tu nombre.'); btn.classList.remove('loading'); return; }
+    if (pass !== confirm) { showModalError('Las contraseñas no coinciden.'); btn.classList.remove('loading'); return; }
+
+    supabase.auth.signUp({
+      email: email,
+      password: pass,
+      options: { data: { name: name } }
+    }).then(function(res) {
+      btn.classList.remove('loading');
+      if (res.error) { showModalError(res.error.message); return; }
+      closeModal();
       showToast('Cuenta creada. Bienvenido, ' + name + '!');
-    } else {
-      var users2 = JSON.parse(localStorage.getItem('qr_users') || '{}');
-      var user   = users2[email];
-      if (!user || user.pass !== pass) { showModalError('Email o contraseña incorrectos.'); return; }
-      currentUser = { name:user.name, email:email, bio:user.bio||'', web:user.web||'' };
-      localStorage.setItem('qr_user', JSON.stringify(currentUser));
-      showLoggedIn(); closeModal();
-      showToast('Bienvenido de vuelta, ' + user.name + '!');
-    }
-  }, 800);
+    });
+
+  } else {
+    supabase.auth.signInWithPassword({
+      email: email,
+      password: pass
+    }).then(function(res) {
+      btn.classList.remove('loading');
+      if (res.error) { showModalError('Email o contraseña incorrectos.'); return; }
+      closeModal();
+      showToast('Bienvenido de vuelta!');
+    });
+  }
 }
 
 function showModalError(msg) {
@@ -538,10 +595,11 @@ function printQR() {
 }
 
 // ── Reseñas ──
-function loadReviewsSection() {
+async function loadReviewsSection() {
   var list = document.getElementById('reviews-public-list');
-  if (!list) return;
-  var revs = JSON.parse(localStorage.getItem('qr_reviews') || '[]');
+  if (!list || !supabase) return;
+  var res = await supabase.from('reviews').select('*').order('created_at', { ascending:false }).limit(6);
+  var revs = res.data || [];
   var count = document.getElementById('reviews-count');
   if (count) count.textContent = revs.length;
   if (revs.length === 0) {
@@ -551,13 +609,13 @@ function loadReviewsSection() {
   var avg = revs.reduce(function(a,r){ return a+r.stars; },0) / revs.length;
   var avgEl = document.getElementById('reviews-avg');
   if (avgEl) avgEl.textContent = avg.toFixed(1);
-  list.innerHTML = revs.slice(0,6).map(function(r){
+  list.innerHTML = revs.map(function(r){
     var stars = '';
     for (var i=0;i<5;i++) stars += (i<r.stars ? '★' : '☆');
     return '<div class="rev-card">'
       + '<div class="rev-head">'
       + '<div class="rev-av">' + r.name.slice(0,2).toUpperCase() + '</div>'
-      + '<div><div class="rev-name">' + r.name + '</div><div class="rev-date">' + r.date + '</div></div>'
+      + '<div><div class="rev-name">' + r.name + '</div><div class="rev-date">' + new Date(r.created_at).toLocaleDateString("es-AR") + '</div></div>'
       + '<div class="rev-stars">' + stars + '</div>'
       + '</div>'
       + '<div class="rev-text">' + r.text + '</div>'
@@ -578,20 +636,179 @@ function setStar(n) {
   });
 }
 
-function sendReview() {
+async function sendReview() {
   if (!currentUser) { openModal('login'); return; }
   if (currentStar === 0) { showToast('Elegí una puntuación'); return; }
   var text = document.getElementById('review-text-input').value.trim();
   if (!text) { showToast('Escribí tu reseña'); return; }
-  var revs = JSON.parse(localStorage.getItem('qr_reviews') || '[]');
-  revs.unshift({ name:currentUser.name, email:currentUser.email, stars:currentStar, text:text, date:new Date().toLocaleDateString('es-AR') });
-  localStorage.setItem('qr_reviews', JSON.stringify(revs));
+  if (!supabase) return;
+  var res = await supabase.from('reviews').insert({
+    user_id: currentUser.id,
+    name:    currentUser.name,
+    email:   currentUser.email,
+    stars:   currentStar,
+    text:    text
+  });
+  if (res.error) { showToast('Error al enviar reseña'); return; }
   document.getElementById('review-text-input').value = '';
   currentStar = 0;
   document.querySelectorAll('.star-btn').forEach(function(s){ s.classList.remove('on'); });
   document.getElementById('write-review-form').classList.remove('open');
   loadReviewsSection();
   showToast('Reseña enviada. ¡Gracias!');
+}
+
+// ── Premium ──
+function checkPremiumStatus() {
+  if (!currentUser) return;
+  var plan = currentUser.plan || 'free';
+  if (plan === 'premium') {
+    showPremiumPanel();
+  }
+}
+
+function showPremiumPanel() {
+  var locked = document.getElementById('premium-locked');
+  var panel  = document.getElementById('premium-panel');
+  var badge  = document.getElementById('plan-badge');
+  if (locked) locked.style.display = 'none';
+  if (panel)  panel.style.display  = 'block';
+  if (badge)  badge.textContent    = '⭐ Plan Premium';
+  loadDynamicQRs();
+}
+
+// ── QR Dinámicos ──
+function generateShortCode() {
+  var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  var code  = '';
+  for (var i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+async function createDynamicQR() {
+  if (!currentUser) { openModal('login'); return; }
+  if (!supabase)    { showToast('Error de conexión'); return; }
+
+  var name = document.getElementById('dqr-name').value.trim();
+  var url  = document.getElementById('dqr-url').value.trim();
+  if (!name) { showToast('Ingresá un nombre para el QR'); return; }
+  if (!url)  { showToast('Ingresá una URL destino'); return; }
+  if (!url.startsWith('http')) { showToast('La URL debe empezar con https://'); return; }
+
+  var code = generateShortCode();
+
+  var res = await supabase.from('dynamic_qrs').insert({
+    user_id:         currentUser.id,
+    short_code:      code,
+    destination_url: url,
+    name:            name
+  });
+
+  if (res.error) {
+    showToast('Error al crear QR: ' + res.error.message);
+    return;
+  }
+
+  document.getElementById('dqr-name').value = '';
+  document.getElementById('dqr-url').value  = '';
+  showToast('QR dinámico creado correctamente');
+  loadDynamicQRs();
+}
+
+async function loadDynamicQRs() {
+  if (!currentUser || !supabase) return;
+
+  var res = await supabase
+    .from('dynamic_qrs')
+    .select('*, qr_scans(count)')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  if (res.error) { showToast('Error al cargar QR'); return; }
+
+  var list  = document.getElementById('dqr-list');
+  var count = document.getElementById('dqr-count');
+  var qrs   = res.data || [];
+
+  if (count) count.textContent = qrs.length + ' QR';
+
+  if (qrs.length === 0) {
+    list.innerHTML = '<p style="font-size:.82rem;color:var(--muted2);text-align:center;padding:1rem 0">Todavía no creaste ningún QR dinámico.</p>';
+    return;
+  }
+
+  list.innerHTML = qrs.map(function(qr) {
+    var scans = qr.qr_scans ? qr.qr_scans.length : 0;
+    var link  = 'https://lucky-qr.com/r/' + qr.short_code;
+    return '<div class="dqr-item">'
+      + '<div class="dqr-item-head">'
+      + '<span class="dqr-item-name">' + qr.name + '</span>'
+      + '<span class="dqr-item-code">' + qr.short_code + '</span>'
+      + '</div>'
+      + '<div class="dqr-item-url">' + qr.destination_url + '</div>'
+      + '<div style="font-size:.7rem;color:var(--muted2);margin-bottom:.6rem">📊 ' + scans + ' escaneos · ' + link + '</div>'
+      + '<div class="dqr-item-actions">'
+      + '<button class="btn-dqr-action" onclick="copyText(\'' + link + '\')">Copiar link</button>'
+      + '<button class="btn-dqr-action" onclick="openEditModal(\'' + qr.id + '\',\'' + qr.destination_url + '\')">Editar URL</button>'
+      + '<button class="btn-dqr-action" onclick="generateDynamicQRCode(\'' + link + '\')">Ver QR</button>'
+      + '<button class="btn-dqr-action danger" onclick="deleteDynamicQR(\'' + qr.id + '\')">Borrar</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+async function deleteDynamicQR(id) {
+  if (!supabase) return;
+  if (!confirm('¿Seguro que querés borrar este QR?')) return;
+  await supabase.from('dynamic_qrs').delete().eq('id', id);
+  showToast('QR eliminado');
+  loadDynamicQRs();
+}
+
+function openEditModal(id, url) {
+  document.getElementById('edit-qr-id').value  = id;
+  document.getElementById('edit-qr-url').value = url;
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+}
+
+async function saveEditedURL() {
+  var id  = document.getElementById('edit-qr-id').value;
+  var url = document.getElementById('edit-qr-url').value.trim();
+  if (!url) { showToast('Ingresá una URL válida'); return; }
+  if (!supabase) return;
+  var res = await supabase.from('dynamic_qrs').update({ destination_url: url, updated_at: new Date().toISOString() }).eq('id', id);
+  if (res.error) { showToast('Error al guardar'); return; }
+  closeEditModal();
+  showToast('URL actualizada — el QR ya redirige al nuevo destino');
+  loadDynamicQRs();
+}
+
+function generateDynamicQRCode(url) {
+  var output = document.getElementById('qr-output');
+  output.innerHTML = '';
+  new QRCode(output, { text: url, width: 256, height: 256, colorDark: currentDark, colorLight: currentLight, correctLevel: QRCode.CorrectLevel.H });
+  document.getElementById('qr-info-text').textContent = url;
+  document.getElementById('qr-info-meta').textContent = 'QR Dinámico · 256 × 256 px';
+  document.getElementById('qr-info').style.display = 'block';
+  var st = document.getElementById('qr-status');
+  st.textContent = 'Listo ✓'; st.style.color = 'var(--accent)';
+  ['btn-copy','btn-dl','btn-share','btn-print','btn-svg'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.disabled = false;
+  });
+  window.scrollTo({ top: document.getElementById('generator').offsetTop - 80, behavior: 'smooth' });
+  showToast('QR dinámico generado');
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    showToast('Link copiado al portapapeles');
+  });
 }
 
 // ── FAQ ──
