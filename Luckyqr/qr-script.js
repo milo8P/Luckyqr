@@ -638,6 +638,17 @@ async function upgradeToPremium() {
     showToast('Error de conexión');
   }
 }
+async function resetPassword() {
+  var email = document.getElementById('auth-email').value.trim();
+  if (!email) { showModalError('Ingresá tu email primero.'); return; }
+  if (!supabase) return;
+  var res = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://lucky-qr.com/?reset=true'
+  });
+  if (res.error) { showModalError('Error al enviar email.'); return; }
+  closeModal();
+  showToast('Te enviamos un email para recuperar tu contraseña');
+}
 // ── FAQ ──
 function toggleFaq(btn) {
   var item = btn.closest('.faq-item');
