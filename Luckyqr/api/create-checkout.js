@@ -1,7 +1,9 @@
-export default async function handler(req, res) {
+const Stripe = require('stripe')
+
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const stripe = (await import('stripe')).default(process.env.STRIPE_SECRET_KEY)
+  const stripe = Stripe(process.env.STRIPE_SECRET_KEY)
 
   try {
     const { userId, email } = req.body
@@ -21,6 +23,7 @@ export default async function handler(req, res) {
 
     res.json({ url: session.url })
   } catch(e) {
+    console.error(e)
     res.status(500).json({ error: e.message })
   }
 }
