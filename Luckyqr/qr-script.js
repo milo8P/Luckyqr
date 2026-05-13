@@ -492,7 +492,7 @@ async function createDynamicQR() {
 
 async function loadDynamicQRs() {
   if (!currentUser || !supabase) return;
-  var res = await supabase.from('dynamic_qrs').select('*').eq('user_id', currentUser.id).order('created_at', { ascending:false });
+  var res = await supabase.from('dynamic_qrs').select('*, qr_scans(count)').eq('user_id', currentUser.id).order('created_at', { ascending:false });
   if (res.error) { showToast('Error al cargar QR'); return; }
   var list  = document.getElementById('dqr-list');
   var count = document.getElementById('dqr-count');
@@ -503,10 +503,12 @@ async function loadDynamicQRs() {
     return;
   }
   list.innerHTML = qrs.map(function(qr){
-    var link = 'https://lucky-qr.com/r/' + qr.short_code;
+    var link   = 'https://lucky-qr.com/r/' + qr.short_code;
+    var scans  = qr.qr_scans ? qr.qr_scans[0].count : 0;
     return '<div class="dqr-item">'
       + '<div class="dqr-item-head"><span class="dqr-item-name">' + qr.name + '</span><span class="dqr-item-code">' + qr.short_code + '</span></div>'
       + '<div class="dqr-item-url">' + qr.destination_url + '</div>'
+      + '<div style="font-size:.72rem;color:var(--accent);font-weight:500;margin-bottom:.6rem">📊 ' + scans + ' escaneo' + (scans !== 1 ? 's' : '') + '</div>'
       + '<div class="dqr-item-actions">'
       + '<button class="btn-dqr-action" onclick="copyText(\'' + link + '\')">Copiar link</button>'
       + '<button class="btn-dqr-action" onclick="openEditModal(\'' + qr.id + '\',\'' + qr.destination_url.replace(/'/g,"\\'") + '\')">Editar URL</button>'
