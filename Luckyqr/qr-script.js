@@ -5,7 +5,9 @@ var supabase = null;
 
 window.addEventListener('load', function() {
   if (window.supabase && window.supabase.createClient) {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    supabase = window.supabase && window.supabase.createClient 
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : (typeof supabaseJs !== 'undefined' ? supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY) : null);
     // escuchar cambios de sesión
     supabase.auth.onAuthStateChange(function(event, session) {
       if (session && session.user) {
