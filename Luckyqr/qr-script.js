@@ -3,30 +3,50 @@ var SUPABASE_URL = 'https://mqhgqdozuilerfhisoqy.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_Owm4MnvGI5FepdV9-wTo9w_U9xI7oxH';
 var supabase = null;
 
+function initSupabase() {
+  // el CDN de supabase expone el cliente como window.supabase o supabaseJs
+  var client = null;
+  if (window.supabase && typeof window.supabase.createClient === 'function') {
+    client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } else if (window.supabaseJs && typeof window.supabaseJs.createClient === 'function') {
+    client = window.supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } else if (typeof createClient === 'function') {
+    client = createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+  return client;
+}
+
 window.addEventListener('load', function() {
-  if (window.supabase && window.supabase.createClient) {
-    supabase = window.supabase && window.supabase.createClient 
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
-  : (typeof supabaseJs !== 'undefined' ? supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY) : null);
-    // escuchar cambios de sesión
-    supabase.auth.onAuthStateChange(function(event, session) {
-      if (session && session.user) {
-        loadUserProfile(session.user);
-      } else {
-        currentUser = null;
-        showLoggedOut();
-      }
-    });
-    // verificar sesión existente
-    supabase.auth.getSession().then(function(res) {
-      if (res.data && res.data.session) {
-        loadUserProfile(res.data.session.user);
-      } else {
-        showLoggedOut();
-      }
-    });
+  supabase = initSupabase();
+  if (!supabase) {
+    // intentar de nuevo después de 500ms por si el CDN todavía está cargando
+    setTimeout(function() {
+      supabase = initSupabase();
+      if (supabase) startAuth();
+      else showLoggedOut();
+    }, 500);
+  } else {
+    startAuth();
   }
 });
+
+function startAuth() {
+  supabase.auth.onAuthStateChange(function(event, session) {
+    if (session && session.user) {
+      loadUserProfile(session.user);
+    } else {
+      currentUser = null;
+      showLoggedOut();
+    }
+  });
+  supabase.auth.getSession().then(function(res) {
+    if (res.data && res.data.session) {
+      loadUserProfile(res.data.session.user);
+    } else {
+      showLoggedOut();
+    }
+  });
+}
 
 async function loadUserProfile(authUser) {
   // buscar perfil en tabla profiles
