@@ -4,6 +4,10 @@ var SUPABASE_KEY = 'sb_publishable_Owm4MnvGI5FepdV9-wTo9w_U9xI7oxH';
 var supabase = null;
 
 function initSupabase() {
+  if (window.Supabase) {
+  client = window.Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  return client;
+}
   // el CDN de supabase expone el cliente como window.supabase o supabaseJs
   var client = null;
   if (window.supabase && typeof window.supabase.createClient === 'function') {
