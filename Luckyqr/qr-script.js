@@ -619,7 +619,25 @@ async function sendReview() {
   loadReviewsSection();
   showToast('Reseña enviada. ¡Gracias!');
 }
-
+async function upgradeToPremium() {
+  if (!currentUser) { openModal('login'); return; }
+  showToast('Redirigiendo al pago...');
+  try {
+    var res = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: currentUser.id, email: currentUser.email })
+    });
+    var data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast('Error al iniciar el pago');
+    }
+  } catch(e) {
+    showToast('Error de conexión');
+  }
+}
 // ── FAQ ──
 function toggleFaq(btn) {
   var item = btn.closest('.faq-item');
