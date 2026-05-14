@@ -646,12 +646,13 @@ async function resetPassword() {
   if (!email) { showModalError('Ingresá tu email primero.'); return; }
   if (!supabase) return;
   var res = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://lucky-qr.com/?reset=true'
+    redirectTo: 'https://lucky-qr.com'
   });
   if (res.error) { showModalError('Error al enviar email.'); return; }
   closeModal();
   showToast('Te enviamos un email para recuperar tu contraseña');
 }
+
 async function cancelPremium() {
   if (!currentUser || !supabase) return;
   if (!confirm('¿Seguro que querés cancelar el plan Premium? Seguirá activo hasta fin del período.')) return;
@@ -667,22 +668,34 @@ async function cancelPremium() {
     showToast('Error al cancelar: ' + data.error);
   }
 }
+
+function closeResetModal() {
+  document.getElementById('reset-modal').classList.remove('open');
+}
+
+async function confirmResetPassword() {
+  var pass    = document.getElementById('reset-pass').value;
+  var confirm = document.getElementById('reset-pass-confirm').value;
+  var errEl   = document.getElementById('reset-error');
+  errEl.classList.remove('show');
+  if (pass.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; errEl.classList.add('show'); return; }
+  if (pass !== confirm) { errEl.textContent = 'Las contraseñas no coinciden.'; errEl.classList.add('show'); return; }
+  var res = await supabase.auth.updateUser({ password: pass });
+  if (res.error) { errEl.textContent = 'Error: ' + res.error.message; errEl.classList.add('show'); return; }
+  closeResetModal();
+  showToast('Contraseña actualizada. Ya podés iniciar sesión.');
+  supabase.auth.signOut();
+  showLoggedOut();
+}
+
 // ── Reset password handler ──
 window.addEventListener('load', function() {
-  var hash = window.location.hash;
-  if (hash.includes('type=recovery')) {
-    var newPass = prompt('Ingresá tu nueva contraseña (mínimo 6 caracteres):');
-    if (newPass && newPass.length >= 6) {
-      supabase.auth.updateUser({ password: newPass }).then(function(res) {
-        if (res.error) {
-          alert('Error al cambiar contraseña: ' + res.error.message);
-        } else {
-          showToast('Contraseña actualizada correctamente');
-          window.location.href = 'https://lucky-qr.com';
-        }
-      });
+  setTimeout(function() {
+    var hash = window.location.hash;
+    if (hash.includes('type=recovery')) {
+      document.getElementById('reset-modal').classList.add('open');
     }
-  }
+  }, 1000);
 });
 // ── FAQ ──
 function toggleFaq(btn) {
