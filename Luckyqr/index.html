@@ -562,6 +562,26 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
     </div>
   </div>
 </section>
+<div class="dqr-body">
+            <div id="dqr-list"><p style="font-size:.82rem;color:var(--muted2);text-align:center;padding:1rem 0">Todavía no creaste ningún QR dinámico.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estadísticas -->
+      <div class="dqr-panel" style="margin-top:1.5rem">
+        <div class="dqr-panel-hdr">
+          <span class="dqr-panel-title">Escaneos últimos 7 días</span>
+          <span id="total-scans" style="font-size:.7rem;color:var(--muted2)">0 total</span>
+        </div>
+        <div class="dqr-body">
+          <canvas id="scans-chart" height="120"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
 
 <section style="padding:3rem 0 0;border-top:1px solid var(--border)">
   <div class="reviews-section">
@@ -787,6 +807,7 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script src="qr-script.js"></script>
 </body>
 </html>
