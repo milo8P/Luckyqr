@@ -198,20 +198,16 @@ function handleAuth() {
   if (!supabase) { showModalError('Error de conexión. Recargá la página.'); return; }
   btn.classList.add('loading');
 
-  if (authMode === 'register') {
-    var name    = document.getElementById('auth-name').value.trim();
-    var confirm = document.getElementById('auth-confirm').value;
-    if (!name)           { showModalError('Ingresá tu nombre.'); btn.classList.remove('loading'); return; }
-    if (pass !== confirm){ showModalError('Las contraseñas no coinciden.'); btn.classList.remove('loading'); return; }
-    supabase.auth.signUp({ email:email, password:pass, options:{ data:{ name:name } } }).then(function(res) {
+  supabase.auth.signUp({ email:email, password:pass, options:{ data:{ name:name } } }).then(function(res) {
       btn.classList.remove('loading');
       if (res.error) { showModalError(res.error.message); return; }
-    closeModal();
-    showToast('Cuenta creada. Bienvenido, ' + name + '!');
-    fetch('/api/send-welcome', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, name: name })
+      closeModal();
+      showToast('Cuenta creada. Bienvenido, ' + name + '!');
+      fetch('/api/send-welcome', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, name: name })
+      });
     });
   } else {
     supabase.auth.signInWithPassword({ email:email, password:pass }).then(function(res) {
@@ -222,7 +218,6 @@ function handleAuth() {
     });
   }
 }
-
 function showModalError(msg) {
   var e = document.getElementById('modal-error');
   e.textContent = msg; e.classList.add('show');
