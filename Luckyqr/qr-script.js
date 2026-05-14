@@ -57,6 +57,8 @@ function showLoggedIn() {
   var dn = document.getElementById('up-dname'); if (dn) dn.textContent = currentUser.name || 'Usuario';
   var de = document.getElementById('up-demail'); if (de) de.textContent = currentUser.email;
   checkPremiumStatus();
+  var btnCancel = document.getElementById('btn-cancel-premium');
+if (btnCancel) btnCancel.style.display = currentUser.plan === 'premium' ? 'block' : 'none';
 }
 
 function showLoggedOut() {
@@ -648,6 +650,21 @@ async function resetPassword() {
   if (res.error) { showModalError('Error al enviar email.'); return; }
   closeModal();
   showToast('Te enviamos un email para recuperar tu contraseña');
+}
+async function cancelPremium() {
+  if (!currentUser || !supabase) return;
+  if (!confirm('¿Seguro que querés cancelar el plan Premium? Seguirá activo hasta fin del período.')) return;
+  var res = await fetch('/api/cancel-subscription', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ customerId: currentUser.stripe_customer_id })
+  });
+  var data = await res.json();
+  if (data.success) {
+    showToast('Suscripción cancelada — seguirá activa hasta fin del período');
+  } else {
+    showToast('Error al cancelar: ' + data.error);
+  }
 }
 // ── FAQ ──
 function toggleFaq(btn) {
