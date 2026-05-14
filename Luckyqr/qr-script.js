@@ -21,11 +21,17 @@ var currentLight = '#ffffff';
     supabase = mod.createClient(SUPABASE_URL, SUPABASE_KEY);
     // escuchar cambios de sesión
     supabase.auth.onAuthStateChange(function(event, session) {
-      if (session && session.user) {
-        loadUserProfile(session.user);
-      } else {
-        currentUser = null;
-        showLoggedOut();
+  if (event === 'PASSWORD_RECOVERY') {
+    document.getElementById('reset-modal').classList.add('open');
+    return;
+  }
+  if (session && session.user) {
+    loadUserProfile(session.user);
+  } else {
+    currentUser = null;
+    showLoggedOut();
+  }
+});
       }
     });
     // verificar sesión existente al cargar
