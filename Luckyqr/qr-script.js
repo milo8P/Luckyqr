@@ -468,6 +468,7 @@ function checkPremiumStatus() {
     if (panel)  panel.style.display  = 'block';
     if (badge)  badge.textContent    = '⭐ Plan Premium';
     loadDynamicQRs();
+    loadScansChart();
   }
 }
 
