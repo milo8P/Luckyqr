@@ -4,19 +4,6 @@
       "source": "/r/:code",
       "destination": "/api/r/[code]"
     }
-  ]
-}
-{
-  "rewrites": [
-    {
-      "source": "/r/:code",
-      "destination": "/api/r/[code]"
-    }
   ],
-  "errors": [
-    {
-      "statusCode": 404,
-      "path": "/404.html"
-    }
-  ]
+  "cleanUrls": true
 }
