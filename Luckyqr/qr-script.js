@@ -843,7 +843,26 @@ function toggleFaq(btn) {
   var item = btn.closest('.faq-item');
   item.classList.toggle('open');
 }
+// ── Cookie Consent ──
+function initCookieBanner() {
+  if (!localStorage.getItem('cookie_consent')) {
+    document.getElementById('cookie-banner').style.display = 'flex';
+  }
+}
 
+function acceptCookies() {
+  localStorage.setItem('cookie_consent', 'accepted');
+  document.getElementById('cookie-banner').style.display = 'none';
+}
+
+function declineCookies() {
+  localStorage.setItem('cookie_consent', 'declined');
+  document.getElementById('cookie-banner').style.display = 'none';
+}
+
+window.addEventListener('load', function() {
+  setTimeout(initCookieBanner, 1000);
+});
 // ── Toast ──
 var toastTimer;
 function showToast(msg) {

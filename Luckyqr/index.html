@@ -814,6 +814,17 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
     </div>
   </div>
 </div>
+<!-- COOKIE CONSENT -->
+<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:700;background:#18160f;color:#faf9f7;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;box-shadow:0 -4px 20px rgba(0,0,0,.15)">
+  <p style="font-size:.8rem;line-height:1.6;max-width:600px">
+    🍪 Usamos cookies para mejorar tu experiencia y mostrar anuncios relevantes. 
+    <a href="/privacy.html" style="color:#a3d9b8;text-decoration:underline">Ver política de privacidad</a>
+  </p>
+  <div style="display:flex;gap:8px;flex-shrink:0">
+    <button onclick="acceptCookies()" style="padding:.6rem 1.25rem;background:#1d6b4a;color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:.82rem;font-weight:500;cursor:pointer">Aceptar</button>
+    <button onclick="declineCookies()" style="padding:.6rem 1.25rem;background:transparent;color:#faf9f7;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-family:var(--sans);font-size:.82rem;cursor:pointer">Solo necesarias</button>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script src="qr-script.js"></script>
