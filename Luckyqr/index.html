@@ -325,6 +325,29 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
 }
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
+/* ── Collapsible config sections ── */
+.cfg-sec{border:1px solid var(--border);border-radius:var(--r);margin-bottom:.6rem;overflow:hidden}
+.cfg-sec-hdr{width:100%;display:flex;align-items:center;justify-content:space-between;padding:.65rem 1rem;font-size:.8rem;font-weight:500;background:var(--bg2);border:none;cursor:pointer;font-family:var(--sans);color:var(--text);transition:background .15s;gap:.5rem}
+.cfg-sec-hdr:hover{background:var(--border)}
+.cfg-sec-hdr.open{background:var(--accent-l);color:var(--accent)}
+.cfg-arrow{font-size:.7rem;color:inherit;transition:transform .2s;flex-shrink:0;margin-left:auto}
+.cfg-sec-hdr.open .cfg-arrow{transform:rotate(180deg)}
+.cfg-sec-body{padding:.85rem}
+/* ── Shape picker ── */
+.shape-picker{display:flex;gap:6px;flex-wrap:wrap}
+.shape-btn{width:40px;height:40px;border:2px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;color:var(--muted2)}
+.shape-btn:hover{border-color:var(--border2);color:var(--text)}
+.shape-btn.active{border-color:var(--accent);background:var(--accent-l);color:var(--accent)}
+.shape-btn svg{width:22px;height:22px}
+/* ── Frame picker ── */
+.frame-picker{display:flex;gap:5px;flex-wrap:wrap}
+.frame-btn{padding:5px 9px;font-size:.71rem;font-family:var(--sans);font-weight:500;border:1.5px solid var(--border);border-radius:8px;background:var(--bg);cursor:pointer;transition:all .15s;color:var(--muted)}
+.frame-btn:hover{border-color:var(--border2);color:var(--text)}
+.frame-btn.active{border-color:var(--accent);background:var(--accent-l);color:var(--accent)}
+/* ── Gradient row ── */
+.gradient-row{display:flex;align-items:center;gap:12px}
+.gradient-row label{display:flex;align-items:center;gap:7px;font-size:.82rem;font-weight:500;color:var(--text);cursor:pointer;margin:0}
+.gradient-row input[type=checkbox]{width:auto;margin:0}
 </style>
 </head>
 <body>
@@ -388,105 +411,191 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
       <span class="panel-title">Configuración</span>
       <span id="char-count" style="font-size:.68rem;color:var(--muted2)">0 caracteres</span>
     </div>
-    <div class="panel-body">
-      <div class="field">
-        <label>Tipo de QR</label>
-        <div class="type-tabs">
-          <button class="tab active" onclick="setType('url',this)">URL</button>
-          <button class="tab" onclick="setType('text',this)">Texto</button>
-          <button class="tab" onclick="setType('email',this)">Email</button>
-          <button class="tab" onclick="setType('tel',this)">Teléfono</button>
-          <button class="tab" onclick="setType('wifi',this)">WiFi</button>
-          <button class="tab" onclick="setType('sms',this)">SMS</button>
-          <button class="tab" onclick="setType('vcard',this)">vCard</button>
-          <button class="tab" onclick="setType('geo',this)">Ubicación</button>
-          <button class="tab" onclick="setType('whatsapp',this)">WhatsApp</button>
-          <button class="tab" onclick="setType('youtube',this)">YouTube</button>
-          <button class="tab" onclick="setType('instagram',this)">Instagram</button>
-          <button class="tab" onclick="setType('pdf',this)">PDF/Archivo</button>
-        </div>
-      </div>
-      <div id="input-area" class="field">
-        <label for="qr-input">URL <span class="sublabel">ej: https://mi-sitio.com</span></label>
-        <input type="url" id="qr-input" placeholder="https://" autocomplete="off" oninput="onInputChange()"/>
-      </div>
-      <div id="wifi-fields" style="display:none">
-        <div class="field"><label>Nombre de red</label><input type="text" id="wifi-ssid" placeholder="Mi Red WiFi"/></div>
-        <div class="field"><label>Contraseña</label><input type="text" id="wifi-pass" placeholder="contraseña123"/></div>
-        <div class="field"><label>Seguridad</label><select id="wifi-sec"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="">Sin contraseña</option></select></div>
-      </div>
-      <div id="sms-fields" style="display:none">
-        <div class="field"><label>Número</label><input type="tel" id="sms-tel" placeholder="+54 9 11 1234 5678"/></div>
-        <div class="field"><label>Mensaje <span class="sublabel">opcional</span></label><textarea id="sms-msg" placeholder="Hola!" style="min-height:56px"></textarea></div>
-      </div>
-      <div id="vcard-fields" style="display:none">
-        <div class="field"><label>Nombre completo</label><input type="text" id="vc-name" placeholder="Juan García"/></div>
-        <div class="field"><label>Teléfono</label><input type="tel" id="vc-phone" placeholder="+54 9 11 1234 5678"/></div>
-        <div class="field"><label>Email</label><input type="email" id="vc-email" placeholder="juan@email.com"/></div>
-        <div class="field"><label>Empresa</label><input type="text" id="vc-company" placeholder="Mi Empresa SA"/></div>
-        <div class="field"><label>Sitio web</label><input type="url" id="vc-web" placeholder="https://mi-sitio.com"/></div>
-      </div>
-      <div id="geo-fields" style="display:none">
-        <div class="field"><label>Link de Google Maps o coordenadas</label><input type="text" id="geo-input" placeholder="https://maps.google.com/... o -34.6037, -58.3816" oninput="parseGeoInput()"/></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div class="field"><label>Latitud</label><input type="text" id="geo-lat" placeholder="-34.6037" oninput="updateCharCount()"/></div>
-          <div class="field"><label>Longitud</label><input type="text" id="geo-lng" placeholder="-58.3816" oninput="updateCharCount()"/></div>
-        </div>
-      </div>
-      <div id="whatsapp-fields" style="display:none">
-        <div class="field"><label>Número de WhatsApp</label><input type="tel" id="wa-phone" placeholder="+54 9 11 1234 5678"/></div>
-        <div class="field"><label>Mensaje predefinido <span class="sublabel">opcional</span></label><textarea id="wa-msg" placeholder="Hola! Me comunico porque..." style="min-height:56px"></textarea></div>
-      </div>
-      <div id="youtube-fields" style="display:none">
-        <div class="field"><label>Link de YouTube</label><input type="url" id="yt-url" placeholder="https://youtube.com/watch?v=..." oninput="onInputChange()"/></div>
-      </div>
-      <div id="instagram-fields" style="display:none">
-        <div class="field"><label>Usuario o link de Instagram</label><input type="text" id="ig-user" placeholder="@mi_usuario" oninput="onInputChange()"/></div>
-      </div>
-      <div id="pdf-fields" style="display:none">
-        <div class="field"><label>Link del archivo <span class="sublabel">Google Drive, Dropbox, etc.</span></label><input type="url" id="pdf-url" placeholder="https://drive.google.com/..." oninput="onInputChange()"/></div>
-      </div>
-      <div class="field">
-        <label>Colores</label>
-        <div class="color-section">
-          <div class="color-picker-wrap">
-            <label>Módulos</label>
-            <div class="color-wheel-btn" id="swatch-dark" style="background:#18160f"><input type="color" id="c-dark" value="#18160f" oninput="onColorChange()"/></div>
-            <span class="color-hex-label" id="hex-dark">#18160f</span>
+    <div class="panel-body" style="padding:.75rem">
+
+      <!-- ── Contenido ── -->
+      <div class="cfg-sec">
+        <button class="cfg-sec-hdr open" onclick="toggleCfgSec(this)">Contenido <span class="cfg-arrow">▾</span></button>
+        <div class="cfg-sec-body">
+          <div class="field" style="margin-bottom:.75rem">
+            <label>Tipo de QR</label>
+            <div class="type-tabs">
+              <button class="tab active" onclick="setType('url',this)">URL</button>
+              <button class="tab" onclick="setType('text',this)">Texto</button>
+              <button class="tab" onclick="setType('email',this)">Email</button>
+              <button class="tab" onclick="setType('tel',this)">Teléfono</button>
+              <button class="tab" onclick="setType('wifi',this)">WiFi</button>
+              <button class="tab" onclick="setType('sms',this)">SMS</button>
+              <button class="tab" onclick="setType('vcard',this)">vCard</button>
+              <button class="tab" onclick="setType('geo',this)">Ubicación</button>
+              <button class="tab" onclick="setType('whatsapp',this)">WhatsApp</button>
+              <button class="tab" onclick="setType('youtube',this)">YouTube</button>
+              <button class="tab" onclick="setType('instagram',this)">Instagram</button>
+              <button class="tab" onclick="setType('pdf',this)">PDF</button>
+              <button class="tab" onclick="setType('event',this)">Evento</button>
+              <button class="tab" onclick="setType('app',this)">App</button>
+              <button class="tab" onclick="setType('social',this)">Redes</button>
+            </div>
           </div>
-          <div class="color-picker-wrap">
-            <label>Fondo</label>
-            <div class="color-wheel-btn" id="swatch-light" style="background:#ffffff"><input type="color" id="c-light" value="#ffffff" oninput="onColorChange()"/></div>
-            <span class="color-hex-label" id="hex-light">#ffffff</span>
+          <div id="input-area" class="field">
+            <label for="qr-input">URL <span class="sublabel">ej: https://mi-sitio.com</span></label>
+            <input type="url" id="qr-input" placeholder="https://" autocomplete="off" oninput="onInputChange()"/>
+          </div>
+          <div id="wifi-fields" style="display:none">
+            <div class="field"><label>Nombre de red</label><input type="text" id="wifi-ssid" placeholder="Mi Red WiFi"/></div>
+            <div class="field"><label>Contraseña</label><input type="text" id="wifi-pass" placeholder="contraseña123"/></div>
+            <div class="field"><label>Seguridad</label><select id="wifi-sec"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="">Sin contraseña</option></select></div>
+          </div>
+          <div id="sms-fields" style="display:none">
+            <div class="field"><label>Número</label><input type="tel" id="sms-tel" placeholder="+54 9 11 1234 5678"/></div>
+            <div class="field"><label>Mensaje <span class="sublabel">opcional</span></label><textarea id="sms-msg" placeholder="Hola!" style="min-height:56px"></textarea></div>
+          </div>
+          <div id="vcard-fields" style="display:none">
+            <div class="field"><label>Nombre completo</label><input type="text" id="vc-name" placeholder="Juan García"/></div>
+            <div class="field"><label>Teléfono</label><input type="tel" id="vc-phone" placeholder="+54 9 11 1234 5678"/></div>
+            <div class="field"><label>Email</label><input type="email" id="vc-email" placeholder="juan@email.com"/></div>
+            <div class="field"><label>Empresa</label><input type="text" id="vc-company" placeholder="Mi Empresa SA"/></div>
+            <div class="field"><label>Sitio web</label><input type="url" id="vc-web" placeholder="https://mi-sitio.com"/></div>
+          </div>
+          <div id="geo-fields" style="display:none">
+            <div class="field"><label>Link de Google Maps o coordenadas</label><input type="text" id="geo-input" placeholder="https://maps.google.com/... o -34.6037, -58.3816" oninput="parseGeoInput()"/></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="field"><label>Latitud</label><input type="text" id="geo-lat" placeholder="-34.6037" oninput="updateCharCount()"/></div>
+              <div class="field"><label>Longitud</label><input type="text" id="geo-lng" placeholder="-58.3816" oninput="updateCharCount()"/></div>
+            </div>
+          </div>
+          <div id="whatsapp-fields" style="display:none">
+            <div class="field"><label>Número de WhatsApp</label><input type="tel" id="wa-phone" placeholder="+54 9 11 1234 5678"/></div>
+            <div class="field"><label>Mensaje predefinido <span class="sublabel">opcional</span></label><textarea id="wa-msg" placeholder="Hola! Me comunico porque..." style="min-height:56px"></textarea></div>
+          </div>
+          <div id="youtube-fields" style="display:none">
+            <div class="field"><label>Link de YouTube</label><input type="url" id="yt-url" placeholder="https://youtube.com/watch?v=..." oninput="onInputChange()"/></div>
+          </div>
+          <div id="instagram-fields" style="display:none">
+            <div class="field"><label>Usuario o link de Instagram</label><input type="text" id="ig-user" placeholder="@mi_usuario" oninput="onInputChange()"/></div>
+          </div>
+          <div id="pdf-fields" style="display:none">
+            <div class="field"><label>Link del archivo <span class="sublabel">Google Drive, Dropbox, etc.</span></label><input type="url" id="pdf-url" placeholder="https://drive.google.com/..." oninput="onInputChange()"/></div>
+          </div>
+          <div id="event-fields" style="display:none">
+            <div class="field"><label>Nombre del evento</label><input type="text" id="ev-name" placeholder="Mi evento" oninput="onInputChange()"/></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div class="field"><label>Fecha</label><input type="date" id="ev-date" oninput="onInputChange()"/></div>
+              <div class="field"><label>Hora <span class="sublabel">opcional</span></label><input type="time" id="ev-time" oninput="onInputChange()"/></div>
+            </div>
+            <div class="field"><label>Lugar <span class="sublabel">opcional</span></label><input type="text" id="ev-loc" placeholder="Buenos Aires, Argentina" oninput="onInputChange()"/></div>
+            <div class="field"><label>Descripción <span class="sublabel">opcional</span></label><textarea id="ev-desc" placeholder="Detalles del evento..." style="min-height:56px" oninput="onInputChange()"></textarea></div>
+          </div>
+          <div id="app-fields" style="display:none">
+            <div class="field"><label>App Store (iOS)</label><input type="url" id="app-ios" placeholder="https://apps.apple.com/..." oninput="onInputChange()"/></div>
+            <div class="field"><label>Play Store (Android)</label><input type="url" id="app-android" placeholder="https://play.google.com/store/apps/..." oninput="onInputChange()"/></div>
+            <div style="font-size:.71rem;color:var(--muted2);background:var(--bg2);border-radius:8px;padding:7px 10px;margin-bottom:.5rem">El QR apunta a la App Store por defecto. La detección de plataforma requiere QR dinámico (Premium).</div>
+          </div>
+          <div id="social-fields" style="display:none">
+            <div class="field"><label>Instagram</label><input type="text" id="soc-ig" placeholder="@usuario" oninput="onInputChange()"/></div>
+            <div class="field"><label>Twitter / X</label><input type="text" id="soc-tw" placeholder="@usuario" oninput="onInputChange()"/></div>
+            <div class="field"><label>TikTok</label><input type="text" id="soc-tt" placeholder="@usuario" oninput="onInputChange()"/></div>
+            <div class="field"><label>LinkedIn</label><input type="url" id="soc-li" placeholder="https://linkedin.com/in/..." oninput="onInputChange()"/></div>
+            <div class="field"><label>YouTube</label><input type="url" id="soc-yt" placeholder="https://youtube.com/@..." oninput="onInputChange()"/></div>
+            <div class="field"><label>Facebook</label><input type="url" id="soc-fb" placeholder="https://facebook.com/..." oninput="onInputChange()"/></div>
           </div>
         </div>
-        <div class="color-warning" id="color-warning">⚠ Los colores son muy similares — el QR puede no leerse</div>
       </div>
-      <div class="field">
-        <label>Tamaño</label>
-        <div class="slider-wrap">
-          <input type="range" id="qr-size" min="128" max="512" value="256" step="32" oninput="document.getElementById('sz-val').textContent=this.value+'px'"/>
-          <span class="slider-val" id="sz-val">256px</span>
+
+      <!-- ── Diseño ── -->
+      <div class="cfg-sec">
+        <button class="cfg-sec-hdr open" onclick="toggleCfgSec(this)">Diseño <span class="cfg-arrow">▾</span></button>
+        <div class="cfg-sec-body">
+          <div class="field">
+            <label>Colores</label>
+            <div class="color-section">
+              <div class="color-picker-wrap">
+                <label>Módulos</label>
+                <div class="color-wheel-btn" id="swatch-dark" style="background:#18160f"><input type="color" id="c-dark" value="#18160f" oninput="onColorChange()"/></div>
+                <span class="color-hex-label" id="hex-dark">#18160f</span>
+              </div>
+              <div class="color-picker-wrap">
+                <label>Fondo</label>
+                <div class="color-wheel-btn" id="swatch-light" style="background:#ffffff"><input type="color" id="c-light" value="#ffffff" oninput="onColorChange()"/></div>
+                <span class="color-hex-label" id="hex-light">#ffffff</span>
+              </div>
+            </div>
+            <div class="color-warning" id="color-warning">⚠ Los colores son muy similares — el QR puede no leerse</div>
+          </div>
+          <div class="field">
+            <div class="gradient-row">
+              <label for="use-gradient"><input type="checkbox" id="use-gradient" onchange="onGradientChange()"/> Usar gradiente</label>
+              <div id="grad-swatch" style="display:none;position:relative;width:32px;height:32px;border-radius:50%;border:2px solid var(--border);cursor:pointer;overflow:hidden;flex-shrink:0">
+                <div id="grad-swatch-bg" style="position:absolute;inset:0;background:#1d6b4a"></div>
+                <input type="color" id="c-grad" value="#1d6b4a" oninput="onGradientColorChange()" style="position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px);border:none;padding:0;cursor:pointer;opacity:0"/>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Forma de módulos</label>
+            <div class="shape-picker">
+              <button class="shape-btn active" onclick="setShape('square',this)" title="Cuadrado">
+                <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18"/></svg>
+              </button>
+              <button class="shape-btn" onclick="setShape('rounded',this)" title="Redondeado">
+                <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="5"/></svg>
+              </button>
+              <button class="shape-btn" onclick="setShape('dots',this)" title="Puntos">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>
+              </button>
+              <button class="shape-btn" onclick="setShape('diamond',this)" title="Diamante">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L22 12 L12 22 L2 12 Z"/></svg>
+              </button>
+              <button class="shape-btn" onclick="setShape('star',this)" title="Estrella">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 8.2H23l-7 5.2 2.6 8.2L12 18.2l-6.6 5.4 2.6-8.2-7-5.2h8.1Z"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Marco</label>
+            <div class="frame-picker">
+              <button class="frame-btn active" onclick="setFrame('none',this)">Sin marco</button>
+              <button class="frame-btn" onclick="setFrame('scanme',this)">SCAN ME</button>
+              <button class="frame-btn" onclick="setFrame('escaneame',this)">Escaneame</button>
+              <button class="frame-btn" onclick="setFrame('leeme',this)">¡Leeme!</button>
+              <button class="frame-btn" onclick="setFrame('simple',this)">Simple</button>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="field">
-        <label for="qr-ec">Corrección de errores</label>
-        <select id="qr-ec">
-          <option value="L">L — Bajo (7%)</option>
-          <option value="M" selected>M — Medio (15%) recomendado</option>
-          <option value="Q">Q — Alto (25%)</option>
-          <option value="H">H — Máximo (30%)</option>
-        </select>
+
+      <!-- ── Opciones avanzadas ── -->
+      <div class="cfg-sec">
+        <button class="cfg-sec-hdr" onclick="toggleCfgSec(this)">Opciones avanzadas <span class="cfg-arrow">▾</span></button>
+        <div class="cfg-sec-body" style="display:none">
+          <div class="field">
+            <label>Tamaño</label>
+            <div class="slider-wrap">
+              <input type="range" id="qr-size" min="128" max="512" value="256" step="32" oninput="document.getElementById('sz-val').textContent=this.value+'px'"/>
+              <span class="slider-val" id="sz-val">256px</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="qr-ec">Corrección de errores</label>
+            <select id="qr-ec">
+              <option value="L">L — Bajo (7%)</option>
+              <option value="M" selected>M — Medio (15%) recomendado</option>
+              <option value="Q">Q — Alto (25%)</option>
+              <option value="H">H — Máximo (30%)</option>
+            </select>
+          </div>
+          <div class="field" id="logo-field" style="display:none">
+            <label>Logo en el centro <span class="sublabel">solo Premium</span></label>
+            <input type="file" id="qr-logo" accept="image/*" onchange="onLogoChange()" style="padding:.4rem;font-size:.78rem"/>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:.5rem">
+              <img id="logo-preview" style="display:none;width:40px;height:40px;object-fit:contain;border:1px solid var(--border);border-radius:8px;padding:3px"/>
+              <button id="btn-remove-logo" onclick="removeLogo()" style="display:none;font-size:.72rem;color:var(--danger);background:none;border:none;cursor:pointer;font-family:var(--sans)">✕ Quitar logo</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
-      <div class="field" id="logo-field" style="display:none">
-  <label>Logo en el centro <span class="sublabel">solo Premium</span></label>
-  <input type="file" id="qr-logo" accept="image/*" onchange="onLogoChange()" style="padding:.4rem;font-size:.78rem"/>
-  <div style="display:flex;align-items:center;gap:8px;margin-top:.5rem">
-    <img id="logo-preview" style="display:none;width:40px;height:40px;object-fit:contain;border:1px solid var(--border);border-radius:8px;padding:3px"/>
-    <button id="btn-remove-logo" onclick="removeLogo()" style="display:none;font-size:.72rem;color:var(--danger);background:none;border:none;cursor:pointer;font-family:var(--sans)">✕ Quitar logo</button>
-  </div>
-</div>
+
+      <div class="progress" style="margin-top:.5rem"><div class="progress-bar" id="progress-bar"></div></div>
       <button class="btn-gen" id="gen-btn" onclick="tryGenerate()">
         <div class="spinner"></div><span class="btn-text">Generar QR</span>
       </button>

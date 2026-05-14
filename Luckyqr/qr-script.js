@@ -13,6 +13,10 @@ var currentType  = 'url';
 var currentStar  = 0;
 var currentDark  = '#18160f';
 var currentLight = '#ffffff';
+var currentShape = 'square';
+var currentFrame = 'none';
+var currentGradient = false;
+var currentGradientColor = '#1d6b4a';
 
 // ── Inicializar Supabase con ESM dinámico ──
 (async function() {
@@ -239,7 +243,7 @@ function setType(type, btn) {
   currentType = type;
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
   btn.classList.add('active');
-  var ids = ['input-area','wifi-fields','sms-fields','vcard-fields','geo-fields','whatsapp-fields','youtube-fields','instagram-fields','pdf-fields'];
+  var ids = ['input-area','wifi-fields','sms-fields','vcard-fields','geo-fields','whatsapp-fields','youtube-fields','instagram-fields','pdf-fields','event-fields','app-fields','social-fields'];
   ids.forEach(function(id){ var e = document.getElementById(id); if (e) e.style.display = 'none'; });
   var cfg = {
     url:   { l:'URL',      s:'ej: https://mi-sitio.com', p:'https://',            t:'url'   },
@@ -247,7 +251,7 @@ function setType(type, btn) {
     email: { l:'Email',    s:'dirección de correo',       p:'nombre@ejemplo.com',  t:'email' },
     tel:   { l:'Teléfono', s:'con código de país',        p:'+54 9 11 1234 5678',  t:'tel'   },
   };
-  var specials = { wifi:'wifi-fields', sms:'sms-fields', vcard:'vcard-fields', geo:'geo-fields', whatsapp:'whatsapp-fields', youtube:'youtube-fields', instagram:'instagram-fields', pdf:'pdf-fields' };
+  var specials = { wifi:'wifi-fields', sms:'sms-fields', vcard:'vcard-fields', geo:'geo-fields', whatsapp:'whatsapp-fields', youtube:'youtube-fields', instagram:'instagram-fields', pdf:'pdf-fields', event:'event-fields', app:'app-fields', social:'social-fields' };
   if (specials[type]) {
     var el = document.getElementById(specials[type]); if (el) el.style.display = 'block';
   } else {
@@ -313,6 +317,43 @@ function getContent() {
     return 'https://instagram.com/' + (ig.startsWith('@') ? ig.slice(1) : ig);
   }
   if (currentType === 'pdf') { var pu = document.getElementById('pdf-url').value.trim(); return pu || null; }
+  if (currentType === 'event') {
+    var evName = (document.getElementById('ev-name')||{value:''}).value.trim();
+    var evDate = (document.getElementById('ev-date')||{value:''}).value.trim();
+    var evTime = (document.getElementById('ev-time')||{value:''}).value.trim();
+    var evLoc  = (document.getElementById('ev-loc') ||{value:''}).value.trim();
+    var evDesc = (document.getElementById('ev-desc')||{value:''}).value.trim();
+    if (!evName || !evDate) return null;
+    var dtStart = evDate.replace(/-/g,'') + (evTime ? 'T' + evTime.replace(':','') + '00' : '');
+    return 'BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:' + evName
+      + '\nDTSTART:' + dtStart
+      + (evLoc  ? '\nLOCATION:'    + evLoc  : '')
+      + (evDesc ? '\nDESCRIPTION:' + evDesc : '')
+      + '\nEND:VEVENT\nEND:VCALENDAR';
+  }
+  if (currentType === 'app') {
+    var appIos = (document.getElementById('app-ios')    ||{value:''}).value.trim();
+    var appAnd = (document.getElementById('app-android')||{value:''}).value.trim();
+    return appIos || appAnd || null;
+  }
+  if (currentType === 'social') {
+    var socFields = [
+      { id:'soc-ig', base:'https://instagram.com/' },
+      { id:'soc-tw', base:'https://x.com/' },
+      { id:'soc-tt', base:'https://tiktok.com/@' },
+      { id:'soc-li', base:'' },
+      { id:'soc-yt', base:'' },
+      { id:'soc-fb', base:'' }
+    ];
+    var links = [];
+    socFields.forEach(function(f) {
+      var el2 = document.getElementById(f.id); if (!el2) return;
+      var v2 = el2.value.trim(); if (!v2) return;
+      if (f.base && !v2.startsWith('http')) v2 = f.base + (v2.startsWith('@') ? v2.slice(1) : v2);
+      links.push(v2);
+    });
+    return links.length ? (links.length === 1 ? links[0] : links.join('\n')) : null;
+  }
   var el = document.getElementById('qr-input');
   if (!el) return null;
   var v = el.value.trim();
@@ -392,7 +433,9 @@ function generateQR() {
         document.getElementById('qr-info-text').textContent = label;
         document.getElementById('qr-info-meta').textContent = size + ' × ' + size + ' px';
         document.getElementById('qr-info').style.display = 'block';
+        applyShapeToCanvas();
         applyLogoToCanvas();
+        applyFrameToCanvas();
         showToast('QR generado correctamente');
       }, 150);
     } catch(e) {
@@ -863,6 +906,188 @@ function declineCookies() {
 window.addEventListener('load', function() {
   setTimeout(initCookieBanner, 1000);
 });
+// ── Collapsible sections ──
+function toggleCfgSec(btn) {
+  btn.classList.toggle('open');
+  var body = btn.nextElementSibling;
+  body.style.display = body.style.display === 'none' ? 'block' : 'none';
+}
+
+// ── Shape / Frame / Gradient controls ──
+function setShape(shape, btn) {
+  currentShape = shape;
+  document.querySelectorAll('.shape-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+function setFrame(frame, btn) {
+  currentFrame = frame;
+  document.querySelectorAll('.frame-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+function onGradientChange() {
+  currentGradient = document.getElementById('use-gradient').checked;
+  var s = document.getElementById('grad-swatch');
+  if (s) s.style.display = currentGradient ? 'block' : 'none';
+}
+
+function onGradientColorChange() {
+  currentGradientColor = document.getElementById('c-grad').value;
+  var bg = document.getElementById('grad-swatch-bg');
+  if (bg) bg.style.background = currentGradientColor;
+}
+
+// ── Shape rendering ──
+function roundedRectPath(ctx, x, y, w, h, r) {
+  if (ctx.roundRect) { ctx.roundRect(x, y, w, h, r); return; }
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function starPath(ctx, cx, cy, pts, outerR, innerR) {
+  for (var i = 0; i < pts * 2; i++) {
+    var r = i % 2 === 0 ? outerR : innerR;
+    var a = (Math.PI * i / pts) - Math.PI / 2;
+    if (i === 0) ctx.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+    else ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+  }
+  ctx.closePath();
+}
+
+function applyShapeToCanvas() {
+  if (currentShape === 'square' && !currentGradient) return;
+  var canvas = document.querySelector('#qr-output canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var w = canvas.width;
+  var imageData = ctx.getImageData(0, 0, w, w);
+  var data = imageData.data;
+
+  // find first dark pixel in row 0 to handle any quiet-zone margin
+  var startX = 0;
+  while (startX < w && data[startX*4]+data[startX*4+1]+data[startX*4+2] >= 384) startX++;
+
+  // measure first dark run = one cell width
+  var cellSize = 0;
+  for (var x = startX; x < w; x++) {
+    if (data[x*4]+data[x*4+1]+data[x*4+2] < 384) cellSize++;
+    else break;
+  }
+  if (cellSize < 2) return;
+
+  var margin = startX;
+  var N = Math.round((w - margin * 2) / cellSize);
+
+  // build boolean module grid by sampling center of each cell
+  var grid = [];
+  for (var row = 0; row < N; row++) {
+    grid[row] = [];
+    for (var col = 0; col < N; col++) {
+      var px = Math.min(w-1, Math.floor(margin + col * cellSize + cellSize / 2));
+      var py = Math.min(w-1, Math.floor(margin + row * cellSize + cellSize / 2));
+      var idx = (py * w + px) * 4;
+      grid[row][col] = data[idx]+data[idx+1]+data[idx+2] < 384;
+    }
+  }
+
+  // clear canvas with background
+  ctx.fillStyle = currentLight;
+  ctx.fillRect(0, 0, w, w);
+
+  // build fill style (gradient or solid)
+  var fStyle;
+  if (currentGradient) {
+    var grad = ctx.createLinearGradient(0, 0, 0, w);
+    grad.addColorStop(0, currentDark);
+    grad.addColorStop(1, currentGradientColor);
+    fStyle = grad;
+  } else {
+    fStyle = currentDark;
+  }
+  ctx.fillStyle = fStyle;
+
+  // finder pattern regions (always square to preserve scannability)
+  function isFinder(r, c) {
+    if (r < 8 && c < 8) return true;
+    if (r < 8 && c >= N - 8) return true;
+    if (r >= N - 8 && c < 8) return true;
+    return false;
+  }
+
+  for (var row = 0; row < N; row++) {
+    for (var col = 0; col < N; col++) {
+      if (!grid[row][col]) continue;
+      var bx = margin + col * cellSize;
+      var by = margin + row * cellSize;
+      var s  = cellSize;
+      if (isFinder(row, col) || currentShape === 'square') {
+        ctx.fillRect(bx, by, s, s);
+        continue;
+      }
+      ctx.beginPath();
+      var pad = s * 0.1;
+      var ix = bx + pad, iy = by + pad, is = s - pad * 2;
+      if (currentShape === 'rounded') {
+        roundedRectPath(ctx, ix, iy, is, is, is * 0.35);
+      } else if (currentShape === 'dots') {
+        ctx.arc(bx + s/2, by + s/2, s/2 - pad, 0, Math.PI * 2);
+      } else if (currentShape === 'diamond') {
+        var hr = s/2 - pad;
+        ctx.moveTo(bx + s/2, by + pad);
+        ctx.lineTo(bx + s - pad, by + s/2);
+        ctx.lineTo(bx + s/2, by + s - pad);
+        ctx.lineTo(bx + pad, by + s/2);
+        ctx.closePath();
+      } else if (currentShape === 'star') {
+        starPath(ctx, bx + s/2, by + s/2, 5, s/2 - pad, s/4);
+      }
+      ctx.fill();
+    }
+  }
+}
+
+// ── Frame rendering ──
+function applyFrameToCanvas() {
+  if (currentFrame === 'none') return;
+  var original = document.querySelector('#qr-output canvas');
+  if (!original) return;
+  var labelMap = { scanme:'SCAN ME', escaneame:'Escaneame', leeme:'¡Leeme!', simple:'' };
+  var text = labelMap[currentFrame] !== undefined ? labelMap[currentFrame] : '';
+  var qw = original.width, qh = original.height;
+  var border = Math.max(8, Math.round(qw * 0.035));
+  var pad    = Math.max(12, Math.round(qw * 0.05));
+  var fontSize = text ? Math.round(qw * 0.075) : 0;
+  var textArea = fontSize ? fontSize + pad : 0;
+  var tw = qw + (pad + border) * 2;
+  var th = qh + (pad + border) * 2 + textArea;
+  var nc = document.createElement('canvas');
+  nc.width = tw; nc.height = th;
+  var ctx = nc.getContext('2d');
+  // background
+  ctx.fillStyle = currentLight;
+  ctx.fillRect(0, 0, tw, th);
+  // border box around QR area only
+  ctx.strokeStyle = currentDark;
+  ctx.lineWidth = border;
+  ctx.strokeRect(border/2, border/2, tw - border, th - border - textArea);
+  // QR
+  ctx.drawImage(original, pad + border, pad + border);
+  // text label below border
+  if (text) {
+    ctx.fillStyle = currentDark;
+    ctx.font = 'bold ' + fontSize + 'px DM Sans,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, tw / 2, th - textArea / 2);
+  }
+  original.parentNode.replaceChild(nc, original);
+}
+
 // ── Toast ──
 var toastTimer;
 function showToast(msg) {
