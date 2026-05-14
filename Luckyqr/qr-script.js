@@ -716,6 +716,58 @@ window.addEventListener('load', function() {
   }, 1500);
 });
 // ── FAQ ──
+// ── Gráfico de escaneos ──
+var scansChart = null;
+
+async function loadScansChart() {
+  if (!currentUser || !supabase) return;
+  var qrRes = await supabase.from('dynamic_qrs').select('id').eq('user_id', currentUser.id);
+  if (!qrRes.data || qrRes.data.length === 0) return;
+  var qrIds = qrRes.data.map(function(q){ return q.id; });
+  var desde = new Date();
+  desde.setDate(desde.getDate() - 6);
+  desde.setHours(0,0,0,0);
+  var scanRes = await supabase.from('qr_scans').select('scanned_at').in('qr_id', qrIds).gte('scanned_at', desde.toISOString());
+  var scans = scanRes.data || [];
+  var days = [], counts = [];
+  for (var i = 6; i >= 0; i--) {
+    var d = new Date();
+    d.setDate(d.getDate() - i);
+    var label = d.toLocaleDateString('es-AR', { weekday:'short', day:'numeric' });
+    days.push(label);
+    var dayStr = d.toISOString().slice(0,10);
+    var count = scans.filter(function(s){ return s.scanned_at.slice(0,10) === dayStr; }).length;
+    counts.push(count);
+  }
+  var total = scans.length;
+  var totalEl = document.getElementById('total-scans');
+  if (totalEl) totalEl.textContent = total + ' total';
+  var ctx = document.getElementById('scans-chart');
+  if (!ctx) return;
+  if (scansChart) scansChart.destroy();
+  scansChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: days,
+      datasets: [{
+        label: 'Escaneos',
+        data: counts,
+        backgroundColor: 'rgba(29,107,74,.2)',
+        borderColor: '#1d6b4a',
+        borderWidth: 2,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1, font:{ size:11 } }, grid: { color:'#e8e4de' } },
+        x: { ticks: { font:{ size:11 } }, grid: { display:false } }
+      }
+    }
+  });
+}
 function toggleFaq(btn) {
   var item = btn.closest('.faq-item');
   item.classList.toggle('open');
