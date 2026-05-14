@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>¡Bienvenido a Premium! — Lucky QR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #faf9f7;
+      color: #18160f;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid #e8e4de;
+      padding: 3rem 2.5rem;
+      text-align: center;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(0,0,0,.06);
+    }
+    .emoji { font-size: 4rem; margin-bottom: 1.25rem; }
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1d6b4a;
+      margin-bottom: .75rem;
+    }
+    .subtitle {
+      font-size: 1rem;
+      color: #5a5650;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+    .features {
+      list-style: none;
+      text-align: left;
+      background: #f4f9f6;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+    }
+    .features li {
+      font-size: .92rem;
+      color: #18160f;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .features li::before {
+      content: '✓';
+      font-weight: 700;
+      color: #1d6b4a;
+      flex-shrink: 0;
+    }
+    .btn {
+      display: inline-block;
+      background: #1d6b4a;
+      color: #fff;
+      text-decoration: none;
+      padding: .85rem 2.5rem;
+      border-radius: 12px;
+      font-size: .95rem;
+      font-weight: 600;
+      transition: background .2s;
+    }
+    .btn:hover { background: #155638; }
+    .note {
+      margin-top: 1.25rem;
+      font-size: .78rem;
+      color: #9b9690;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="emoji">🎉</div>
+    <h1>¡Bienvenido a Premium!</h1>
+    <p class="subtitle">Tu pago fue procesado exitosamente. Ya tenés acceso a todas las funciones Premium de Lucky QR.</p>
+    <ul class="features">
+      <li>QR dinámicos — cambiá el destino sin regenerar el QR</li>
+      <li>Estadísticas de escaneos en tiempo real</li>
+      <li>Logo personalizado dentro del QR</li>
+      <li>Exportación de datos en CSV</li>
+      <li>Historial completo de tus QR creados</li>
+    </ul>
+    <a href="https://lucky-qr.com" class="btn">Ir a Lucky QR</a>
+    <p class="note">Si tenés algún problema, escribinos a soporte.</p>
+  </div>
+</body>
+</html>

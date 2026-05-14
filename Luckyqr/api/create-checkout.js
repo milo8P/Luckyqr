@@ -34,7 +34,7 @@ module.exports = async function handler(req, res) {
       }],
       customer_email: email,
       metadata: { userId },
-      success_url: 'https://lucky-qr.com/?premium=success',
+      success_url: 'https://lucky-qr.com/success.html',
       cancel_url: 'https://lucky-qr.com/?premium=cancelled',
     })
 
