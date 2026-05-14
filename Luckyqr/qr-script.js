@@ -481,6 +481,7 @@ function generateShortCode() {
 
 async function createDynamicQR() {
   if (!currentUser) { openModal('login'); return; }
+  if (currentUser.plan !== 'premium') { showToast('Necesitás Premium para crear QR dinámicos ⭐'); return; }
   if (!supabase) { showToast('Error de conexión'); return; }
   var name = document.getElementById('dqr-name').value.trim();
   var url  = document.getElementById('dqr-url').value.trim();
