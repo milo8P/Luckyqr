@@ -499,19 +499,31 @@ async function createDynamicQR() {
 
 async function loadDynamicQRs() {
   if (!currentUser || !supabase) return;
-  var res = await supabase.from('dynamic_qrs').select('*').eq('user_id', currentUser.id).order('created_at', { ascending:false });
+  var res = await supabase
+    .from('dynamic_qrs')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
   if (res.error) { showToast('Error al cargar QR'); return; }
   var list  = document.getElementById('dqr-list');
   var count = document.getElementById('dqr-count');
   var qrs   = res.data || [];
   if (count) count.textContent = qrs.length + ' QR';
+  if (!list) return;
   if (qrs.length === 0) {
     list.innerHTML = '<p style="font-size:.82rem;color:var(--muted2);text-align:center;padding:1rem 0">Todavía no creaste ningún QR dinámico.</p>';
     return;
   }
+  var qrIds = qrs.map(function(q){ return q.id; });
+  var scanRes = await supabase.from('qr_scans').select('qr_id').in('qr_id', qrIds);
+  var scanData = scanRes.data || [];
+  var scanCount = {};
+  scanData.forEach(function(s){
+    scanCount[s.qr_id] = (scanCount[s.qr_id] || 0) + 1;
+  });
   list.innerHTML = qrs.map(function(qr){
     var link  = 'https://lucky-qr.com/r/' + qr.short_code;
-    var scans = 0;
+    var scans = scanCount[qr.id] || 0;
     return '<div class="dqr-item">'
       + '<div class="dqr-item-head"><span class="dqr-item-name">' + qr.name + '</span><span class="dqr-item-code">' + qr.short_code + '</span></div>'
       + '<div class="dqr-item-url">' + qr.destination_url + '</div>'
@@ -524,7 +536,6 @@ async function loadDynamicQRs() {
       + '</div></div>';
   }).join('');
 }
-
 async function deleteDynamicQR(id) {
   if (!supabase) return;
   if (!confirm('¿Seguro que querés borrar este QR?')) return;
