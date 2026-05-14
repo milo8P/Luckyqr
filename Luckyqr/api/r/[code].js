@@ -1,7 +1,24 @@
 const SUPABASE_URL = 'https://mqhgqdozuilerfhisoqy.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_Owm4MnvGI5FepdV9-wTo9w_U9xI7oxH'
 
+const rateMap = new Map()
+
+function isRateLimited(ip, max, windowMs) {
+  const now = Date.now()
+  const cutoff = now - windowMs
+  const hits = (rateMap.get(ip) || []).filter(t => t > cutoff)
+  if (hits.length >= max) return true
+  hits.push(now)
+  rateMap.set(ip, hits)
+  return false
+}
+
 export default async function handler(req, res) {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown'
+  if (isRateLimited(ip, 30, 60_000)) {
+    return res.status(429).json({ error: 'Demasiadas solicitudes' })
+  }
+
   const { code } = req.query
 
   if (!code) {
