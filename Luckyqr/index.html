@@ -102,6 +102,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .tab{padding:5px 11px;font-size:.73rem;font-family:var(--sans);font-weight:500;border:1px solid var(--border);border-radius:100px;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s}
 .tab:hover{border-color:var(--border2);color:var(--text)}
 .tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab-premium{border-color:#b45309;color:#b45309}
+.tab-premium:hover{background:#fdf3e7}
+.tab-premium.active{background:#b45309;border-color:#b45309;color:#fff}
 .color-section{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:.75rem}
 .color-picker-wrap{display:flex;flex-direction:column;align-items:center;gap:6px}
 .color-picker-wrap label{font-size:.72rem;font-weight:500;color:var(--muted)}
@@ -458,9 +461,9 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
               <button class="tab" onclick="setType('instagram',this)">Instagram</button>
               <button class="tab" onclick="setType('pdf',this)">PDF</button>
               <button class="tab" onclick="setType('event',this)">Evento</button>
-              <button class="tab" onclick="setType('app',this)">App</button>
-              <button class="tab" onclick="setType('social',this)">Redes</button>
-              <button class="tab" onclick="setType('landing',this)" title="Solo Premium — Landing Page">🌐 Landing</button>
+              <button class="tab tab-premium" onclick="setType('app',this)" title="Solo Premium">⭐ App</button>
+              <button class="tab tab-premium" onclick="setType('social',this)" title="Solo Premium">⭐ Redes</button>
+              <button class="tab tab-premium" onclick="setType('landing',this)" title="Solo Premium — Landing Page">⭐ Landing</button>
             </div>
           </div>
           <div id="input-area" class="field">

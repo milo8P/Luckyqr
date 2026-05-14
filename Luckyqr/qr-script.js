@@ -240,6 +240,9 @@ function tryGenerate() {
 }
 
 function setType(type, btn) {
+  if (['app','social','landing'].indexOf(type) !== -1 && (!currentUser || currentUser.plan !== 'premium')) {
+    showToast('Necesitás Premium para usar esta función ⭐');
+  }
   currentType = type;
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
   btn.classList.add('active');
@@ -404,9 +407,6 @@ function colorSimilar(h1, h2) {
 // ── Generar QR ──
 function generateQR() {
   if (currentType === 'app' || currentType === 'social' || currentType === 'landing') {
-    if (!currentUser || currentUser.plan !== 'premium') {
-      showToast('Necesitás Premium para usar esta función ⭐'); return;
-    }
     generateQRDynamic(); return;
   }
   var content = getContent();
