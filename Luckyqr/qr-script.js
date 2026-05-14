@@ -235,7 +235,7 @@ function showModalError(msg) {
 }
 
 // ── Tipo de QR ──
-function tryGenerate() {
+async function tryGenerate() {
   if (!currentUser) { openModal('login'); showToast(t('toast.loginRequired')); return; }
   console.log('currentUser plan:', currentUser?.plan);
   if (['app','social','landing'].indexOf(currentType) !== -1 && currentUser.plan !== 'premium') {
@@ -243,7 +243,7 @@ function tryGenerate() {
     document.getElementById('premium-locked')?.scrollIntoView({ behavior: 'smooth' });
     return;
   }
-  generateQR();
+  await generateQR();
 }
 
 function setType(type, btn) {
@@ -343,11 +343,13 @@ function getContent() {
       + '\nEND:VEVENT\nEND:VCALENDAR';
   }
   if (currentType === 'app') {
+    if (!currentUser || currentUser.plan !== 'premium') return null;
     var appIos = (document.getElementById('app-ios')    ||{value:''}).value.trim();
     var appAnd = (document.getElementById('app-android')||{value:''}).value.trim();
     return appIos || appAnd || null;
   }
   if (currentType === 'social') {
+    if (!currentUser || currentUser.plan !== 'premium') return null;
     var socFields = [
       { id:'soc-ig', base:'https://instagram.com/' },
       { id:'soc-tw', base:'https://x.com/' },
@@ -413,9 +415,16 @@ function colorSimilar(h1, h2) {
 }
 
 // ── Generar QR ──
-function generateQR() {
+async function generateQR() {
   if (currentType === 'app' || currentType === 'social' || currentType === 'landing') {
-    generateQRDynamic(); return;
+    var isPremium = await verifyPremiumServer();
+    if (!isPremium) {
+      showToast('Necesitás Premium ⭐');
+      document.getElementById('premium-locked')?.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    await generateQRDynamic();
+    return;
   }
   var content = getContent();
   if (!content) { showToast(t('toast.fillContent')); return; }
@@ -496,13 +505,6 @@ async function verifyPremiumServer() {
 async function generateQRDynamic() {
   if (!supabase) { showToast('Error de conexión'); return; }
   if (!currentUser) { openModal('login'); return; }
-
-  var isPremium = await verifyPremiumServer();
-  if (!isPremium) {
-    showToast('Necesitás Premium ⭐');
-    document.getElementById('premium-locked')?.scrollIntoView({ behavior: 'smooth' });
-    return;
-  }
 
   var code = generateShortCode();
   var content;
