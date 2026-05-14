@@ -198,7 +198,9 @@ function handleAuth() {
   if (!supabase) { showModalError('Error de conexión. Recargá la página.'); return; }
   btn.classList.add('loading');
 
-  supabase.auth.signUp({ email:email, password:pass, options:{ data:{ name:name } } }).then(function(res) {
+  if (authMode === 'register') {
+    var name = (document.getElementById('auth-name') || { value: '' }).value.trim();
+    supabase.auth.signUp({ email:email, password:pass, options:{ data:{ name:name } } }).then(function(res) {
       btn.classList.remove('loading');
       if (res.error) { showModalError(res.error.message); return; }
       closeModal();
