@@ -666,6 +666,23 @@ async function cancelPremium() {
     showToast('Error al cancelar: ' + data.error);
   }
 }
+// ── Reset password handler ──
+window.addEventListener('load', function() {
+  var hash = window.location.hash;
+  if (hash.includes('type=recovery')) {
+    var newPass = prompt('Ingresá tu nueva contraseña (mínimo 6 caracteres):');
+    if (newPass && newPass.length >= 6) {
+      supabase.auth.updateUser({ password: newPass }).then(function(res) {
+        if (res.error) {
+          alert('Error al cambiar contraseña: ' + res.error.message);
+        } else {
+          showToast('Contraseña actualizada correctamente');
+          window.location.href = 'https://lucky-qr.com';
+        }
+      });
+    }
+  }
+});
 // ── FAQ ──
 function toggleFaq(btn) {
   var item = btn.closest('.faq-item');
