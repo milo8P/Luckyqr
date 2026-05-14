@@ -472,26 +472,34 @@ function validateUrl(url) {
   return (u.startsWith('https://') || u.startsWith('http://')) ? u : null;
 }
 
+async function verifyPremiumServer() {
+  if (!currentUser || !supabase) return false;
+  try {
+    var session = await supabase.auth.getSession();
+    var token = session?.data?.session?.access_token;
+    if (!token) return false;
+    var res = await fetch('/api/verify-premium', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      }
+    });
+    var data = await res.json();
+    return data.premium === true;
+  } catch (e) {
+    console.error('verifyPremiumServer error:', e);
+    return false;
+  }
+}
+
 async function generateQRDynamic() {
   if (!supabase) { showToast('Error de conexión'); return; }
+  if (!currentUser) { openModal('login'); return; }
 
-  // Server-side premium verification — never trust local plan state
-  var sessionRes = await supabase.auth.getSession();
-  var jwt = sessionRes?.data?.session?.access_token;
-  if (!jwt) { openModal('login'); return; }
-
-  var verifyRes;
-  try {
-    verifyRes = await fetch('/api/verify-premium', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + jwt }
-    });
-  } catch (e) {
-    showToast(t('toast.connectionError')); return;
-  }
-  var verifyData = await verifyRes.json();
-  if (!verifyData.premium) {
-    showToast(t('toast.premiumRequired'));
+  var isPremium = await verifyPremiumServer();
+  if (!isPremium) {
+    showToast('Necesitás Premium ⭐');
     document.getElementById('premium-locked')?.scrollIntoView({ behavior: 'smooth' });
     return;
   }
