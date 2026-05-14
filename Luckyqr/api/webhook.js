@@ -25,13 +25,11 @@ module.exports = async function handler(req, res) {
     return res.status(400).send('Webhook error: ' + e.message)
   }
 
+  // pago completado → activar Premium
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
     const userId  = session.metadata.userId
-
-    console.log('Session completa:', JSON.stringify(session))
-    console.log('Activando premium para userId:', userId)
-
+    console.log('Activando premium para:', userId)
     await fetch(`${process.env.SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
       method: 'PATCH',
       headers: {
@@ -40,7 +38,24 @@ module.exports = async function handler(req, res) {
         'Content-Type': 'application/json',
         Prefer:         'return=minimal'
       },
-      body: JSON.stringify({ plan: 'premium' })
+      body: JSON.stringify({ plan: 'premium', stripe_customer_id: session.customer })
+    })
+  }
+
+  // suscripción cancelada → volver a free
+  if (event.type === 'customer.subscription.deleted') {
+    const subscription = event.data.object
+    const customerId   = subscription.customer
+    console.log('Cancelando premium para customer:', customerId)
+    await fetch(`${process.env.SUPABASE_URL}/rest/v1/profiles?stripe_customer_id=eq.${customerId}`, {
+      method: 'PATCH',
+      headers: {
+        apikey:         process.env.SUPABASE_KEY,
+        Authorization:  `Bearer ${process.env.SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer:         'return=minimal'
+      },
+      body: JSON.stringify({ plan: 'free' })
     })
   }
 
