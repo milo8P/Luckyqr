@@ -206,8 +206,12 @@ function handleAuth() {
     supabase.auth.signUp({ email:email, password:pass, options:{ data:{ name:name } } }).then(function(res) {
       btn.classList.remove('loading');
       if (res.error) { showModalError(res.error.message); return; }
-      closeModal();
-      showToast('Cuenta creada. Bienvenido, ' + name + '! Revisá tu email para confirmar.');
+    closeModal();
+    showToast('Cuenta creada. Bienvenido, ' + name + '!');
+    fetch('/api/send-welcome', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, name: name })
     });
   } else {
     supabase.auth.signInWithPassword({ email:email, password:pass }).then(function(res) {
