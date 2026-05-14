@@ -1,5 +1,3 @@
-const Stripe = require('stripe')
-
 const SUPABASE_URL = 'https://mqhgqdozuilerfhisoqy.supabase.co'
 
 const rateMap = new Map()
@@ -12,12 +10,6 @@ function isRateLimited(ip, max, windowMs) {
   hits.push(now)
   rateMap.set(ip, hits)
   return false
-}
-
-function sanitizeEmail(email) {
-  if (typeof email !== 'string') return null
-  const e = email.trim().toLowerCase()
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && e.length <= 254 ? e : null
 }
 
 module.exports = async function handler(req, res) {
@@ -53,25 +45,20 @@ module.exports = async function handler(req, res) {
 
   if (!authUser?.id) return res.status(401).json({ error: 'Token inválido' })
 
-  const email = sanitizeEmail(authUser.email || req.body?.email)
-  if (!email) return res.status(400).json({ error: 'Email inválido' })
-
-  const stripe = Stripe(process.env.STRIPE_SECRET_KEY)
-
   try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
-      line_items: [{ price: 'price_1TWlWRJ2mvjOcUaYhf4lUSuT', quantity: 1 }],
-      customer_email: email,
-      metadata: { userId: authUser.id },
-      success_url: 'https://lucky-qr.com/success.html',
-      cancel_url: 'https://lucky-qr.com/?premium=cancelled',
-    })
-
-    res.json({ url: session.url })
-  } catch(e) {
-    console.error(e)
-    res.status(500).json({ error: 'Error al crear la sesión de pago' })
+    const profileRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/profiles?id=eq.${encodeURIComponent(authUser.id)}&select=plan&limit=1`,
+      {
+        headers: {
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`
+        }
+      }
+    )
+    const profiles = await profileRes.json()
+    const premium = Array.isArray(profiles) && profiles[0]?.plan === 'premium'
+    return res.json({ premium })
+  } catch {
+    return res.status(500).json({ error: 'Error al verificar el plan' })
   }
 }

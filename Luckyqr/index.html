@@ -348,6 +348,26 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
 .gradient-row{display:flex;align-items:center;gap:12px}
 .gradient-row label{display:flex;align-items:center;gap:7px;font-size:.82rem;font-weight:500;color:var(--text);cursor:pointer;margin:0}
 .gradient-row input[type=checkbox]{width:auto;margin:0}
+/* ── Language selector ── */
+.lang-sel{display:flex;gap:2px;align-items:center}
+.lang-btn{background:none;border:none;cursor:pointer;font-size:1.1rem;padding:3px 5px;border-radius:6px;transition:opacity .15s,background .15s;line-height:1}
+.lang-btn:hover{background:var(--bg2)}
+/* ── Password field inline ── */
+.pw-check-row{display:flex;align-items:center;gap:8px;margin-top:.75rem;padding:.65rem .9rem;background:var(--bg2);border-radius:9px;border:1px solid var(--border)}
+.pw-check-row label{display:flex;align-items:center;gap:7px;font-size:.82rem;font-weight:500;color:var(--text);cursor:pointer;margin:0;flex:1}
+.pw-check-row input[type=checkbox]{width:auto;margin:0}
+/* ── Folder chips ── */
+.folder-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:100px;font-size:.7rem;font-weight:500;border:1px solid transparent;cursor:pointer;transition:all .15s}
+.folder-chip:hover{opacity:.8}
+.folder-chip.active{box-shadow:0 0 0 2px currentColor}
+/* ── Bulk / API key panels ── */
+.stat-mini{background:var(--bg2);border-radius:9px;padding:.65rem .75rem;text-align:center}
+.stat-mini-n{font-family:var(--serif);font-size:1.4rem;font-weight:600;color:var(--accent);line-height:1}
+.stat-mini-l{font-size:.65rem;color:var(--muted);margin-top:2px}
+.api-key-row{display:flex;align-items:center;gap:8px;padding:.65rem 0;border-bottom:1px solid var(--border);font-size:.78rem}
+.api-key-row:last-child{border-bottom:none}
+.api-key-val{font-family:monospace;font-size:.72rem;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.api-key-name{font-weight:500;font-size:.78rem;color:var(--text)}
 </style>
 </head>
 <body>
@@ -355,9 +375,14 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
 <nav>
   <a href="#" class="nav-brand"><div class="nav-dot"></div>Lucky QR</a>
   <div class="nav-right">
-    <div class="nav-hint" id="nav-auth-hint">Registrate para generar QR</div>
-    <button class="btn-nav-log" id="btn-nav-login" onclick="openModal('login')">Iniciar sesión</button>
-    <button class="btn-nav-reg" id="btn-nav-register" onclick="openModal('register')">Registrarse gratis</button>
+    <div class="nav-hint" id="nav-auth-hint" data-i18n="nav.hint">Registrate para generar QR</div>
+    <button class="btn-nav-log" id="btn-nav-login" onclick="openModal('login')" data-i18n="nav.login">Iniciar sesión</button>
+    <button class="btn-nav-reg" id="btn-nav-register" onclick="openModal('register')" data-i18n="nav.register">Registrarse gratis</button>
+    <div class="lang-sel" id="lang-sel">
+      <button class="lang-btn" data-lang="es" onclick="changeLanguage('es')" title="Español">🇦🇷</button>
+      <button class="lang-btn" data-lang="en" onclick="changeLanguage('en')" title="English">🇺🇸</button>
+      <button class="lang-btn" data-lang="pt" onclick="changeLanguage('pt')" title="Português">🇧🇷</button>
+    </div>
     <div class="nav-user" id="nav-user">
       <div class="nav-avatar" id="nav-avatar" onclick="toggleUserPanel()">?</div>
       <span class="nav-uname" id="nav-username"></span>
@@ -435,6 +460,7 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
               <button class="tab" onclick="setType('event',this)">Evento</button>
               <button class="tab" onclick="setType('app',this)">App</button>
               <button class="tab" onclick="setType('social',this)">Redes</button>
+              <button class="tab" onclick="setType('landing',this)" title="Solo Premium — Landing Page">🌐 Landing</button>
             </div>
           </div>
           <div id="input-area" class="field">
@@ -500,6 +526,17 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
             <div class="field"><label>LinkedIn</label><input type="url" id="soc-li" placeholder="https://linkedin.com/in/..." oninput="onInputChange()"/></div>
             <div class="field"><label>YouTube</label><input type="url" id="soc-yt" placeholder="https://youtube.com/@..." oninput="onInputChange()"/></div>
             <div class="field"><label>Facebook</label><input type="url" id="soc-fb" placeholder="https://facebook.com/..." oninput="onInputChange()"/></div>
+          </div>
+          <div id="landing-fields" style="display:none">
+            <div style="font-size:.71rem;color:var(--muted2);background:var(--accent-l);border:1px solid var(--accent-l2);border-radius:8px;padding:7px 10px;margin-bottom:.75rem">⭐ Premium — el QR apunta a una página personalizada con tu título, descripción y botón.</div>
+            <div class="field"><label>Título</label><input type="text" id="lp-title" placeholder="Mi Producto o Servicio" oninput="onInputChange()"/></div>
+            <div class="field"><label>Descripción</label><textarea id="lp-desc" placeholder="Describí lo que ofrecés en 1-2 oraciones..." style="min-height:72px" oninput="onInputChange()"></textarea></div>
+            <div class="field"><label>Texto del botón</label><input type="text" id="lp-btn-text" placeholder="Ver más" oninput="onInputChange()"/></div>
+            <div class="field"><label>URL del botón</label><input type="url" id="lp-btn-url" placeholder="https://mi-sitio.com" oninput="onInputChange()"/></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="field"><label>Color de fondo</label><div style="display:flex;align-items:center;gap:8px"><input type="color" id="lp-bg" value="#ffffff" style="width:40px;height:32px;border:1px solid var(--border);border-radius:6px;padding:2px;cursor:pointer"/><span style="font-size:.78rem;color:var(--muted)">#ffffff</span></div></div>
+              <div class="field"><label>Color de acento</label><div style="display:flex;align-items:center;gap:8px"><input type="color" id="lp-accent" value="#1d6b4a" style="width:40px;height:32px;border:1px solid var(--border);border-radius:6px;padding:2px;cursor:pointer"/><span style="font-size:.78rem;color:var(--muted)">#1d6b4a</span></div></div>
+            </div>
           </div>
         </div>
       </div>
@@ -646,49 +683,112 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
       <p>Creá QR que podés editar sin reimprimir y ve cuántas veces se escanearon.</p>
       <ul class="premium-features-list">
         <li>QR dinámicos — cambiás la URL sin reimprimir</li>
-        <li>Estadísticas de escaneos</li>
-        <li>Sin anuncios en la página</li>
-        <li>Resolución hasta 2048px</li>
-        <li>Historial en la nube</li>
+        <li>Estadísticas detalladas (ciudad, OS, hora pico)</li>
+        <li>Carpetas para organizar tus QR</li>
+        <li>QR con contraseña</li>
+        <li>Landing Pages personalizadas</li>
+        <li>Generación en lote (hasta 50 QR en ZIP)</li>
+        <li>API pública para integrar en tus apps</li>
+        <li>Logo en el centro del QR</li>
       </ul>
       <button class="btn-upgrade" onclick="upgradeToPremium()">Obtener Premium — $4.99 USD/mes</button>
     </div>
     <div id="premium-panel" style="display:none">
       <div class="premium-grid">
         <div class="dqr-panel">
-          <div class="dqr-panel-hdr"><span class="dqr-panel-title">Nuevo QR dinámico</span></div>
+          <div class="dqr-panel-hdr"><span class="dqr-panel-title" data-i18n="dqr.new">Nuevo QR dinámico</span></div>
           <div class="dqr-body">
-            <div class="field"><label>Nombre del QR</label><input type="text" id="dqr-name" placeholder="ej: Menú del restaurante"/></div>
-            <div class="field"><label>URL destino</label><input type="url" id="dqr-url" placeholder="https://mi-sitio.com/menu"/></div>
-            <button class="btn-create-dqr" onclick="createDynamicQR()">+ Crear QR dinámico</button>
+            <div class="field"><label data-i18n="dqr.name">Nombre del QR</label><input type="text" id="dqr-name" placeholder="ej: Menú del restaurante"/></div>
+            <div class="field"><label data-i18n="dqr.url">URL destino</label><input type="url" id="dqr-url" placeholder="https://mi-sitio.com/menu"/></div>
+            <div class="pw-check-row">
+              <label><input type="checkbox" id="dqr-pw-enabled" onchange="document.getElementById('dqr-pw-field').style.display=this.checked?'block':'none'"/> Proteger con contraseña</label>
+            </div>
+            <div id="dqr-pw-field" style="display:none;margin-top:.5rem">
+              <div class="field"><label>Contraseña de acceso</label><input type="password" id="dqr-pw" placeholder="contraseña123"/></div>
+            </div>
+            <div class="field" style="margin-top:.75rem"><label>Carpeta <span class="sublabel">opcional</span></label><select id="dqr-folder"><option value="">Sin carpeta</option></select></div>
+            <button class="btn-create-dqr" onclick="createDynamicQR()" data-i18n="dqr.create">+ Crear QR dinámico</button>
           </div>
         </div>
         <div class="dqr-panel">
           <div class="dqr-panel-hdr">
-            <span class="dqr-panel-title">Mis QR dinámicos</span>
+            <span class="dqr-panel-title" data-i18n="dqr.list">Mis QR dinámicos</span>
             <span id="dqr-count" style="font-size:.7rem;color:var(--muted2)">0 QR</span>
           </div>
           <div class="dqr-body">
+            <div id="dqr-folder-filter" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.75rem"></div>
             <div id="dqr-list"><p style="font-size:.82rem;color:var(--muted2);text-align:center;padding:1rem 0">Todavía no creaste ningún QR dinámico.</p></div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
 
-
-      <!-- Estadísticas -->
+      <!-- ── Estadísticas detalladas ── -->
       <div class="dqr-panel" style="margin-top:1.5rem">
         <div class="dqr-panel-hdr">
-          <span class="dqr-panel-title">Escaneos últimos 7 días</span>
-          <span id="total-scans" style="font-size:.7rem;color:var(--muted2)">0 total</span>
+          <span class="dqr-panel-title" data-i18n="stats.title">Estadísticas de escaneos</span>
+          <button onclick="exportScansCSV()" style="font-size:.72rem;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:500">📥 CSV</button>
         </div>
         <div class="dqr-body">
-          <canvas id="scans-chart" height="120"></canvas>
-          <button onclick="exportScansCSV()" style="margin-top:1rem;width:100%;padding:.65rem;background:transparent;color:var(--accent);border:1px solid var(--accent-l2);border-radius:9px;font-family:var(--sans);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .18s" onmouseover="this.style.background='var(--accent-l)'" onmouseout="this.style.background='transparent'">
-  📥 Exportar escaneos CSV
-</button>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem">
+            <div class="stat-mini"><div class="stat-mini-n" id="total-scans">0</div><div class="stat-mini-l" data-i18n="stats.total">Total</div></div>
+            <div class="stat-mini"><div class="stat-mini-n" id="stats-today">0</div><div class="stat-mini-l" data-i18n="stats.today">Hoy</div></div>
+            <div class="stat-mini"><div class="stat-mini-n" id="stats-peak-hour">—</div><div class="stat-mini-l" data-i18n="stats.peak">Hora pico</div></div>
+          </div>
+          <canvas id="scans-chart" height="110"></canvas>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1rem">
+            <div>
+              <div style="font-size:.65rem;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Dispositivos</div>
+              <div id="stats-devices"></div>
+            </div>
+            <div>
+              <div style="font-size:.65rem;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Sistemas</div>
+              <div id="stats-os"></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:.75rem">
+            <div>
+              <div style="font-size:.65rem;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Top países</div>
+              <div id="stats-countries"></div>
+            </div>
+            <div>
+              <div style="font-size:.65rem;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Top ciudades</div>
+              <div id="stats-cities"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Carpetas ── -->
+      <div class="dqr-panel" style="margin-top:1.5rem">
+        <div class="dqr-panel-hdr">
+          <span class="dqr-panel-title" data-i18n="folders.title">Carpetas</span>
+          <button onclick="openFolderModal()" style="font-size:.72rem;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:500" data-i18n="folders.new">+ Nueva carpeta</button>
+        </div>
+        <div class="dqr-body">
+          <div id="folders-list" style="display:flex;gap:6px;flex-wrap:wrap"><p style="font-size:.78rem;color:var(--muted2)">Sin carpetas todavía.</p></div>
+        </div>
+      </div>
+
+      <!-- ── Generación en lote ── -->
+      <div class="dqr-panel" style="margin-top:1.5rem">
+        <div class="dqr-panel-hdr">
+          <span class="dqr-panel-title">Generación en lote</span>
+        </div>
+        <div class="dqr-body">
+          <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">Pegá hasta 50 URLs y descargalas como ZIP. Cada QR lleva el estilo actual (colores, forma, marco).</p>
+          <button onclick="openBulkModal()" style="width:100%;padding:.75rem;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:.88rem;font-weight:500;cursor:pointer;transition:background .18s" data-i18n="bulk.btn">📦 Generar en lote</button>
+        </div>
+      </div>
+
+      <!-- ── API Keys ── -->
+      <div class="dqr-panel" style="margin-top:1.5rem" id="api-keys-panel">
+        <div class="dqr-panel-hdr">
+          <span class="dqr-panel-title" data-i18n="api.title">API Keys</span>
+          <button onclick="generateApiKey()" style="font-size:.72rem;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:500" data-i18n="api.new">+ Nueva key</button>
+        </div>
+        <div class="dqr-body">
+          <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">Usá tu API key para generar QR programáticamente. <a href="/api-docs.html" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500">Ver documentación →</a></p>
+          <div id="api-keys-list"><p style="font-size:.78rem;color:var(--muted2)">Sin API keys. Generá una arriba.</p></div>
         </div>
       </div>
 
@@ -738,9 +838,9 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
       <div class="why-card why-card--highlight reveal"><div class="why-card-icon">🔒</div><h3>Tu información nunca sale de tu dispositivo</h3><p>Todo se procesa en tu navegador. Nadie ve lo que escribís — ni nosotros. Tus contraseñas de WiFi y datos de contacto son solo tuyos.</p><div class="why-tag">Privacidad real</div></div>
       <div class="why-card reveal"><div class="why-card-icon">⚡</div><h3>Instantáneo y sin registros molestos</h3><p>Podés explorar todo primero y registrarte solo cuando querés generar. Sin formularios infinitos ni tarjeta de crédito.</p><div class="why-tag">Sin fricciones</div></div>
       <div class="why-card reveal"><div class="why-card-icon">🎨</div><h3>Personalización real, no de adorno</h3><p>Elegís el color exacto con una rueda completa. Si los colores son parecidos, te avisamos antes de que el QR sea ilegible.</p><div class="why-tag">Control total</div></div>
-      <div class="why-card reveal"><div class="why-card-icon">📦</div><h3>Descargás lo que ves, sin sorpresas</h3><p>El QR en pantalla es exactamente el que vas a descargar. Sin marcas de agua escondidas ni degradación de calidad.</p><div class="why-tag">Lo que ves es lo que llevás</div></div>
-      <div class="why-card reveal"><div class="why-card-icon">🌐</div><h3>15 tipos de QR en un solo lugar</h3><p>URL, WiFi, WhatsApp, vCard, geolocalización, SMS, YouTube, Instagram, PDF, App, Redes Sociales y más. Todo sin límites.</p><div class="why-tag">Todo incluido</div></div>
-      <div class="why-card reveal"><div class="why-card-icon">📴</div><h3>Funciona sin internet</h3><p>Una vez que cargaste la página, podés generar QR aunque se corte la conexión. Ideal para eventos o lugares con mala señal.</p><div class="why-tag">Offline ready</div></div>
+      <div class="why-card reveal"><div class="why-card-icon">📦</div><h3>Generación en lote — hasta 50 QR de una vez</h3><p>Pegá tus URLs, generamos todos los QR y los empaquetamos en un ZIP listo para descargar. Ahorrás horas de trabajo.</p><div class="why-tag">Bulk generation</div></div>
+      <div class="why-card reveal"><div class="why-card-icon">🌐</div><h3>16 tipos de QR + Landing Pages propias</h3><p>URL, WiFi, WhatsApp, vCard, App Store, Redes Sociales, Landing Page personalizada y más. Todo sin límites.</p><div class="why-tag">Todo incluido</div></div>
+      <div class="why-card reveal"><div class="why-card-icon">📊</div><h3>Estadísticas que realmente importan</h3><p>Cuántos escaneos, desde qué ciudad, qué sistema operativo, a qué hora. Datos reales para tomar mejores decisiones.</p><div class="why-tag">Analytics Premium</div></div>
     </div>
     <div class="compare-wrap reveal">
       <h3 class="compare-title">Lucky QR vs la competencia</h3>
@@ -753,8 +853,15 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
             <tr><td>Datos privados</td><td class="col-us c-yes">✓ 100% local</td><td class="c-no">Pasan por servidor</td><td class="c-no">Pasan por servidor</td><td class="c-no">Pasan por servidor</td></tr>
             <tr><td>Funciona offline</td><td class="col-us c-yes">✓ Sí</td><td class="c-no">No</td><td class="c-no">No</td><td class="c-no">No</td></tr>
             <tr><td>SVG gratis</td><td class="col-us c-yes">✓ Incluido</td><td class="c-no">Solo premium</td><td class="c-no">Solo premium</td><td class="c-no">No</td></tr>
-            <tr><td>Tipos de QR gratis</td><td class="col-us c-yes">✓ 15 tipos</td><td class="c-mid">5 tipos</td><td class="c-mid">3 tipos</td><td class="c-mid">4 tipos</td></tr>
+            <tr><td>Tipos de QR gratis</td><td class="col-us c-yes">✓ 16 tipos</td><td class="c-mid">5 tipos</td><td class="c-mid">3 tipos</td><td class="c-mid">4 tipos</td></tr>
             <tr><td>Colores personalizados</td><td class="col-us c-yes">✓ Rueda completa</td><td class="c-yes">✓</td><td class="c-mid">Limitado</td><td class="c-no">No</td></tr>
+            <tr><td>Estadísticas detalladas</td><td class="col-us c-yes">✓ Ciudad, OS, hora</td><td class="c-mid">Básicas</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td>Generación en lote</td><td class="col-us c-yes">✓ Hasta 50 en ZIP</td><td class="c-no">No</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td>Landing Pages</td><td class="col-us c-yes">✓ Incluido</td><td class="c-mid">Solo premium</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td>API pública</td><td class="col-us c-yes">✓ Con documentación</td><td class="c-mid">Solo premium</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td>QR con contraseña</td><td class="col-us c-yes">✓ Premium</td><td class="c-no">No</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td>Carpetas / organización</td><td class="col-us c-yes">✓ Premium</td><td class="c-mid">Solo premium</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td>Idiomas</td><td class="col-us c-yes">✓ ES / EN / PT</td><td class="c-yes">✓</td><td class="c-mid">Solo ES</td><td class="c-no">Solo EN</td></tr>
           </tbody>
         </table>
       </div>
@@ -932,8 +1039,36 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
     <button onclick="declineCookies()" style="padding:.6rem 1.25rem;background:transparent;color:#faf9f7;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-family:var(--sans);font-size:.82rem;cursor:pointer">Solo necesarias</button>
   </div>
 </div>
+<!-- FOLDER MODAL -->
+<div class="edit-modal" id="folder-modal">
+  <div class="edit-modal-box">
+    <h3>Nueva carpeta</h3>
+    <div class="field" style="margin-top:1rem"><label>Nombre</label><input type="text" id="folder-name" placeholder="ej: Restaurante"/></div>
+    <div class="field" style="display:flex;align-items:center;gap:10px"><label>Color</label><input type="color" id="folder-color" value="#1d6b4a" style="width:40px;height:32px;border:1px solid var(--border);border-radius:6px;padding:2px;cursor:pointer"/></div>
+    <button class="btn-save-url" onclick="createFolder()" style="margin-top:1rem">Crear carpeta</button>
+    <button class="btn-cancel-edit" onclick="closeFolderModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- BULK MODAL -->
+<div class="edit-modal" id="bulk-modal">
+  <div class="edit-modal-box" style="max-width:580px">
+    <h3>Generar QR en lote</h3>
+    <p style="font-size:.82rem;color:var(--muted);margin:.75rem 0 1rem">Pegá una URL por línea (máximo 50). Se generan con el estilo actual y se descargan en un ZIP.</p>
+    <textarea id="bulk-urls" placeholder="https://ejemplo.com/pagina1&#10;https://ejemplo.com/pagina2&#10;https://ejemplo.com/pagina3" style="width:100%;min-height:160px;padding:.7rem .9rem;background:var(--bg);border:1px solid var(--border);border-radius:9px;font-family:monospace;font-size:.78rem;color:var(--text);outline:none;resize:vertical;margin-bottom:1rem"></textarea>
+    <div id="bulk-progress" style="display:none;margin-bottom:1rem">
+      <div class="progress"><div class="progress-bar" id="bulk-progress-bar"></div></div>
+      <p id="bulk-progress-text" style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:.5rem">Generando...</p>
+    </div>
+    <button class="btn-save-url" id="bulk-run-btn" onclick="runBulkGeneration()">📦 Generar y descargar ZIP</button>
+    <button class="btn-cancel-edit" onclick="closeBulkModal()">Cancelar</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js"></script>
+<script src="i18n.js"></script>
 <script src="qr-script.js"></script>
 </body>
 </html>

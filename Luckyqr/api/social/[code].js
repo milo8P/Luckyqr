@@ -1,6 +1,22 @@
 const SUPABASE_URL = 'https://mqhgqdozuilerfhisoqy.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_Owm4MnvGI5FepdV9-wTo9w_U9xI7oxH'
 
+function escapeHtml(str) {
+  if (!str) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function safeUrl(url) {
+  if (!url || typeof url !== 'string') return null
+  const trimmed = url.trim()
+  return trimmed.startsWith('https://') || trimmed.startsWith('http://') ? trimmed : null
+}
+
 const rateMap = new Map()
 
 function isRateLimited(ip, max, windowMs) {
@@ -87,9 +103,9 @@ function socialPage(title, links) {
   const displayTitle = title || 'Mi perfil'
 
   const cards = links.map(({ label, color, icon, url }) => `
-    <a class="social-btn" href="${url}" target="_blank" rel="noopener noreferrer" style="--brand:${color}">
+    <a class="social-btn" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" style="--brand:${escapeHtml(color)}">
       <span class="social-icon">${icon}</span>
-      <span class="social-label">${label}</span>
+      <span class="social-label">${escapeHtml(label)}</span>
       <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>`).join('\n')
 
@@ -161,13 +177,13 @@ export default async function handler(req, res) {
   const row = data[0]
 
   const links = NETWORKS
-    .filter(n => row[n.key])
-    .map(n => ({ ...n, url: row[n.key] }))
+    .filter(n => safeUrl(row[n.key]))
+    .map(n => ({ ...n, url: safeUrl(row[n.key]) }))
 
   if (links.length === 0) {
     return res.status(404).send(notFoundPage())
   }
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
-  return res.status(200).send(socialPage(row.title, links))
+  return res.status(200).send(socialPage(escapeHtml(row.title), links))
 }

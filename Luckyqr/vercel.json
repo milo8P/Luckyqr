@@ -1,16 +1,28 @@
 {
   "rewrites": [
+    { "source": "/r/:code", "destination": "/api/r/[code]" },
+    { "source": "/app/:code", "destination": "/api/app/[code]" },
+    { "source": "/social/:code", "destination": "/api/social/[code]" },
+    { "source": "/landing/:code", "destination": "/api/landing/[code]" }
+  ],
+  "headers": [
     {
-      "source": "/r/:code",
-      "destination": "/api/r/[code]"
+      "source": "/api/public/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
     },
     {
-      "source": "/app/:code",
-      "destination": "/api/app/[code]"
-    },
-    {
-      "source": "/social/:code",
-      "destination": "/api/social/[code]"
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-XSS-Protection", "value": "1; mode=block" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+      ]
     }
   ],
   "cleanUrls": true

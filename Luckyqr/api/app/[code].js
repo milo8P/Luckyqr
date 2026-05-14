@@ -1,6 +1,22 @@
 const SUPABASE_URL = 'https://mqhgqdozuilerfhisoqy.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_Owm4MnvGI5FepdV9-wTo9w_U9xI7oxH'
 
+function escapeHtml(str) {
+  if (!str) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function safeUrl(url) {
+  if (!url || typeof url !== 'string') return null
+  const trimmed = url.trim()
+  return trimmed.startsWith('https://') || trimmed.startsWith('http://') ? trimmed : null
+}
+
 const rateMap = new Map()
 
 function isRateLimited(ip, max, windowMs) {
@@ -121,15 +137,18 @@ export default async function handler(req, res) {
   }
 
   const { ios_url, android_url, name } = data[0]
+  const safeIos = safeUrl(ios_url)
+  const safeAndroid = safeUrl(android_url)
+  const safeName = escapeHtml(name)
   const ua = req.headers['user-agent'] || ''
 
-  if (/iPhone|iPad|iPod/i.test(ua) && ios_url) {
-    return res.redirect(302, ios_url)
+  if (/iPhone|iPad|iPod/i.test(ua) && safeIos) {
+    return res.redirect(302, safeIos)
   }
-  if (/Android/i.test(ua) && android_url) {
-    return res.redirect(302, android_url)
+  if (/Android/i.test(ua) && safeAndroid) {
+    return res.redirect(302, safeAndroid)
   }
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
-  return res.status(200).send(desktopPage(name, ios_url, android_url))
+  return res.status(200).send(desktopPage(safeName, safeIos, safeAndroid))
 }

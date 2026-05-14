@@ -251,7 +251,7 @@ function setType(type, btn) {
     email: { l:'Email',    s:'dirección de correo',       p:'nombre@ejemplo.com',  t:'email' },
     tel:   { l:'Teléfono', s:'con código de país',        p:'+54 9 11 1234 5678',  t:'tel'   },
   };
-  var specials = { wifi:'wifi-fields', sms:'sms-fields', vcard:'vcard-fields', geo:'geo-fields', whatsapp:'whatsapp-fields', youtube:'youtube-fields', instagram:'instagram-fields', pdf:'pdf-fields', event:'event-fields', app:'app-fields', social:'social-fields' };
+  var specials = { wifi:'wifi-fields', sms:'sms-fields', vcard:'vcard-fields', geo:'geo-fields', whatsapp:'whatsapp-fields', youtube:'youtube-fields', instagram:'instagram-fields', pdf:'pdf-fields', event:'event-fields', app:'app-fields', social:'social-fields', landing:'landing-fields' };
   if (specials[type]) {
     var el = document.getElementById(specials[type]); if (el) el.style.display = 'block';
   } else {
@@ -403,9 +403,9 @@ function colorSimilar(h1, h2) {
 
 // ── Generar QR ──
 function generateQR() {
-  if (currentType === 'app' || currentType === 'social') {
+  if (currentType === 'app' || currentType === 'social' || currentType === 'landing') {
     if (!currentUser || currentUser.plan !== 'premium') {
-      showToast('Necesitás Premium'); return;
+      showToast('Necesitás Premium para usar esta función ⭐'); return;
     }
     generateQRDynamic(); return;
   }
@@ -454,31 +454,76 @@ function generateQR() {
   }, 250);
 }
 
+function stripHtml(str) {
+  return str ? String(str).replace(/<[^>]*>/g, '').slice(0, 100) : '';
+}
+
+function validateUrl(url) {
+  if (!url) return null;
+  var u = url.trim().slice(0, 500);
+  return (u.startsWith('https://') || u.startsWith('http://')) ? u : null;
+}
+
 async function generateQRDynamic() {
   if (!supabase) { showToast('Error de conexión'); return; }
+
+  // Server-side premium verification — never trust local plan state
+  var sessionRes = await supabase.auth.getSession();
+  var jwt = sessionRes?.data?.session?.access_token;
+  if (!jwt) { openModal('login'); return; }
+
+  var verifyRes;
+  try {
+    verifyRes = await fetch('/api/verify-premium', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + jwt }
+    });
+  } catch (e) {
+    showToast('Error de conexión al verificar el plan'); return;
+  }
+  var verifyData = await verifyRes.json();
+  if (!verifyData.premium) {
+    showToast('Necesitás Premium para usar esta función ⭐');
+    document.getElementById('premium')?.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
   var code = generateShortCode();
   var content;
 
-  if (currentType === 'app') {
-    var iosUrl  = (document.getElementById('app-ios')     || {value:''}).value.trim();
-    var andUrl  = (document.getElementById('app-android') || {value:''}).value.trim();
-    var appName = (document.getElementById('app-name')    || {value:''}).value.trim();
-    if (!iosUrl && !andUrl) { showToast('Completá al menos una URL de la app'); return; }
+  if (currentType === 'landing') {
+    var lpTitle   = stripHtml((document.getElementById('lp-title')    || {value:''}).value);
+    var lpDesc    = stripHtml((document.getElementById('lp-desc')     || {value:''}).value);
+    var lpBtnText = stripHtml((document.getElementById('lp-btn-text') || {value:''}).value);
+    var lpBtnUrl  = validateUrl((document.getElementById('lp-btn-url') || {value:''}).value);
+    var lpBg      = (document.getElementById('lp-bg')     || {value:'#ffffff'}).value;
+    var lpAccent  = (document.getElementById('lp-accent') || {value:'#1d6b4a'}).value;
+    if (!lpTitle) { showToast('Ingresá un título para la Landing Page'); return; }
+    var res = await supabase.from('landing_pages').insert({ code, user_id: currentUser.id, title: lpTitle, description: lpDesc, button_text: lpBtnText || 'Ver más', button_url: lpBtnUrl || '', bg_color: lpBg, accent_color: lpAccent });
+    if (res.error) { showToast('Error al guardar la Landing Page'); return; }
+    content = 'https://lucky-qr.com/landing/' + code;
+  } else if (currentType === 'app') {
+    var iosUrl  = validateUrl((document.getElementById('app-ios')     || {value:''}).value);
+    var andUrl  = validateUrl((document.getElementById('app-android') || {value:''}).value);
+    var appName = stripHtml((document.getElementById('app-name')      || {value:''}).value);
+    if (!iosUrl && !andUrl) { showToast('Completá al menos una URL válida de la app (https://)'); return; }
     var res = await supabase.from('app_qrs').insert({ code, user_id: currentUser.id, ios_url: iosUrl, android_url: andUrl, name: appName });
     if (res.error) { showToast('Error al guardar el QR de app'); return; }
     content = 'https://lucky-qr.com/app/' + code;
   } else {
-    var title = (document.getElementById('soc-title') || {value:''}).value.trim();
-    var ig    = (document.getElementById('soc-ig')    || {value:''}).value.trim();
-    var tw    = (document.getElementById('soc-tw')    || {value:''}).value.trim();
-    var tt    = (document.getElementById('soc-tt')    || {value:''}).value.trim();
-    var li    = (document.getElementById('soc-li')    || {value:''}).value.trim();
-    var yt    = (document.getElementById('soc-yt')    || {value:''}).value.trim();
-    var fb    = (document.getElementById('soc-fb')    || {value:''}).value.trim();
+    var title = stripHtml((document.getElementById('soc-title') || {value:''}).value);
+    var ig    = (document.getElementById('soc-ig') || {value:''}).value.trim().slice(0, 500);
+    var tw    = (document.getElementById('soc-tw') || {value:''}).value.trim().slice(0, 500);
+    var tt    = (document.getElementById('soc-tt') || {value:''}).value.trim().slice(0, 500);
+    var li    = (document.getElementById('soc-li') || {value:''}).value.trim().slice(0, 500);
+    var yt    = (document.getElementById('soc-yt') || {value:''}).value.trim().slice(0, 500);
+    var fb    = (document.getElementById('soc-fb') || {value:''}).value.trim().slice(0, 500);
     if (!ig && !tw && !tt && !li && !yt && !fb) { showToast('Completá al menos una red social'); return; }
     if (ig && !ig.startsWith('http')) ig = 'https://instagram.com/' + ig.replace('@', '');
     if (tw && !tw.startsWith('http')) tw = 'https://x.com/' + tw.replace('@', '');
     if (tt && !tt.startsWith('http')) tt = 'https://tiktok.com/@' + tt.replace('@', '');
+    ig = validateUrl(ig) || ''; tw = validateUrl(tw) || ''; tt = validateUrl(tt) || '';
+    li = validateUrl(li) || ''; yt = validateUrl(yt) || ''; fb = validateUrl(fb) || '';
     var res = await supabase.from('social_qrs').insert({ code, user_id: currentUser.id, title, instagram: ig, twitter: tw, tiktok: tt, linkedin: li, youtube: yt, facebook: fb });
     if (res.error) { showToast('Error al guardar el QR social'); return; }
     content = 'https://lucky-qr.com/social/' + code;
@@ -586,6 +631,8 @@ function checkPremiumStatus() {
     if (badge)  badge.textContent    = '⭐ Plan Premium';
     loadDynamicQRs();
     loadScansChart();
+    loadFolders();
+    loadApiKeys();
     var logoField = document.getElementById('logo-field');
     if (logoField) logoField.style.display = 'block';
   }
@@ -609,11 +656,20 @@ async function createDynamicQR() {
   if (!url)  { showToast('Ingresá una URL destino'); return; }
   if (!url.startsWith('http')) { showToast('La URL debe empezar con https://'); return; }
   var code = generateShortCode();
-  var res = await supabase.from('dynamic_qrs').insert({ user_id:currentUser.id, short_code:code, destination_url:url, name:name });
+  var pwEnabled = document.getElementById('dqr-pw-enabled') && document.getElementById('dqr-pw-enabled').checked;
+  var pw        = pwEnabled ? ((document.getElementById('dqr-pw') || {value:''}).value.trim()) : '';
+  var folderId  = (document.getElementById('dqr-folder') || {value:''}).value || null;
+  var insertData = { user_id: currentUser.id, short_code: code, destination_url: url, name: name };
+  if (pwEnabled && pw) { insertData.password_enabled = true; insertData.password = pw; }
+  if (folderId) insertData.folder_id = folderId;
+  var res = await supabase.from('dynamic_qrs').insert(insertData);
   if (res.error) { showToast('Error al crear QR'); return; }
   document.getElementById('dqr-name').value = '';
   document.getElementById('dqr-url').value  = '';
-  showToast('QR dinámico creado');
+  if (document.getElementById('dqr-pw-enabled')) document.getElementById('dqr-pw-enabled').checked = false;
+  if (document.getElementById('dqr-pw-field')) document.getElementById('dqr-pw-field').style.display = 'none';
+  if (document.getElementById('dqr-pw')) document.getElementById('dqr-pw').value = '';
+  showToast('QR dinámico creado' + (pwEnabled && pw ? ' 🔒 con contraseña' : ''));
   loadDynamicQRs();
 }
 
@@ -641,11 +697,26 @@ async function loadDynamicQRs() {
   scanData.forEach(function(s){
     scanCount[s.qr_id] = (scanCount[s.qr_id] || 0) + 1;
   });
-  list.innerHTML = qrs.map(function(qr){
+  var folderFilter = document.getElementById('dqr-folder-filter');
+  if (folderFilter) {
+    var folderRes2 = await supabase.from('folders').select('id,name,color').eq('user_id', currentUser.id).order('name');
+    var foldersArr = (folderRes2.data || []);
+    var chips = '<button class="folder-chip active" data-folder="" onclick="setFolderFilter(\'\',this)" style="background:var(--bg2);color:var(--muted);border-color:var(--border)">Todos</button>';
+    foldersArr.forEach(function(f){
+      chips += '<button class="folder-chip" data-folder="' + f.id + '" onclick="setFolderFilter(\'' + f.id + '\',this)" style="background:' + f.color + '22;color:' + f.color + ';border-color:' + f.color + '">' + f.name + '</button>';
+    });
+    folderFilter.innerHTML = chips;
+  }
+
+  var activeFolder = window.__activeFolder || '';
+  var displayQrs = activeFolder ? qrs.filter(function(q){ return q.folder_id === activeFolder; }) : qrs;
+
+  list.innerHTML = displayQrs.map(function(qr){
     var link  = 'https://lucky-qr.com/r/' + qr.short_code;
     var scans = scanCount[qr.id] || 0;
+    var pwBadge = qr.password_enabled ? ' 🔒' : '';
     return '<div class="dqr-item">'
-      + '<div class="dqr-item-head"><span class="dqr-item-name">' + qr.name + '</span><span class="dqr-item-code">' + qr.short_code + '</span></div>'
+      + '<div class="dqr-item-head"><span class="dqr-item-name">' + qr.name + pwBadge + '</span><span class="dqr-item-code">' + qr.short_code + '</span></div>'
       + '<div class="dqr-item-url">' + qr.destination_url + '</div>'
       + '<div style="font-size:.72rem;color:var(--accent);font-weight:500;margin-bottom:.6rem">📊 ' + scans + ' escaneo' + (scans !== 1 ? 's' : '') + '</div>'
       + '<div class="dqr-item-actions">'
@@ -654,7 +725,7 @@ async function loadDynamicQRs() {
       + '<button class="btn-dqr-action" onclick="generateDynamicQRCode(\'' + link + '\')">Ver QR</button>'
       + '<button class="btn-dqr-action danger" onclick="deleteDynamicQR(\'' + qr.id + '\')">Borrar</button>'
       + '</div></div>';
-  }).join('');
+  }).join('') || '<p style="font-size:.82rem;color:var(--muted2);text-align:center;padding:1rem 0">Ningún QR en esta carpeta.</p>';
 }
 async function deleteDynamicQR(id) {
   if (!supabase) return;
@@ -761,10 +832,13 @@ async function upgradeToPremium() {
   if (!currentUser) { openModal('login'); return; }
   showToast('Redirigiendo al pago...');
   try {
+    var sessionRes = await supabase.auth.getSession();
+    var jwt = sessionRes?.data?.session?.access_token;
+    if (!jwt) { openModal('login'); return; }
     var res = await fetch('/api/create-checkout', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: currentUser.id, email: currentUser.email })
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
+      body: JSON.stringify({ email: currentUser.email })
     });
     var data = await res.json();
     if (data.url) {
@@ -835,8 +909,16 @@ window.addEventListener('load', function() {
   }, 1500);
 });
 // ── FAQ ──
-// ── Gráfico de escaneos ──
+// ── Gráfico de escaneos (estadísticas detalladas) ──
 var scansChart = null;
+
+function statBar(label, count, total) {
+  var pct = total ? Math.round(count / total * 100) : 0;
+  return '<div style="display:flex;justify-content:space-between;align-items:center;font-size:.75rem;padding:3px 0">'
+    + '<span style="color:var(--muted)">' + label + '</span>'
+    + '<span style="color:var(--accent);font-weight:500">' + count + ' <span style="color:var(--muted2);font-weight:400">(' + pct + '%)</span></span>'
+    + '</div>';
+}
 
 async function loadScansChart() {
   if (!currentUser || !supabase) return;
@@ -845,47 +927,95 @@ async function loadScansChart() {
   var qrIds = qrRes.data.map(function(q){ return q.id; });
   var desde = new Date();
   desde.setDate(desde.getDate() - 6);
-  desde.setHours(0,0,0,0);
-  var scanRes = await supabase.from('qr_scans').select('scanned_at').in('qr_id', qrIds).gte('scanned_at', desde.toISOString());
+  desde.setHours(0, 0, 0, 0);
+  var scanRes = await supabase.from('qr_scans')
+    .select('scanned_at,device,country,city,os,hour')
+    .in('qr_id', qrIds)
+    .gte('scanned_at', desde.toISOString());
   var scans = scanRes.data || [];
+
+  // Totales
+  var totalEl = document.getElementById('total-scans');
+  if (totalEl) totalEl.textContent = scans.length;
+
+  var today = new Date().toISOString().slice(0, 10);
+  var todayCount = scans.filter(function(s){ return s.scanned_at && s.scanned_at.slice(0, 10) === today; }).length;
+  var todayEl = document.getElementById('stats-today');
+  if (todayEl) todayEl.textContent = todayCount;
+
+  // Hora pico
+  var hourCount = {};
+  scans.forEach(function(s){ if (s.hour != null) hourCount[s.hour] = (hourCount[s.hour] || 0) + 1; });
+  var peakHour = null, peakHourMax = 0;
+  Object.keys(hourCount).forEach(function(h){ if (hourCount[h] > peakHourMax) { peakHourMax = hourCount[h]; peakHour = h; } });
+  var peakEl = document.getElementById('stats-peak-hour');
+  if (peakEl) peakEl.textContent = peakHour !== null ? peakHour + ':00h' : '—';
+
+  // Gráfico por día
   var days = [], counts = [];
   for (var i = 6; i >= 0; i--) {
     var d = new Date();
     d.setDate(d.getDate() - i);
-    var label = d.toLocaleDateString('es-AR', { weekday:'short', day:'numeric' });
-    days.push(label);
-    var dayStr = d.toISOString().slice(0,10);
-    var count = scans.filter(function(s){ return s.scanned_at.slice(0,10) === dayStr; }).length;
-    counts.push(count);
+    days.push(d.toLocaleDateString('es-AR', { weekday:'short', day:'numeric' }));
+    var dayStr = d.toISOString().slice(0, 10);
+    counts.push(scans.filter(function(s){ return s.scanned_at && s.scanned_at.slice(0, 10) === dayStr; }).length);
   }
-  var total = scans.length;
-  var totalEl = document.getElementById('total-scans');
-  if (totalEl) totalEl.textContent = total + ' total';
   var ctx = document.getElementById('scans-chart');
-  if (!ctx) return;
-  if (scansChart) scansChart.destroy();
-  scansChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: days,
-      datasets: [{
-        label: 'Escaneos',
-        data: counts,
-        backgroundColor: 'rgba(29,107,74,.2)',
-        borderColor: '#1d6b4a',
-        borderWidth: 2,
-        borderRadius: 6,
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true, ticks: { stepSize: 1, font:{ size:11 } }, grid: { color:'#e8e4de' } },
-        x: { ticks: { font:{ size:11 } }, grid: { display:false } }
+  if (ctx) {
+    if (scansChart) scansChart.destroy();
+    scansChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: days,
+        datasets: [{ label:'Escaneos', data: counts, backgroundColor:'rgba(29,107,74,.2)', borderColor:'#1d6b4a', borderWidth:2, borderRadius:6 }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1, font:{ size:10 } }, grid: { color:'#e8e4de' } },
+          x: { ticks: { font:{ size:10 } }, grid: { display:false } }
+        }
       }
-    }
-  });
+    });
+  }
+
+  var total = scans.length || 1;
+
+  // Dispositivos
+  var devEl = document.getElementById('stats-devices');
+  if (devEl) {
+    var mob = scans.filter(function(s){ return s.device === 'mobile'; }).length;
+    var dsk = scans.filter(function(s){ return s.device === 'desktop'; }).length;
+    devEl.innerHTML = statBar('📱 Móvil', mob, total) + statBar('🖥 Desktop', dsk, total);
+  }
+
+  // OS
+  var osEl = document.getElementById('stats-os');
+  if (osEl) {
+    var osCnt = {};
+    scans.forEach(function(s){ if (s.os) osCnt[s.os] = (osCnt[s.os] || 0) + 1; });
+    var osArr = Object.entries(osCnt).sort(function(a, b){ return b[1] - a[1]; }).slice(0, 4);
+    osEl.innerHTML = osArr.map(function(o){ return statBar(o[0], o[1], total); }).join('') || '<span style="font-size:.73rem;color:var(--muted2)">Sin datos aún</span>';
+  }
+
+  // Países
+  var cntEl = document.getElementById('stats-countries');
+  if (cntEl) {
+    var cntCnt = {};
+    scans.forEach(function(s){ if (s.country) cntCnt[s.country] = (cntCnt[s.country] || 0) + 1; });
+    var cntArr = Object.entries(cntCnt).sort(function(a, b){ return b[1] - a[1]; }).slice(0, 3);
+    cntEl.innerHTML = cntArr.map(function(c){ return statBar(c[0], c[1], total); }).join('') || '<span style="font-size:.73rem;color:var(--muted2)">Sin datos aún</span>';
+  }
+
+  // Ciudades
+  var citEl = document.getElementById('stats-cities');
+  if (citEl) {
+    var citCnt = {};
+    scans.forEach(function(s){ if (s.city) citCnt[s.city] = (citCnt[s.city] || 0) + 1; });
+    var citArr = Object.entries(citCnt).sort(function(a, b){ return b[1] - a[1]; }).slice(0, 3);
+    citEl.innerHTML = citArr.map(function(c){ return statBar(c[0], c[1], total); }).join('') || '<span style="font-size:.73rem;color:var(--muted2)">Sin datos aún</span>';
+  }
 }
 // ── Export CSV ──
 async function exportScansCSV() {
@@ -1208,6 +1338,172 @@ document.addEventListener('click', function(e){
     panel.style.display = 'none';
   }
 });
+
+// ── Carpetas ──
+async function loadFolders() {
+  if (!currentUser || !supabase) return;
+  var res = await supabase.from('folders').select('id,name,color').eq('user_id', currentUser.id).order('name');
+  var folders = res.data || [];
+  var listEl = document.getElementById('folders-list');
+  if (listEl) {
+    if (folders.length === 0) {
+      listEl.innerHTML = '<p style="font-size:.78rem;color:var(--muted2)">Sin carpetas. Creá la primera arriba.</p>';
+    } else {
+      listEl.innerHTML = folders.map(function(f){
+        return '<span class="folder-chip" style="background:' + f.color + '22;color:' + f.color + ';border-color:' + f.color + '">'
+          + f.name
+          + ' <button onclick="deleteFolder(\'' + f.id + '\')" style="background:none;border:none;cursor:pointer;font-size:.7rem;color:inherit;margin-left:3px;padding:0;line-height:1">✕</button>'
+          + '</span>';
+      }).join('');
+    }
+  }
+  // Poblar select en formulario de creación
+  var sel = document.getElementById('dqr-folder');
+  if (sel) {
+    sel.innerHTML = '<option value="">Sin carpeta</option>'
+      + folders.map(function(f){ return '<option value="' + f.id + '">' + f.name + '</option>'; }).join('');
+  }
+}
+
+function openFolderModal() { document.getElementById('folder-modal').classList.add('open'); }
+function closeFolderModal() { document.getElementById('folder-modal').classList.remove('open'); }
+
+async function createFolder() {
+  if (!currentUser || !supabase) return;
+  var name  = (document.getElementById('folder-name') || {value:''}).value.trim();
+  var color = (document.getElementById('folder-color') || {value:'#1d6b4a'}).value;
+  if (!name) { showToast('Ingresá un nombre para la carpeta'); return; }
+  var res = await supabase.from('folders').insert({ user_id: currentUser.id, name: name, color: color });
+  if (res.error) { showToast('Error al crear carpeta'); return; }
+  document.getElementById('folder-name').value = '';
+  closeFolderModal();
+  showToast('Carpeta creada');
+  loadFolders();
+  loadDynamicQRs();
+}
+
+async function deleteFolder(id) {
+  if (!confirm('¿Borrar esta carpeta? Los QR asignados quedarán sin carpeta.')) return;
+  await supabase.from('folders').delete().eq('id', id);
+  showToast('Carpeta eliminada');
+  loadFolders();
+  loadDynamicQRs();
+}
+
+var __activeFolder = '';
+function setFolderFilter(folderId, btn) {
+  window.__activeFolder = folderId;
+  document.querySelectorAll('#dqr-folder-filter .folder-chip').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  loadDynamicQRs();
+}
+
+// ── Generación en lote ──
+function openBulkModal() { document.getElementById('bulk-modal').classList.add('open'); }
+function closeBulkModal() { document.getElementById('bulk-modal').classList.remove('open'); }
+
+async function runBulkGeneration() {
+  var raw = (document.getElementById('bulk-urls') || {value:''}).value;
+  var urls = raw.split('\n').map(function(u){ return u.trim(); }).filter(function(u){ return u.startsWith('http'); });
+  if (urls.length === 0) { showToast('Pegá al menos una URL válida (https://)'); return; }
+  if (urls.length > 50) { urls = urls.slice(0, 50); showToast('Máximo 50 URLs — tomando las primeras 50'); }
+
+  var btn = document.getElementById('bulk-run-btn');
+  var progressDiv = document.getElementById('bulk-progress');
+  var progressBar = document.getElementById('bulk-progress-bar');
+  var progressText = document.getElementById('bulk-progress-text');
+  if (btn) btn.disabled = true;
+  if (progressDiv) progressDiv.style.display = 'block';
+
+  var zip = new JSZip();
+  var size = parseInt(document.getElementById('qr-size').value) || 256;
+  var dark  = currentDark  || '#18160f';
+  var light = currentLight || '#ffffff';
+
+  for (var i = 0; i < urls.length; i++) {
+    var pct = Math.round((i / urls.length) * 100);
+    if (progressBar) progressBar.style.width = pct + '%';
+    if (progressText) progressText.textContent = 'Generando ' + (i + 1) + ' de ' + urls.length + '...';
+
+    var tmpDiv = document.createElement('div');
+    try {
+      new QRCode(tmpDiv, { text: urls[i], width: size, height: size, colorDark: dark, colorLight: light, correctLevel: QRCode.CorrectLevel.H });
+      await new Promise(function(r){ setTimeout(r, 80); });
+      var canvas = tmpDiv.querySelector('canvas');
+      if (canvas) {
+        var dataUrl = canvas.toDataURL('image/png');
+        var base64  = dataUrl.replace('data:image/png;base64,', '');
+        var num = String(i + 1).padStart(2, '0');
+        zip.file('qr-' + num + '.png', base64, { base64: true });
+      }
+    } catch(e) {}
+  }
+
+  if (progressBar) progressBar.style.width = '100%';
+  if (progressText) progressText.textContent = 'Creando ZIP...';
+
+  var dateStr = new Date().toISOString().slice(0, 10);
+  zip.generateAsync({ type: 'blob' }).then(function(blob) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'lucky-qr-lote-' + dateStr + '.zip';
+    a.click();
+    if (btn) btn.disabled = false;
+    if (progressDiv) progressDiv.style.display = 'none';
+    if (progressBar) progressBar.style.width = '0%';
+    closeBulkModal();
+    showToast('ZIP descargado con ' + urls.length + ' QR');
+  });
+}
+
+// ── API Keys ──
+function generateKeyString() {
+  var chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  var key = 'lqr_';
+  for (var i = 0; i < 32; i++) key += chars[Math.floor(Math.random() * chars.length)];
+  return key;
+}
+
+async function loadApiKeys() {
+  if (!currentUser || !supabase) return;
+  var res = await supabase.from('api_keys').select('id,key,name,calls_count,created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  var keys = res.data || [];
+  var listEl = document.getElementById('api-keys-list');
+  if (!listEl) return;
+  if (keys.length === 0) {
+    listEl.innerHTML = '<p style="font-size:.78rem;color:var(--muted2)">Sin API keys. Generá una arriba.</p>';
+    return;
+  }
+  listEl.innerHTML = keys.map(function(k){
+    var shortKey = k.key.slice(0, 12) + '••••••••••••';
+    return '<div class="api-key-row">'
+      + '<div><div class="api-key-name">' + (k.name || 'API Key') + '</div><div class="api-key-val" title="' + k.key + '">' + shortKey + '</div></div>'
+      + '<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">'
+      + '<span style="font-size:.68rem;color:var(--muted)">' + (k.calls_count || 0) + ' llamadas</span>'
+      + '<button onclick="copyText(\'' + k.key + '\')" class="btn-dqr-action" style="font-size:.68rem;padding:3px 8px">Copiar</button>'
+      + '<button onclick="deleteApiKey(\'' + k.id + '\')" class="btn-dqr-action danger" style="font-size:.68rem;padding:3px 8px">Borrar</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function generateApiKey() {
+  if (!currentUser || !supabase) return;
+  var name = prompt('Nombre para esta API key (ej: Mi App):');
+  if (name === null) return;
+  var key = generateKeyString();
+  var res = await supabase.from('api_keys').insert({ user_id: currentUser.id, key: key, name: name || 'API Key' });
+  if (res.error) { showToast('Error al generar API key'); return; }
+  showToast('API key generada — copiala ahora');
+  navigator.clipboard.writeText(key).catch(function(){});
+  loadApiKeys();
+}
+
+async function deleteApiKey(id) {
+  if (!confirm('¿Borrar esta API key? Las integraciones que la usen dejarán de funcionar.')) return;
+  await supabase.from('api_keys').delete().eq('id', id);
+  showToast('API key eliminada');
+  loadApiKeys();
+}
 
 // ── Cargar reseñas al inicio ──
 window.addEventListener('load', function(){
