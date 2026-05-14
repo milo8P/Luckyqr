@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -13,6 +13,13 @@
 <meta property="og:type" content="website"/>
 <meta property="og:url" content="https://lucky-qr.com"/>
 <link rel="canonical" href="https://lucky-qr.com"/>
+<link rel="alternate" hreflang="en" href="https://lucky-qr.com/"/>
+<link rel="alternate" hreflang="es" href="https://lucky-qr.com/?lang=es"/>
+<link rel="alternate" hreflang="pt" href="https://lucky-qr.com/?lang=pt"/>
+<link rel="alternate" hreflang="ru" href="https://lucky-qr.com/?lang=ru"/>
+<link rel="alternate" hreflang="zh" href="https://lucky-qr.com/?lang=zh"/>
+<link rel="alternate" hreflang="de" href="https://lucky-qr.com/?lang=de"/>
+<link rel="alternate" hreflang="x-default" href="https://lucky-qr.com/"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231d6b4a'/><rect x='6' y='6' width='8' height='8' rx='1' fill='white'/><rect x='7' y='7' width='6' height='6' rx='0.5' fill='%231d6b4a'/><rect x='8' y='8' width='4' height='4' fill='white'/><rect x='18' y='6' width='8' height='8' rx='1' fill='white'/><rect x='19' y='7' width='6' height='6' rx='0.5' fill='%231d6b4a'/><rect x='20' y='8' width='4' height='4' fill='white'/><rect x='6' y='18' width='8' height='8' rx='1' fill='white'/><rect x='7' y='19' width='6' height='6' rx='0.5' fill='%231d6b4a'/><rect x='8' y='20' width='4' height='4' fill='white'/><rect x='18' y='18' width='4' height='4' fill='white'/><rect x='24' y='18' width='2' height='2' fill='white'/><rect x='18' y='22' width='2' height='2' fill='white'/><rect x='22' y='22' width='4' height='4' fill='white'/></svg>"/>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -352,9 +359,14 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
 .gradient-row label{display:flex;align-items:center;gap:7px;font-size:.82rem;font-weight:500;color:var(--text);cursor:pointer;margin:0}
 .gradient-row input[type=checkbox]{width:auto;margin:0}
 /* ── Language selector ── */
-.lang-sel{display:flex;gap:2px;align-items:center}
-.lang-btn{background:none;border:none;cursor:pointer;font-size:1.1rem;padding:3px 5px;border-radius:6px;transition:opacity .15s,background .15s;line-height:1}
-.lang-btn:hover{background:var(--bg2)}
+.lang-selector{position:relative}
+.lang-selector-btn{padding:5px 10px;background:transparent;border:1px solid var(--border);border-radius:100px;font-family:var(--sans);font-size:.75rem;cursor:pointer;color:var(--text);display:flex;align-items:center;gap:4px;transition:all .15s;white-space:nowrap}
+.lang-selector-btn:hover{border-color:var(--border2);background:var(--bg2)}
+.lang-dropdown{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shl);z-index:500;min-width:150px;overflow:hidden}
+.lang-dropdown.open{display:block}
+.lang-option{display:flex;align-items:center;gap:8px;padding:.5rem .9rem;font-size:.8rem;cursor:pointer;color:var(--text);transition:background .12s;white-space:nowrap;border:none;background:none;width:100%;text-align:left;font-family:var(--sans)}
+.lang-option:hover{background:var(--bg2)}
+.lang-option.active{color:var(--accent);font-weight:500}
 /* ── Password field inline ── */
 .pw-check-row{display:flex;align-items:center;gap:8px;margin-top:.75rem;padding:.65rem .9rem;background:var(--bg2);border-radius:9px;border:1px solid var(--border)}
 .pw-check-row label{display:flex;align-items:center;gap:7px;font-size:.82rem;font-weight:500;color:var(--text);cursor:pointer;margin:0;flex:1}
@@ -378,18 +390,24 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
 <nav>
   <a href="#" class="nav-brand"><div class="nav-dot"></div>Lucky QR</a>
   <div class="nav-right">
-    <div class="nav-hint" id="nav-auth-hint" data-i18n="nav.hint">Registrate para generar QR</div>
-    <button class="btn-nav-log" id="btn-nav-login" onclick="openModal('login')" data-i18n="nav.login">Iniciar sesión</button>
-    <button class="btn-nav-reg" id="btn-nav-register" onclick="openModal('register')" data-i18n="nav.register">Registrarse gratis</button>
-    <div class="lang-sel" id="lang-sel">
-      <button class="lang-btn" data-lang="es" onclick="changeLanguage('es')" title="Español">🇦🇷</button>
-      <button class="lang-btn" data-lang="en" onclick="changeLanguage('en')" title="English">🇺🇸</button>
-      <button class="lang-btn" data-lang="pt" onclick="changeLanguage('pt')" title="Português">🇧🇷</button>
+    <div class="nav-hint" id="nav-auth-hint" data-i18n="nav.hint">Sign up to generate QR codes</div>
+    <button class="btn-nav-log" id="btn-nav-login" onclick="openModal('login')" data-i18n="nav.login">Log in</button>
+    <button class="btn-nav-reg" id="btn-nav-register" onclick="openModal('register')" data-i18n="nav.register">Sign up free</button>
+    <div class="lang-selector" id="lang-selector">
+      <button id="lang-selector-btn" class="lang-selector-btn" onclick="toggleLangDropdown()">🇺🇸 EN</button>
+      <div class="lang-dropdown" id="lang-dropdown">
+        <button class="lang-option active" data-lang="en" onclick="chooseLang('en')">🇺🇸 English</button>
+        <button class="lang-option" data-lang="es" onclick="chooseLang('es')">🇦🇷 Español</button>
+        <button class="lang-option" data-lang="pt" onclick="chooseLang('pt')">🇧🇷 Português</button>
+        <button class="lang-option" data-lang="ru" onclick="chooseLang('ru')">🇷🇺 Русский</button>
+        <button class="lang-option" data-lang="zh" onclick="chooseLang('zh')">🇨🇳 中文</button>
+        <button class="lang-option" data-lang="de" onclick="chooseLang('de')">🇩🇪 Deutsch</button>
+      </div>
     </div>
     <div class="nav-user" id="nav-user">
       <div class="nav-avatar" id="nav-avatar" onclick="toggleUserPanel()">?</div>
       <span class="nav-uname" id="nav-username"></span>
-      <button class="btn-logout-nav" onclick="logout()">Salir</button>
+      <button class="btn-logout-nav" onclick="logout()" data-i18n="nav.logout">Log out</button>
     </div>
     <div class="user-panel" id="user-panel">
       <div class="up-head">
@@ -397,73 +415,73 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
         <div class="up-meta"><h4 id="up-dname">Usuario</h4><p id="up-demail"></p></div>
       </div>
       <div class="up-tabs">
-        <button class="up-tab active" onclick="switchUpTab('info',this)">Mi perfil</button>
-        <button class="up-tab" onclick="switchUpTab('stats',this)">Actividad</button>
+        <button class="up-tab active" onclick="switchUpTab('info',this)" data-i18n="user.profile">My profile</button>
+        <button class="up-tab" onclick="switchUpTab('stats',this)" data-i18n="user.activity">Activity</button>
       </div>
       <div class="up-section active" id="up-tab-info">
-        <div class="up-field"><label>Nombre</label><input type="text" id="up-name" placeholder="Tu nombre"/></div>
-        <div class="up-field"><label>Email</label><input type="email" id="up-email" readonly/></div>
-        <div class="up-field"><label>Sitio web</label><input type="url" id="up-web" placeholder="https://mi-sitio.com"/></div>
-        <div class="up-field"><label>Bio</label><textarea id="up-bio" placeholder="Contá algo sobre vos..."></textarea></div>
-        <button class="btn-save" onclick="saveProfile()">Guardar cambios</button>
-        <button id="btn-cancel-premium" onclick="cancelPremium()" style="display:none;width:100%;padding:.62rem;background:transparent;color:var(--danger);border:1px solid var(--danger);border-radius:8px;font-family:var(--sans);font-size:.82rem;cursor:pointer;margin-top:.5rem">Cancelar Premium</button>
+        <div class="up-field"><label data-i18n="user.name">Name</label><input type="text" id="up-name" data-i18n-placeholder="modal.namePlaceholder" placeholder="Your name"/></div>
+        <div class="up-field"><label data-i18n="user.email">Email</label><input type="email" id="up-email" readonly/></div>
+        <div class="up-field"><label data-i18n="user.web">Website</label><input type="url" id="up-web" placeholder="https://my-site.com"/></div>
+        <div class="up-field"><label data-i18n="user.bio">Bio</label><textarea id="up-bio" placeholder="Tell us something about you..."></textarea></div>
+        <button class="btn-save" onclick="saveProfile()" data-i18n="user.save">Save changes</button>
+        <button id="btn-cancel-premium" onclick="cancelPremium()" style="display:none;width:100%;padding:.62rem;background:transparent;color:var(--danger);border:1px solid var(--danger);border-radius:8px;font-family:var(--sans);font-size:.82rem;cursor:pointer;margin-top:.5rem" data-i18n="premium.cancelBtn">Cancel Premium</button>
       </div>
       <div class="up-section" id="up-tab-stats">
         <div class="up-stat-row">
-          <div class="up-stat"><div class="up-stat-n" id="up-qr-count">0</div><div class="up-stat-l">QR dinámicos</div></div>
-          <div class="up-stat"><div class="up-stat-n" id="up-review-count">0</div><div class="up-stat-l">Reseñas</div></div>
+          <div class="up-stat"><div class="up-stat-n" id="up-qr-count">0</div><div class="up-stat-l" data-i18n="user.dynamicQr">Dynamic QR</div></div>
+          <div class="up-stat"><div class="up-stat-n" id="up-review-count">0</div><div class="up-stat-l" data-i18n="user.reviews">Reviews</div></div>
         </div>
         <div id="up-history-list"></div>
       </div>
-      <div class="up-foot"><button class="btn-logout-full" onclick="logout()">Cerrar sesión</button></div>
+      <div class="up-foot"><button class="btn-logout-full" onclick="logout()" data-i18n="nav.logoutFull">Log out</button></div>
     </div>
   </div>
 </nav>
 
 <section class="hero">
-  <div class="hero-chip"><span class="chip-dot"></span>Generador online — Sin costo</div>
-  <h1>Creá tu código QR<br><em>perfecto</em> en segundos</h1>
-  <p class="hero-sub">URL, WiFi, WhatsApp, contacto, ubicación y más. Personalizá colores y tamaño. Descargá al instante.</p>
+  <div class="hero-chip"><span class="chip-dot"></span><span data-i18n="hero.chip">Online generator — Free</span></div>
+  <h1 data-i18n="hero.h1">Create your perfect<br><em>QR code</em> in seconds</h1>
+  <p class="hero-sub" data-i18n="hero.sub">URL, WiFi, WhatsApp, contacts, location and more. Customize colors and size. Download instantly.</p>
   <div class="hero-btns" id="hero-btns">
-    <button class="btn btn-p" onclick="openModal('register')">Crear cuenta gratis</button>
-    <button class="btn btn-g" onclick="openModal('login')">Ya tengo cuenta</button>
+    <button class="btn btn-p" onclick="openModal('register')" data-i18n="hero.cta1">Create free account</button>
+    <button class="btn btn-g" onclick="openModal('login')" data-i18n="hero.cta2">I already have an account</button>
   </div>
-  <div class="reg-banner" id="register-banner">
-    Necesitás una cuenta para generar QR — <a onclick="openModal('register')">Registrarse es gratis</a>
+  <div class="reg-banner" id="register-banner" data-i18n="hero.banner">
+    You need an account to generate QR — <a onclick="openModal('register')">Sign up for free</a>
   </div>
 </section>
 
 <main class="main" id="generator">
   <div class="panel">
     <div class="panel-hdr">
-      <span class="panel-title">Configuración</span>
-      <span id="char-count" style="font-size:.68rem;color:var(--muted2)">0 caracteres</span>
+      <span class="panel-title" data-i18n="gen.title">Configuration</span>
+      <span id="char-count" style="font-size:.68rem;color:var(--muted2)">0 <span data-i18n="gen.chars">characters</span></span>
     </div>
     <div class="panel-body" style="padding:.75rem">
 
       <!-- ── Contenido ── -->
       <div class="cfg-sec">
-        <button class="cfg-sec-hdr open" onclick="toggleCfgSec(this)">Contenido <span class="cfg-arrow">▾</span></button>
+        <button class="cfg-sec-hdr open" onclick="toggleCfgSec(this)"><span data-i18n="gen.content">Content</span> <span class="cfg-arrow">▾</span></button>
         <div class="cfg-sec-body">
           <div class="field" style="margin-bottom:.75rem">
-            <label>Tipo de QR</label>
+            <label data-i18n="gen.typeLabel">QR type</label>
             <div class="type-tabs">
               <button class="tab active" onclick="setType('url',this)">URL</button>
-              <button class="tab" onclick="setType('text',this)">Texto</button>
+              <button class="tab" onclick="setType('text',this)" data-i18n="gen.types.text">Text</button>
               <button class="tab" onclick="setType('email',this)">Email</button>
-              <button class="tab" onclick="setType('tel',this)">Teléfono</button>
+              <button class="tab" onclick="setType('tel',this)" data-i18n="gen.types.tel">Phone</button>
               <button class="tab" onclick="setType('wifi',this)">WiFi</button>
               <button class="tab" onclick="setType('sms',this)">SMS</button>
               <button class="tab" onclick="setType('vcard',this)">vCard</button>
-              <button class="tab" onclick="setType('geo',this)">Ubicación</button>
+              <button class="tab" onclick="setType('geo',this)" data-i18n="gen.types.geo">Location</button>
               <button class="tab" onclick="setType('whatsapp',this)">WhatsApp</button>
               <button class="tab" onclick="setType('youtube',this)">YouTube</button>
               <button class="tab" onclick="setType('instagram',this)">Instagram</button>
               <button class="tab" onclick="setType('pdf',this)">PDF</button>
-              <button class="tab" onclick="setType('event',this)">Evento</button>
-              <button class="tab tab-premium" onclick="setType('app',this)" title="Solo Premium">⭐ App</button>
-              <button class="tab tab-premium" onclick="setType('social',this)" title="Solo Premium">⭐ Redes</button>
-              <button class="tab tab-premium" onclick="setType('landing',this)" title="Solo Premium — Landing Page">⭐ Landing</button>
+              <button class="tab" onclick="setType('event',this)" data-i18n="gen.types.event">Event</button>
+              <button class="tab tab-premium" onclick="setType('app',this)" data-i18n-title="premium.tag">⭐ App</button>
+              <button class="tab tab-premium" onclick="setType('social',this)" data-i18n-title="premium.tag">⭐ Social</button>
+              <button class="tab tab-premium" onclick="setType('landing',this)" data-i18n-title="premium.tag">⭐ Landing</button>
             </div>
           </div>
           <div id="input-area" class="field">
@@ -471,74 +489,74 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
             <input type="url" id="qr-input" placeholder="https://" autocomplete="off" oninput="onInputChange()"/>
           </div>
           <div id="wifi-fields" style="display:none">
-            <div class="field"><label>Nombre de red</label><input type="text" id="wifi-ssid" placeholder="Mi Red WiFi"/></div>
-            <div class="field"><label>Contraseña</label><input type="text" id="wifi-pass" placeholder="contraseña123"/></div>
-            <div class="field"><label>Seguridad</label><select id="wifi-sec"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="">Sin contraseña</option></select></div>
+            <div class="field"><label data-i18n="wifi.ssid">Network name</label><input type="text" id="wifi-ssid" data-i18n-placeholder="wifi.ssid" placeholder="My WiFi Network"/></div>
+            <div class="field"><label data-i18n="wifi.pass">Password</label><input type="text" id="wifi-pass" placeholder="password123"/></div>
+            <div class="field"><label data-i18n="wifi.sec">Security</label><select id="wifi-sec"><option value="WPA">WPA/WPA2</option><option value="WEP">WEP</option><option value="" data-i18n="wifi.noPass">No password</option></select></div>
           </div>
           <div id="sms-fields" style="display:none">
-            <div class="field"><label>Número</label><input type="tel" id="sms-tel" placeholder="+54 9 11 1234 5678"/></div>
-            <div class="field"><label>Mensaje <span class="sublabel">opcional</span></label><textarea id="sms-msg" placeholder="Hola!" style="min-height:56px"></textarea></div>
+            <div class="field"><label data-i18n="sms.number">Number</label><input type="tel" id="sms-tel" placeholder="+1 555 1234 5678"/></div>
+            <div class="field"><label data-i18n="sms.message">Message <span class="sublabel">optional</span></label><textarea id="sms-msg" placeholder="Hello!" style="min-height:56px"></textarea></div>
           </div>
           <div id="vcard-fields" style="display:none">
-            <div class="field"><label>Nombre completo</label><input type="text" id="vc-name" placeholder="Juan García"/></div>
-            <div class="field"><label>Teléfono</label><input type="tel" id="vc-phone" placeholder="+54 9 11 1234 5678"/></div>
-            <div class="field"><label>Email</label><input type="email" id="vc-email" placeholder="juan@email.com"/></div>
-            <div class="field"><label>Empresa</label><input type="text" id="vc-company" placeholder="Mi Empresa SA"/></div>
-            <div class="field"><label>Sitio web</label><input type="url" id="vc-web" placeholder="https://mi-sitio.com"/></div>
+            <div class="field"><label data-i18n="vc.name">Full name</label><input type="text" id="vc-name" placeholder="John Smith"/></div>
+            <div class="field"><label data-i18n="vc.phone">Phone</label><input type="tel" id="vc-phone" placeholder="+1 555 1234 5678"/></div>
+            <div class="field"><label>Email</label><input type="email" id="vc-email" placeholder="john@email.com"/></div>
+            <div class="field"><label data-i18n="vc.company">Company</label><input type="text" id="vc-company" placeholder="My Company Inc."/></div>
+            <div class="field"><label data-i18n="vc.web">Website</label><input type="url" id="vc-web" placeholder="https://my-site.com"/></div>
           </div>
           <div id="geo-fields" style="display:none">
-            <div class="field"><label>Link de Google Maps o coordenadas</label><input type="text" id="geo-input" placeholder="https://maps.google.com/... o -34.6037, -58.3816" oninput="parseGeoInput()"/></div>
+            <div class="field"><label data-i18n="geo.input">Google Maps link or coordinates</label><input type="text" id="geo-input" placeholder="https://maps.google.com/... or 40.7128, -74.0060" oninput="parseGeoInput()"/></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <div class="field"><label>Latitud</label><input type="text" id="geo-lat" placeholder="-34.6037" oninput="updateCharCount()"/></div>
-              <div class="field"><label>Longitud</label><input type="text" id="geo-lng" placeholder="-58.3816" oninput="updateCharCount()"/></div>
+              <div class="field"><label data-i18n="geo.lat">Latitude</label><input type="text" id="geo-lat" placeholder="40.7128" oninput="updateCharCount()"/></div>
+              <div class="field"><label data-i18n="geo.lng">Longitude</label><input type="text" id="geo-lng" placeholder="-74.0060" oninput="updateCharCount()"/></div>
             </div>
           </div>
           <div id="whatsapp-fields" style="display:none">
-            <div class="field"><label>Número de WhatsApp</label><input type="tel" id="wa-phone" placeholder="+54 9 11 1234 5678"/></div>
-            <div class="field"><label>Mensaje predefinido <span class="sublabel">opcional</span></label><textarea id="wa-msg" placeholder="Hola! Me comunico porque..." style="min-height:56px"></textarea></div>
+            <div class="field"><label data-i18n="wa.phone">WhatsApp number</label><input type="tel" id="wa-phone" placeholder="+1 555 1234 5678"/></div>
+            <div class="field"><label data-i18n="wa.msg">Default message <span class="sublabel">optional</span></label><textarea id="wa-msg" placeholder="Hello! I'm contacting you because..." style="min-height:56px"></textarea></div>
           </div>
           <div id="youtube-fields" style="display:none">
-            <div class="field"><label>Link de YouTube</label><input type="url" id="yt-url" placeholder="https://youtube.com/watch?v=..." oninput="onInputChange()"/></div>
+            <div class="field"><label data-i18n="yt.link">YouTube link</label><input type="url" id="yt-url" placeholder="https://youtube.com/watch?v=..." oninput="onInputChange()"/></div>
           </div>
           <div id="instagram-fields" style="display:none">
-            <div class="field"><label>Usuario o link de Instagram</label><input type="text" id="ig-user" placeholder="@mi_usuario" oninput="onInputChange()"/></div>
+            <div class="field"><label data-i18n="ig.user">Instagram username or link</label><input type="text" id="ig-user" placeholder="@my_user" oninput="onInputChange()"/></div>
           </div>
           <div id="pdf-fields" style="display:none">
-            <div class="field"><label>Link del archivo <span class="sublabel">Google Drive, Dropbox, etc.</span></label><input type="url" id="pdf-url" placeholder="https://drive.google.com/..." oninput="onInputChange()"/></div>
+            <div class="field"><label data-i18n="pdf.link">File link <span class="sublabel" data-i18n="pdf.hint">Google Drive, Dropbox, etc.</span></label><input type="url" id="pdf-url" placeholder="https://drive.google.com/..." oninput="onInputChange()"/></div>
           </div>
           <div id="event-fields" style="display:none">
-            <div class="field"><label>Nombre del evento</label><input type="text" id="ev-name" placeholder="Mi evento" oninput="onInputChange()"/></div>
+            <div class="field"><label data-i18n="ev.name">Event name</label><input type="text" id="ev-name" placeholder="My event" oninput="onInputChange()"/></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <div class="field"><label>Fecha</label><input type="date" id="ev-date" oninput="onInputChange()"/></div>
-              <div class="field"><label>Hora <span class="sublabel">opcional</span></label><input type="time" id="ev-time" oninput="onInputChange()"/></div>
+              <div class="field"><label data-i18n="ev.date">Date</label><input type="date" id="ev-date" oninput="onInputChange()"/></div>
+              <div class="field"><label data-i18n="ev.time">Time <span class="sublabel">optional</span></label><input type="time" id="ev-time" oninput="onInputChange()"/></div>
             </div>
-            <div class="field"><label>Lugar <span class="sublabel">opcional</span></label><input type="text" id="ev-loc" placeholder="Buenos Aires, Argentina" oninput="onInputChange()"/></div>
-            <div class="field"><label>Descripción <span class="sublabel">opcional</span></label><textarea id="ev-desc" placeholder="Detalles del evento..." style="min-height:56px" oninput="onInputChange()"></textarea></div>
+            <div class="field"><label data-i18n="ev.loc">Location <span class="sublabel">optional</span></label><input type="text" id="ev-loc" placeholder="New York, USA" oninput="onInputChange()"/></div>
+            <div class="field"><label data-i18n="ev.desc">Description <span class="sublabel">optional</span></label><textarea id="ev-desc" placeholder="Event details..." style="min-height:56px" oninput="onInputChange()"></textarea></div>
           </div>
           <div id="app-fields" style="display:none">
-            <div class="field"><label>Nombre de la app <span class="sublabel">opcional</span></label><input type="text" id="app-name" placeholder="Mi App" oninput="onInputChange()"/></div>
-            <div class="field"><label>App Store (iOS)</label><input type="url" id="app-ios" placeholder="https://apps.apple.com/..." oninput="onInputChange()"/></div>
-            <div class="field"><label>Play Store (Android)</label><input type="url" id="app-android" placeholder="https://play.google.com/store/apps/..." oninput="onInputChange()"/></div>
-            <div style="font-size:.71rem;color:var(--muted2);background:var(--bg2);border-radius:8px;padding:7px 10px;margin-bottom:.5rem">⭐ Premium — el QR detecta el dispositivo y redirige a la tienda correcta automáticamente.</div>
+            <div class="field"><label data-i18n="app.name">App name <span class="sublabel">optional</span></label><input type="text" id="app-name" placeholder="My App" oninput="onInputChange()"/></div>
+            <div class="field"><label data-i18n="app.ios">App Store (iOS)</label><input type="url" id="app-ios" placeholder="https://apps.apple.com/..." oninput="onInputChange()"/></div>
+            <div class="field"><label data-i18n="app.android">Play Store (Android)</label><input type="url" id="app-android" placeholder="https://play.google.com/store/apps/..." oninput="onInputChange()"/></div>
+            <div style="font-size:.71rem;color:var(--muted2);background:var(--bg2);border-radius:8px;padding:7px 10px;margin-bottom:.5rem" data-i18n="app.info">⭐ Premium — the QR detects the device and redirects to the correct store automatically.</div>
           </div>
           <div id="social-fields" style="display:none">
-            <div class="field"><label>Nombre del perfil <span class="sublabel">opcional</span></label><input type="text" id="soc-title" placeholder="Juan García" oninput="onInputChange()"/></div>
-            <div class="field"><label>Instagram</label><input type="text" id="soc-ig" placeholder="@usuario" oninput="onInputChange()"/></div>
-            <div class="field"><label>Twitter / X</label><input type="text" id="soc-tw" placeholder="@usuario" oninput="onInputChange()"/></div>
-            <div class="field"><label>TikTok</label><input type="text" id="soc-tt" placeholder="@usuario" oninput="onInputChange()"/></div>
+            <div class="field"><label data-i18n="soc.titleLabel">Profile name <span class="sublabel">optional</span></label><input type="text" id="soc-title" placeholder="John Smith" oninput="onInputChange()"/></div>
+            <div class="field"><label>Instagram</label><input type="text" id="soc-ig" placeholder="@username" oninput="onInputChange()"/></div>
+            <div class="field"><label>Twitter / X</label><input type="text" id="soc-tw" placeholder="@username" oninput="onInputChange()"/></div>
+            <div class="field"><label>TikTok</label><input type="text" id="soc-tt" placeholder="@username" oninput="onInputChange()"/></div>
             <div class="field"><label>LinkedIn</label><input type="url" id="soc-li" placeholder="https://linkedin.com/in/..." oninput="onInputChange()"/></div>
             <div class="field"><label>YouTube</label><input type="url" id="soc-yt" placeholder="https://youtube.com/@..." oninput="onInputChange()"/></div>
             <div class="field"><label>Facebook</label><input type="url" id="soc-fb" placeholder="https://facebook.com/..." oninput="onInputChange()"/></div>
           </div>
           <div id="landing-fields" style="display:none">
-            <div style="font-size:.71rem;color:var(--muted2);background:var(--accent-l);border:1px solid var(--accent-l2);border-radius:8px;padding:7px 10px;margin-bottom:.75rem">⭐ Premium — el QR apunta a una página personalizada con tu título, descripción y botón.</div>
-            <div class="field"><label>Título</label><input type="text" id="lp-title" placeholder="Mi Producto o Servicio" oninput="onInputChange()"/></div>
-            <div class="field"><label>Descripción</label><textarea id="lp-desc" placeholder="Describí lo que ofrecés en 1-2 oraciones..." style="min-height:72px" oninput="onInputChange()"></textarea></div>
-            <div class="field"><label>Texto del botón</label><input type="text" id="lp-btn-text" placeholder="Ver más" oninput="onInputChange()"/></div>
-            <div class="field"><label>URL del botón</label><input type="url" id="lp-btn-url" placeholder="https://mi-sitio.com" oninput="onInputChange()"/></div>
+            <div style="font-size:.71rem;color:var(--muted2);background:var(--accent-l);border:1px solid var(--accent-l2);border-radius:8px;padding:7px 10px;margin-bottom:.75rem" data-i18n="lp.info">⭐ Premium — the QR points to a custom page with your title, description and button.</div>
+            <div class="field"><label data-i18n="lp.title">Title</label><input type="text" id="lp-title" placeholder="My Product or Service" oninput="onInputChange()"/></div>
+            <div class="field"><label data-i18n="lp.desc">Description</label><textarea id="lp-desc" placeholder="Describe what you offer in 1-2 sentences..." style="min-height:72px" oninput="onInputChange()"></textarea></div>
+            <div class="field"><label data-i18n="lp.btnText">Button text</label><input type="text" id="lp-btn-text" placeholder="Learn more" oninput="onInputChange()"/></div>
+            <div class="field"><label data-i18n="lp.btnUrl">Button URL</label><input type="url" id="lp-btn-url" placeholder="https://my-site.com" oninput="onInputChange()"/></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-              <div class="field"><label>Color de fondo</label><div style="display:flex;align-items:center;gap:8px"><input type="color" id="lp-bg" value="#ffffff" style="width:40px;height:32px;border:1px solid var(--border);border-radius:6px;padding:2px;cursor:pointer"/><span style="font-size:.78rem;color:var(--muted)">#ffffff</span></div></div>
-              <div class="field"><label>Color de acento</label><div style="display:flex;align-items:center;gap:8px"><input type="color" id="lp-accent" value="#1d6b4a" style="width:40px;height:32px;border:1px solid var(--border);border-radius:6px;padding:2px;cursor:pointer"/><span style="font-size:.78rem;color:var(--muted)">#1d6b4a</span></div></div>
+              <div class="field"><label data-i18n="lp.bg">Background color</label><div style="display:flex;align-items:center;gap:8px"><input type="color" id="lp-bg" value="#ffffff" style="width:40px;height:32px;border:1px solid var(--border);border-radius:6px;padding:2px;cursor:pointer"/><span style="font-size:.78rem;color:var(--muted)">#ffffff</span></div></div>
+              <div class="field"><label data-i18n="lp.accent">Accent color</label><div style="display:flex;align-items:center;gap:8px"><input type="color" id="lp-accent" value="#1d6b4a" style="width:40px;height:32px;border:1px solid var(--border);border-radius:6px;padding:2px;cursor:pointer"/><span style="font-size:.78rem;color:var(--muted)">#1d6b4a</span></div></div>
             </div>
           </div>
         </div>
@@ -546,27 +564,27 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
 
       <!-- ── Diseño ── -->
       <div class="cfg-sec">
-        <button class="cfg-sec-hdr open" onclick="toggleCfgSec(this)">Diseño <span class="cfg-arrow">▾</span></button>
+        <button class="cfg-sec-hdr open" onclick="toggleCfgSec(this)"><span data-i18n="gen.design">Design</span> <span class="cfg-arrow">▾</span></button>
         <div class="cfg-sec-body">
           <div class="field">
-            <label>Colores</label>
+            <label data-i18n="gen.colorLabel">Colors</label>
             <div class="color-section">
               <div class="color-picker-wrap">
-                <label>Módulos</label>
+                <label data-i18n="gen.modules">Modules</label>
                 <div class="color-wheel-btn" id="swatch-dark" style="background:#18160f"><input type="color" id="c-dark" value="#18160f" oninput="onColorChange()"/></div>
                 <span class="color-hex-label" id="hex-dark">#18160f</span>
               </div>
               <div class="color-picker-wrap">
-                <label>Fondo</label>
+                <label data-i18n="gen.bg">Background</label>
                 <div class="color-wheel-btn" id="swatch-light" style="background:#ffffff"><input type="color" id="c-light" value="#ffffff" oninput="onColorChange()"/></div>
                 <span class="color-hex-label" id="hex-light">#ffffff</span>
               </div>
             </div>
-            <div class="color-warning" id="color-warning">⚠ Los colores son muy similares — el QR puede no leerse</div>
+            <div class="color-warning" id="color-warning" data-i18n="gen.colorWarning">⚠ Colors are very similar — the QR may not scan correctly</div>
           </div>
           <div class="field">
             <div class="gradient-row">
-              <label for="use-gradient"><input type="checkbox" id="use-gradient" onchange="onGradientChange()"/> Usar gradiente</label>
+              <label for="use-gradient"><input type="checkbox" id="use-gradient" onchange="onGradientChange()"/> <span data-i18n="gen.gradient">Use gradient</span></label>
               <div id="grad-swatch" style="display:none;position:relative;width:32px;height:32px;border-radius:50%;border:2px solid var(--border);cursor:pointer;overflow:hidden;flex-shrink:0">
                 <div id="grad-swatch-bg" style="position:absolute;inset:0;background:#1d6b4a"></div>
                 <input type="color" id="c-grad" value="#1d6b4a" oninput="onGradientColorChange()" style="position:absolute;inset:-4px;width:calc(100% + 8px);height:calc(100% + 8px);border:none;padding:0;cursor:pointer;opacity:0"/>
@@ -574,28 +592,27 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
             </div>
           </div>
           <div class="field">
-            <label>Forma de módulos</label>
+            <label data-i18n="gen.shapeLabel">Module shape</label>
             <div class="shape-picker">
-              <button class="shape-btn active" onclick="setShape('square',this)" title="Cuadrado">
+              <button class="shape-btn active" onclick="setShape('square',this)" data-i18n-title="gen.square">
                 <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18"/></svg>
               </button>
-              <button class="shape-btn" onclick="setShape('rounded',this)" title="Redondeado">
+              <button class="shape-btn" onclick="setShape('rounded',this)" data-i18n-title="gen.rounded">
                 <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="18" height="18" rx="5"/></svg>
               </button>
-              <button class="shape-btn" onclick="setShape('dots',this)" title="Puntos">
+              <button class="shape-btn" onclick="setShape('dots',this)" data-i18n-title="gen.dots">
                 <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9"/></svg>
               </button>
-
             </div>
           </div>
           <div class="field">
-            <label>Marco</label>
+            <label data-i18n="gen.frameLabel">Frame</label>
             <div class="frame-picker">
-              <button class="frame-btn active" onclick="setFrame('none',this)">Sin marco</button>
+              <button class="frame-btn active" onclick="setFrame('none',this)" data-i18n="gen.frameNone">No frame</button>
               <button class="frame-btn" onclick="setFrame('scanme',this)">SCAN ME</button>
-              <button class="frame-btn" onclick="setFrame('escaneame',this)">Escaneame</button>
-              <button class="frame-btn" onclick="setFrame('leeme',this)">¡Leeme!</button>
-              <button class="frame-btn" onclick="setFrame('simple',this)">Simple</button>
+              <button class="frame-btn" onclick="setFrame('escaneame',this)" data-i18n="gen.frameEscaneame">Scan me</button>
+              <button class="frame-btn" onclick="setFrame('leeme',this)" data-i18n="gen.frameLeeme">Read me!</button>
+              <button class="frame-btn" onclick="setFrame('simple',this)" data-i18n="gen.frameSimple">Simple</button>
             </div>
           </div>
         </div>
@@ -603,30 +620,30 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
 
       <!-- ── Opciones avanzadas ── -->
       <div class="cfg-sec">
-        <button class="cfg-sec-hdr" onclick="toggleCfgSec(this)">Opciones avanzadas <span class="cfg-arrow">▾</span></button>
+        <button class="cfg-sec-hdr" onclick="toggleCfgSec(this)"><span data-i18n="gen.advanced">Advanced options</span> <span class="cfg-arrow">▾</span></button>
         <div class="cfg-sec-body" style="display:none">
           <div class="field">
-            <label>Tamaño</label>
+            <label data-i18n="gen.sizeLabel">Size</label>
             <div class="slider-wrap">
               <input type="range" id="qr-size" min="128" max="512" value="256" step="32" oninput="document.getElementById('sz-val').textContent=this.value+'px'"/>
               <span class="slider-val" id="sz-val">256px</span>
             </div>
           </div>
           <div class="field">
-            <label for="qr-ec">Corrección de errores</label>
+            <label for="qr-ec" data-i18n="gen.ecLabel">Error correction</label>
             <select id="qr-ec">
-              <option value="L">L — Bajo (7%)</option>
-              <option value="M" selected>M — Medio (15%) recomendado</option>
-              <option value="Q">Q — Alto (25%)</option>
-              <option value="H">H — Máximo (30%)</option>
+              <option value="L" data-i18n="gen.ecL">L — Low (7%)</option>
+              <option value="M" selected data-i18n="gen.ecM">M — Medium (15%) recommended</option>
+              <option value="Q" data-i18n="gen.ecQ">Q — High (25%)</option>
+              <option value="H" data-i18n="gen.ecH">H — Maximum (30%)</option>
             </select>
           </div>
           <div class="field" id="logo-field" style="display:none">
-            <label>Logo en el centro <span class="sublabel">solo Premium</span></label>
+            <label data-i18n="gen.logoLabel">Logo in center <span class="sublabel" data-i18n="gen.logoHint">Premium only</span></label>
             <input type="file" id="qr-logo" accept="image/*" onchange="onLogoChange()" style="padding:.4rem;font-size:.78rem"/>
             <div style="display:flex;align-items:center;gap:8px;margin-top:.5rem">
               <img id="logo-preview" style="display:none;width:40px;height:40px;object-fit:contain;border:1px solid var(--border);border-radius:8px;padding:3px"/>
-              <button id="btn-remove-logo" onclick="removeLogo()" style="display:none;font-size:.72rem;color:var(--danger);background:none;border:none;cursor:pointer;font-family:var(--sans)">✕ Quitar logo</button>
+              <button id="btn-remove-logo" onclick="removeLogo()" style="display:none;font-size:.72rem;color:var(--danger);background:none;border:none;cursor:pointer;font-family:var(--sans)" data-i18n="gen.logoRemove">✕ Remove logo</button>
             </div>
           </div>
         </div>
@@ -634,15 +651,15 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
 
       <div class="progress" style="margin-top:.5rem"><div class="progress-bar" id="progress-bar"></div></div>
       <button class="btn-gen" id="gen-btn" onclick="tryGenerate()">
-        <div class="spinner"></div><span class="btn-text">Generar QR</span>
+        <div class="spinner"></div><span class="btn-text" data-i18n="gen.btn">Generate QR</span>
       </button>
     </div>
   </div>
 
   <div class="preview-panel">
     <div class="panel-hdr">
-      <span class="panel-title">Vista previa</span>
-      <span id="qr-status" style="font-size:.7rem;color:var(--muted2)">Sin generar</span>
+      <span class="panel-title" data-i18n="preview.title">Preview</span>
+      <span id="qr-status" style="font-size:.7rem;color:var(--muted2)" data-i18n="gen.statusEmpty">Not generated</span>
     </div>
     <div class="qr-display">
       <div class="qr-frame">
@@ -650,7 +667,7 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
         <div id="qr-output">
           <div class="qr-empty">
             <svg class="qr-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-            <p>Completá el formulario<br>y presioná <strong>Generar QR</strong></p>
+            <p data-i18n="preview.empty">Fill in the form<br>and press <strong>Generate QR</strong></p>
           </div>
         </div>
       </div>
@@ -660,12 +677,12 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
       </div>
     </div>
     <div class="dl-row">
-      <button class="btn-dl" id="btn-copy" onclick="copyQR()" disabled>Copiar</button>
-      <button class="btn-dl p" id="btn-dl" onclick="downloadQR()" disabled>Descargar PNG</button>
+      <button class="btn-dl" id="btn-copy" onclick="copyQR()" disabled data-i18n="preview.copy">Copy</button>
+      <button class="btn-dl p" id="btn-dl" onclick="downloadQR()" disabled data-i18n="preview.download">Download PNG</button>
     </div>
     <div class="share-row">
-      <button class="btn-sh" id="btn-share" onclick="shareQR()" disabled>Compartir</button>
-      <button class="btn-sh" id="btn-print" onclick="printQR()" disabled>Imprimir</button>
+      <button class="btn-sh" id="btn-share" onclick="shareQR()" disabled data-i18n="preview.share">Share</button>
+      <button class="btn-sh" id="btn-print" onclick="printQR()" disabled data-i18n="preview.print">Print</button>
       <button class="btn-sh" id="btn-svg" onclick="downloadSVG()" disabled>SVG</button>
     </div>
   </div>
@@ -675,42 +692,42 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
   <div class="premium-section">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem">
       <div>
-        <div class="section-tag">Plan Premium</div>
-        <h2 style="font-family:var(--serif);font-size:1.8rem;font-weight:600;letter-spacing:-.5px">QR <em style="font-style:italic;font-weight:400;color:var(--accent)">dinámicos</em> y estadísticas</h2>
+        <div class="section-tag" data-i18n="premium.tag">Premium Plan</div>
+        <h2 style="font-family:var(--serif);font-size:1.8rem;font-weight:600;letter-spacing:-.5px" data-i18n="premium.title"><em style="font-style:italic;font-weight:400;color:var(--accent)">Dynamic</em> QR &amp; analytics</h2>
       </div>
-      <div class="premium-badge" id="plan-badge">🆓 Plan Gratis</div>
+      <div class="premium-badge" id="plan-badge" data-i18n="premium.freeBadge">🆓 Free Plan</div>
     </div>
     <div id="premium-locked" class="premium-locked">
       <div class="premium-locked-icon">⭐</div>
-      <h3>Desbloqueá Lucky QR Premium</h3>
-      <p>Creá QR que podés editar sin reimprimir y ve cuántas veces se escanearon.</p>
+      <h3 data-i18n="premium.lockedTitle">Unlock Lucky QR Premium</h3>
+      <p data-i18n="premium.lockedDesc">Create QR codes you can edit without reprinting and track how many times they were scanned.</p>
       <ul class="premium-features-list">
-        <li>QR dinámicos — cambiás la URL sin reimprimir</li>
-        <li>Estadísticas detalladas (ciudad, OS, hora pico)</li>
-        <li>Carpetas para organizar tus QR</li>
-        <li>QR con contraseña</li>
-        <li>Landing Pages personalizadas</li>
-        <li>Generación en lote (hasta 50 QR en ZIP)</li>
-        <li>API pública para integrar en tus apps</li>
-        <li>Logo en el centro del QR</li>
+        <li data-i18n="premium.f1">Dynamic QR — change the URL without reprinting</li>
+        <li data-i18n="premium.f2">Detailed analytics (city, OS, peak hour)</li>
+        <li data-i18n="premium.f3">Folders to organize your QR codes</li>
+        <li data-i18n="premium.f4">Password-protected QR</li>
+        <li data-i18n="premium.f5">Custom Landing Pages</li>
+        <li data-i18n="premium.f6">Bulk generation (up to 50 QR in ZIP)</li>
+        <li data-i18n="premium.f7">Public API to integrate in your apps</li>
+        <li data-i18n="premium.f8">Logo in the center of the QR</li>
       </ul>
-      <button class="btn-upgrade" onclick="upgradeToPremium()">Obtener Premium — $4.99 USD/mes</button>
+      <button class="btn-upgrade" onclick="upgradeToPremium()" data-i18n="premium.upgrade">Get Premium — $4.99 USD/mo</button>
     </div>
     <div id="premium-panel" style="display:none">
       <div class="premium-grid">
         <div class="dqr-panel">
-          <div class="dqr-panel-hdr"><span class="dqr-panel-title" data-i18n="dqr.new">Nuevo QR dinámico</span></div>
+          <div class="dqr-panel-hdr"><span class="dqr-panel-title" data-i18n="dqr.new">New dynamic QR</span></div>
           <div class="dqr-body">
-            <div class="field"><label data-i18n="dqr.name">Nombre del QR</label><input type="text" id="dqr-name" placeholder="ej: Menú del restaurante"/></div>
-            <div class="field"><label data-i18n="dqr.url">URL destino</label><input type="url" id="dqr-url" placeholder="https://mi-sitio.com/menu"/></div>
+            <div class="field"><label data-i18n="dqr.name">QR name</label><input type="text" id="dqr-name" placeholder="e.g. Restaurant menu"/></div>
+            <div class="field"><label data-i18n="dqr.url">Destination URL</label><input type="url" id="dqr-url" placeholder="https://my-site.com/menu"/></div>
             <div class="pw-check-row">
-              <label><input type="checkbox" id="dqr-pw-enabled" onchange="document.getElementById('dqr-pw-field').style.display=this.checked?'block':'none'"/> Proteger con contraseña</label>
+              <label><input type="checkbox" id="dqr-pw-enabled" onchange="document.getElementById('dqr-pw-field').style.display=this.checked?'block':'none'"/> <span data-i18n="dqr.pwProtect">Password protect</span></label>
             </div>
             <div id="dqr-pw-field" style="display:none;margin-top:.5rem">
-              <div class="field"><label>Contraseña de acceso</label><input type="password" id="dqr-pw" placeholder="contraseña123"/></div>
+              <div class="field"><label data-i18n="dqr.pw">Access password</label><input type="password" id="dqr-pw" placeholder="password123"/></div>
             </div>
-            <div class="field" style="margin-top:.75rem"><label>Carpeta <span class="sublabel">opcional</span></label><select id="dqr-folder"><option value="">Sin carpeta</option></select></div>
-            <button class="btn-create-dqr" onclick="createDynamicQR()" data-i18n="dqr.create">+ Crear QR dinámico</button>
+            <div class="field" style="margin-top:.75rem"><label data-i18n="dqr.folder">Folder <span class="sublabel">optional</span></label><select id="dqr-folder"><option value="" data-i18n="dqr.noFolder">No folder</option></select></div>
+            <button class="btn-create-dqr" onclick="createDynamicQR()" data-i18n="dqr.create">+ Create dynamic QR</button>
           </div>
         </div>
         <div class="dqr-panel">
@@ -720,7 +737,7 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
           </div>
           <div class="dqr-body">
             <div id="dqr-folder-filter" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.75rem"></div>
-            <div id="dqr-list"><p style="font-size:.82rem;color:var(--muted2);text-align:center;padding:1rem 0">Todavía no creaste ningún QR dinámico.</p></div>
+            <div id="dqr-list"><p style="font-size:.82rem;color:var(--muted2);text-align:center;padding:1rem 0" data-i18n="dqr.empty">You haven't created any dynamic QR codes yet.</p></div>
           </div>
         </div>
       </div>
@@ -740,21 +757,21 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
           <canvas id="scans-chart" height="110"></canvas>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1rem">
             <div>
-              <div style="font-size:.65rem;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Dispositivos</div>
+              <div style="font-size:.65rem;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px" data-i18n="stats.devices">Devices</div>
               <div id="stats-devices"></div>
             </div>
             <div>
-              <div style="font-size:.65rem;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Sistemas</div>
+              <div style="font-size:.65rem;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px" data-i18n="stats.os">Systems</div>
               <div id="stats-os"></div>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:.75rem">
             <div>
-              <div style="font-size:.65rem;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Top países</div>
+              <div style="font-size:.65rem;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px" data-i18n="stats.countries">Top countries</div>
               <div id="stats-countries"></div>
             </div>
             <div>
-              <div style="font-size:.65rem;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Top ciudades</div>
+              <div style="font-size:.65rem;font-weight:500;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px" data-i18n="stats.cities">Top cities</div>
               <div id="stats-cities"></div>
             </div>
           </div>
@@ -775,10 +792,10 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
       <!-- ── Generación en lote ── -->
       <div class="dqr-panel" style="margin-top:1.5rem">
         <div class="dqr-panel-hdr">
-          <span class="dqr-panel-title">Generación en lote</span>
+          <span class="dqr-panel-title" data-i18n="bulk.sectionTitle">Bulk generation</span>
         </div>
         <div class="dqr-body">
-          <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem">Pegá hasta 50 URLs y descargalas como ZIP. Cada QR lleva el estilo actual (colores, forma, marco).</p>
+          <p style="font-size:.82rem;color:var(--muted);margin-bottom:1rem" data-i18n="bulk.sectionDesc">Paste up to 50 URLs and download them as a ZIP. Each QR uses the current style (colors, shape, frame).</p>
           <button onclick="openBulkModal()" style="width:100%;padding:.75rem;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:.88rem;font-weight:500;cursor:pointer;transition:background .18s" data-i18n="bulk.btn">📦 Generar en lote</button>
         </div>
       </div>
@@ -790,8 +807,8 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
           <button onclick="generateApiKey()" style="font-size:.72rem;color:var(--accent);background:none;border:none;cursor:pointer;font-family:var(--sans);font-weight:500" data-i18n="api.new">+ Nueva key</button>
         </div>
         <div class="dqr-body">
-          <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">Usá tu API key para generar QR programáticamente. <a href="/api-docs.html" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500">Ver documentación →</a></p>
-          <div id="api-keys-list"><p style="font-size:.78rem;color:var(--muted2)">Sin API keys. Generá una arriba.</p></div>
+          <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem"><span data-i18n="api.desc">Use your API key to generate QR codes programmatically.</span> <a href="/api-docs.html" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500" data-i18n="api.docs">View documentation →</a></p>
+          <div id="api-keys-list"><p style="font-size:.78rem;color:var(--muted2)" data-i18n="api.empty">No API keys. Generate one above.</p></div>
         </div>
       </div>
 
@@ -803,19 +820,19 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
   <div class="reviews-section">
     <div class="reviews-header">
       <div>
-        <div class="section-tag">Opiniones</div>
-        <h2 style="font-family:var(--serif);font-size:1.8rem;font-weight:600;letter-spacing:-.5px">Lo que dicen<br><em style="font-style:italic;font-weight:400;color:var(--accent)">nuestros usuarios</em></h2>
+        <div class="section-tag" data-i18n="reviews.tag">Reviews</div>
+        <h2 style="font-family:var(--serif);font-size:1.8rem;font-weight:600;letter-spacing:-.5px" data-i18n="reviews.h2">What our<br><em style="font-style:italic;font-weight:400;color:var(--accent)">users say</em></h2>
       </div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <div class="reviews-avg-wrap">
           <div class="reviews-avg-num" id="reviews-avg">—</div>
           <div><div class="reviews-avg-stars">★★★★★</div><div class="reviews-avg-count"><span id="reviews-count">0</span> reseñas</div></div>
         </div>
-        <button class="btn-write-review" onclick="toggleWriteReview()">✍ Dejar reseña</button>
+        <button class="btn-write-review" onclick="toggleWriteReview()" data-i18n="reviews.write">✍ Write a review</button>
       </div>
     </div>
     <div class="write-review-form" id="write-review-form">
-      <h3>Tu opinión sobre Lucky QR</h3>
+      <h3 data-i18n="reviews.formTitle">Your opinion about Lucky QR</h3>
       <div class="stars-row">
         <button class="star-btn" onclick="setStar(1)">★</button>
         <button class="star-btn" onclick="setStar(2)">★</button>
@@ -823,96 +840,96 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
         <button class="star-btn" onclick="setStar(4)">★</button>
         <button class="star-btn" onclick="setStar(5)">★</button>
       </div>
-      <textarea id="review-text-input" placeholder="Contanos qué te pareció Lucky QR..."></textarea>
-      <button class="btn-send-review" onclick="sendReview()">Enviar reseña</button>
+      <textarea id="review-text-input" data-i18n-placeholder="reviews.placeholder" placeholder="Tell us what you think of Lucky QR..."></textarea>
+      <button class="btn-send-review" onclick="sendReview()" data-i18n="reviews.submit">Submit review</button>
     </div>
     <div class="reviews-grid" id="reviews-public-list">
-      <div style="grid-column:1/-1;text-align:center;padding:2rem;font-size:.82rem;color:var(--muted2)">Cargando reseñas...</div>
+      <div style="grid-column:1/-1;text-align:center;padding:2rem;font-size:.82rem;color:var(--muted2)" data-i18n="reviews.loading">Loading reviews...</div>
     </div>
   </div>
 </section>
 
 <section class="why-section" id="why">
   <div class="why-inner">
-    <div class="section-tag">Por qué Lucky QR</div>
-    <h2 class="section-h">No todos los generadores<br>de QR son <em>iguales</em></h2>
-    <p class="why-sub">La mayoría te pide que pagues, te llena de publicidad invasiva o guarda tus datos en sus servidores. Lucky QR nació para ser diferente desde el primer día.</p>
+    <div class="section-tag" data-i18n="why.tag">Why Lucky QR</div>
+    <h2 class="section-h" data-i18n="why.h2">Not all QR generators<br>are <em>equal</em></h2>
+    <p class="why-sub" data-i18n="why.sub">Most ask you to pay, fill you with invasive ads or store your data on their servers. Lucky QR was built to be different from day one.</p>
     <div class="why-grid">
-      <div class="why-card why-card--highlight reveal"><div class="why-card-icon">🔒</div><h3>Tu información nunca sale de tu dispositivo</h3><p>Todo se procesa en tu navegador. Nadie ve lo que escribís — ni nosotros. Tus contraseñas de WiFi y datos de contacto son solo tuyos.</p><div class="why-tag">Privacidad real</div></div>
-      <div class="why-card reveal"><div class="why-card-icon">⚡</div><h3>Instantáneo y sin registros molestos</h3><p>Podés explorar todo primero y registrarte solo cuando querés generar. Sin formularios infinitos ni tarjeta de crédito.</p><div class="why-tag">Sin fricciones</div></div>
-      <div class="why-card reveal"><div class="why-card-icon">🎨</div><h3>Personalización real, no de adorno</h3><p>Elegís el color exacto con una rueda completa. Si los colores son parecidos, te avisamos antes de que el QR sea ilegible.</p><div class="why-tag">Control total</div></div>
-      <div class="why-card reveal"><div class="why-card-icon">📦</div><h3>Generación en lote — hasta 50 QR de una vez</h3><p>Pegá tus URLs, generamos todos los QR y los empaquetamos en un ZIP listo para descargar. Ahorrás horas de trabajo.</p><div class="why-tag">Bulk generation</div></div>
-      <div class="why-card reveal"><div class="why-card-icon">🌐</div><h3>16 tipos de QR + Landing Pages propias</h3><p>URL, WiFi, WhatsApp, vCard, App Store, Redes Sociales, Landing Page personalizada y más. Todo sin límites.</p><div class="why-tag">Todo incluido</div></div>
-      <div class="why-card reveal"><div class="why-card-icon">📊</div><h3>Estadísticas que realmente importan</h3><p>Cuántos escaneos, desde qué ciudad, qué sistema operativo, a qué hora. Datos reales para tomar mejores decisiones.</p><div class="why-tag">Analytics Premium</div></div>
+      <div class="why-card why-card--highlight reveal"><div class="why-card-icon">🔒</div><h3 data-i18n="why.c1t">Your information never leaves your device</h3><p data-i18n="why.c1d">Everything is processed in your browser. Nobody sees what you type — not even us. Your WiFi passwords and contact data are yours alone.</p><div class="why-tag" data-i18n="why.c1tag">Real privacy</div></div>
+      <div class="why-card reveal"><div class="why-card-icon">⚡</div><h3 data-i18n="why.c2t">Instant and without annoying signups</h3><p data-i18n="why.c2d">You can explore everything first and sign up only when you want to generate. No endless forms or credit card required.</p><div class="why-tag" data-i18n="why.c2tag">Frictionless</div></div>
+      <div class="why-card reveal"><div class="why-card-icon">🎨</div><h3 data-i18n="why.c3t">Real customization, not decorative</h3><p data-i18n="why.c3d">You choose the exact color with a full color wheel. If colors are too similar, we warn you before the QR becomes unreadable.</p><div class="why-tag" data-i18n="why.c3tag">Total control</div></div>
+      <div class="why-card reveal"><div class="why-card-icon">📦</div><h3 data-i18n="why.c4t">Bulk generation — up to 50 QR at once</h3><p data-i18n="why.c4d">Paste your URLs, we generate all QR codes and package them in a ZIP ready to download. Save hours of work.</p><div class="why-tag" data-i18n="why.c4tag">Bulk generation</div></div>
+      <div class="why-card reveal"><div class="why-card-icon">🌐</div><h3 data-i18n="why.c5t">16 QR types + Custom Landing Pages</h3><p data-i18n="why.c5d">URL, WiFi, WhatsApp, vCard, App Store, Social Networks, Custom Landing Page and more. All without limits.</p><div class="why-tag" data-i18n="why.c5tag">All included</div></div>
+      <div class="why-card reveal"><div class="why-card-icon">📊</div><h3 data-i18n="why.c6t">Analytics that really matter</h3><p data-i18n="why.c6d">How many scans, from which city, which OS, at what time. Real data to make better decisions.</p><div class="why-tag" data-i18n="why.c6tag">Premium Analytics</div></div>
     </div>
     <div class="compare-wrap reveal">
-      <h3 class="compare-title">Lucky QR vs la competencia</h3>
+      <h3 class="compare-title" data-i18n="why.compareTitle">Lucky QR vs the competition</h3>
       <div class="compare-scroll">
         <table class="compare-table">
-          <thead><tr><th>Característica</th><th class="col-us">Lucky QR 🍀</th><th>QR Tiger</th><th>QRCode.es</th><th>GoQR</th></tr></thead>
+          <thead><tr><th data-i18n="why.fFeature">Feature</th><th class="col-us">Lucky QR 🍀</th><th>QR Tiger</th><th>QRCode.es</th><th>GoQR</th></tr></thead>
           <tbody>
-            <tr><td>100% gratis</td><td class="col-us c-yes">✓ Siempre</td><td class="c-mid">Limitado</td><td class="c-mid">Freemium</td><td class="c-yes">✓</td></tr>
-            <tr><td>Sin marcas de agua</td><td class="col-us c-yes">✓ Nunca</td><td class="c-no">Solo premium</td><td class="c-no">Solo premium</td><td class="c-yes">✓</td></tr>
-            <tr><td>Datos privados</td><td class="col-us c-yes">✓ 100% local</td><td class="c-no">Pasan por servidor</td><td class="c-no">Pasan por servidor</td><td class="c-no">Pasan por servidor</td></tr>
-            <tr><td>Funciona offline</td><td class="col-us c-yes">✓ Sí</td><td class="c-no">No</td><td class="c-no">No</td><td class="c-no">No</td></tr>
-            <tr><td>SVG gratis</td><td class="col-us c-yes">✓ Incluido</td><td class="c-no">Solo premium</td><td class="c-no">Solo premium</td><td class="c-no">No</td></tr>
-            <tr><td>Tipos de QR gratis</td><td class="col-us c-yes">✓ 16 tipos</td><td class="c-mid">5 tipos</td><td class="c-mid">3 tipos</td><td class="c-mid">4 tipos</td></tr>
-            <tr><td>Colores personalizados</td><td class="col-us c-yes">✓ Rueda completa</td><td class="c-yes">✓</td><td class="c-mid">Limitado</td><td class="c-no">No</td></tr>
-            <tr><td>Estadísticas detalladas</td><td class="col-us c-yes">✓ Ciudad, OS, hora</td><td class="c-mid">Básicas</td><td class="c-no">No</td><td class="c-no">No</td></tr>
-            <tr><td>Generación en lote</td><td class="col-us c-yes">✓ Hasta 50 en ZIP</td><td class="c-no">No</td><td class="c-no">No</td><td class="c-no">No</td></tr>
-            <tr><td>Landing Pages</td><td class="col-us c-yes">✓ Incluido</td><td class="c-mid">Solo premium</td><td class="c-no">No</td><td class="c-no">No</td></tr>
-            <tr><td>API pública</td><td class="col-us c-yes">✓ Con documentación</td><td class="c-mid">Solo premium</td><td class="c-no">No</td><td class="c-no">No</td></tr>
-            <tr><td>QR con contraseña</td><td class="col-us c-yes">✓ Premium</td><td class="c-no">No</td><td class="c-no">No</td><td class="c-no">No</td></tr>
-            <tr><td>Carpetas / organización</td><td class="col-us c-yes">✓ Premium</td><td class="c-mid">Solo premium</td><td class="c-no">No</td><td class="c-no">No</td></tr>
-            <tr><td>Idiomas</td><td class="col-us c-yes">✓ ES / EN / PT</td><td class="c-yes">✓</td><td class="c-mid">Solo ES</td><td class="c-no">Solo EN</td></tr>
+            <tr><td data-i18n="why.fFree">100% free</td><td class="col-us c-yes" data-i18n="why.vAlways">✓ Always</td><td class="c-mid" data-i18n="why.vLimited">Limited</td><td class="c-mid" data-i18n="why.vFreemium">Freemium</td><td class="c-yes">✓</td></tr>
+            <tr><td data-i18n="why.fWatermark">No watermarks</td><td class="col-us c-yes" data-i18n="why.vNever">✓ Never</td><td class="c-no" data-i18n="why.vPremiumOnly">Premium only</td><td class="c-no" data-i18n="why.vPremiumOnly">Premium only</td><td class="c-yes">✓</td></tr>
+            <tr><td data-i18n="why.fPrivate">Private data</td><td class="col-us c-yes" data-i18n="why.vLocal">✓ 100% local</td><td class="c-no" data-i18n="why.vViaServer">Via server</td><td class="c-no" data-i18n="why.vViaServer">Via server</td><td class="c-no" data-i18n="why.vViaServer">Via server</td></tr>
+            <tr><td data-i18n="why.fOffline">Works offline</td><td class="col-us c-yes" data-i18n="why.vYes">✓ Yes</td><td class="c-no">No</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td data-i18n="why.fSvg">Free SVG</td><td class="col-us c-yes" data-i18n="why.vIncluded">✓ Included</td><td class="c-no" data-i18n="why.vPremiumOnly">Premium only</td><td class="c-no" data-i18n="why.vPremiumOnly">Premium only</td><td class="c-no">No</td></tr>
+            <tr><td data-i18n="why.fTypes">Free QR types</td><td class="col-us c-yes" data-i18n="why.v16">✓ 16 types</td><td class="c-mid">5</td><td class="c-mid">3</td><td class="c-mid">4</td></tr>
+            <tr><td data-i18n="why.fColors">Custom colors</td><td class="col-us c-yes" data-i18n="why.vWheel">✓ Full color wheel</td><td class="c-yes">✓</td><td class="c-mid" data-i18n="why.vLimited">Limited</td><td class="c-no">No</td></tr>
+            <tr><td data-i18n="why.fStats">Detailed analytics</td><td class="col-us c-yes" data-i18n="why.vCityOs">✓ City, OS, hour</td><td class="c-mid" data-i18n="why.vBasic">Basic</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td data-i18n="why.fBulk">Bulk generation</td><td class="col-us c-yes" data-i18n="why.v50zip">✓ Up to 50 in ZIP</td><td class="c-no">No</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td data-i18n="why.fLanding">Landing Pages</td><td class="col-us c-yes" data-i18n="why.vIncluded">✓ Included</td><td class="c-mid" data-i18n="why.vPremiumOnly">Premium only</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td data-i18n="why.fApi">Public API</td><td class="col-us c-yes" data-i18n="why.vWithDocs">✓ With docs</td><td class="c-mid" data-i18n="why.vPremiumOnly">Premium only</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td data-i18n="why.fPassword">Password QR</td><td class="col-us c-yes" data-i18n="why.vYes">✓ Yes</td><td class="c-no">No</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td data-i18n="why.fFolders">Folders / organization</td><td class="col-us c-yes" data-i18n="why.vYes">✓ Yes</td><td class="c-mid" data-i18n="why.vPremiumOnly">Premium only</td><td class="c-no">No</td><td class="c-no">No</td></tr>
+            <tr><td data-i18n="why.fLangs">Languages</td><td class="col-us c-yes" data-i18n="why.vLangs">✓ ES / EN / PT</td><td class="c-yes">✓</td><td class="c-mid" data-i18n="why.vEsOnly">ES only</td><td class="c-no" data-i18n="why.vEnOnly">EN only</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="compare-note">* Comparativa basada en los planes gratuitos de cada servicio al momento de publicación.</p>
+      <p class="compare-note" data-i18n="why.compareNote">* Comparison based on free plans of each service at time of publication.</p>
     </div>
   </div>
 </section>
 
 <section class="info-section" id="info">
   <div class="info-inner">
-    <div class="section-tag">Para qué sirve</div>
-    <h2 class="section-h">Más usos de los que <em>imaginás</em></h2>
+    <div class="section-tag" data-i18n="info.tag">Para qué sirve</div>
+    <h2 class="section-h" data-i18n="info.h2">Más usos de los que <em>imaginás</em></h2>
     <div class="info-grid">
-      <div class="info-card reveal"><div class="info-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><h3>Menús y catálogos</h3><p>Poné un QR en tu mesa o mostrador. Tus clientes acceden al menú actualizado al instante, sin impresiones ni costos extra.</p></div>
-      <div class="info-card reveal"><div class="info-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>Tarjetas de contacto</h3><p>Compartí tu nombre, teléfono, email y empresa con un solo escaneo usando el formato vCard.</p></div>
-      <div class="info-card reveal"><div class="info-icon"><svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg></div><h3>Acceso WiFi fácil</h3><p>Generá un QR con tu red y contraseña. Tus visitas se conectan escaneando, sin escribir nada.</p></div>
-      <div class="info-card reveal"><div class="info-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><h3>Ubicaciones y mapas</h3><p>Compartí la ubicación de tu local o evento. Pegás el link de Google Maps y extraemos las coordenadas automáticamente.</p></div>
-      <div class="info-card reveal"><div class="info-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3>WhatsApp directo</h3><p>Generá un QR que abre WhatsApp con tu número y un mensaje predefinido. Perfecto para atención al cliente.</p></div>
-      <div class="info-card reveal"><div class="info-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3>100% privado</h3><p>Todo ocurre en tu navegador. Ningún dato que ingresás sale de tu dispositivo. Sin servidores, sin rastreo.</p></div>
+      <div class="info-card reveal"><div class="info-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><h3 data-i18n="info.c1t">Menús y catálogos</h3><p data-i18n="info.c1d">Poné un QR en tu mesa o mostrador. Tus clientes acceden al menú actualizado al instante, sin impresiones ni costos extra.</p></div>
+      <div class="info-card reveal"><div class="info-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3 data-i18n="info.c2t">Tarjetas de contacto</h3><p data-i18n="info.c2d">Compartí tu nombre, teléfono, email y empresa con un solo escaneo usando el formato vCard.</p></div>
+      <div class="info-card reveal"><div class="info-icon"><svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg></div><h3 data-i18n="info.c3t">Acceso WiFi fácil</h3><p data-i18n="info.c3d">Generá un QR con tu red y contraseña. Tus visitas se conectan escaneando, sin escribir nada.</p></div>
+      <div class="info-card reveal"><div class="info-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><h3 data-i18n="info.c4t">Ubicaciones y mapas</h3><p data-i18n="info.c4d">Compartí la ubicación de tu local o evento. Pegás el link de Google Maps y extraemos las coordenadas automáticamente.</p></div>
+      <div class="info-card reveal"><div class="info-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><h3 data-i18n="info.c5t">WhatsApp directo</h3><p data-i18n="info.c5d">Generá un QR que abre WhatsApp con tu número y un mensaje predefinido. Perfecto para atención al cliente.</p></div>
+      <div class="info-card reveal"><div class="info-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><h3 data-i18n="info.c6t">100% privado</h3><p data-i18n="info.c6d">Todo ocurre en tu navegador. Ningún dato que ingresás sale de tu dispositivo. Sin servidores, sin rastreo.</p></div>
     </div>
   </div>
 </section>
 
 <section class="how-section" id="how">
   <div class="how-inner">
-    <div class="section-tag">Proceso simple</div>
-    <h2 class="section-h">En 3 pasos tenés<br>tu QR <em>listo para usar</em></h2>
+    <div class="section-tag" data-i18n="how.tag">Proceso simple</div>
+    <h2 class="section-h" data-i18n="how.h2">En 3 pasos tenés<br>tu QR <em>listo para usar</em></h2>
     <div class="how-steps">
-      <div class="how-step reveal"><div class="how-num">01</div><div class="how-content"><h3>Creá tu cuenta gratis</h3><p>Solo necesitás un email y una contraseña. Sin tarjeta de crédito. En 30 segundos estás adentro.</p></div></div>
+      <div class="how-step reveal"><div class="how-num">01</div><div class="how-content"><h3 data-i18n="how.s1t">Creá tu cuenta gratis</h3><p data-i18n="how.s1d">Solo necesitás un email y una contraseña. Sin tarjeta de crédito. En 30 segundos estás adentro.</p></div></div>
       <div class="how-connector"></div>
-      <div class="how-step reveal"><div class="how-num">02</div><div class="how-content"><h3>Configurá tu QR</h3><p>Elegí el tipo, personalizá los colores y ajustá el tamaño. Ves el resultado en tiempo real.</p></div></div>
+      <div class="how-step reveal"><div class="how-num">02</div><div class="how-content"><h3 data-i18n="how.s2t">Configurá tu QR</h3><p data-i18n="how.s2d">Elegí el tipo, personalizá los colores y ajustá el tamaño. Ves el resultado en tiempo real.</p></div></div>
       <div class="how-connector"></div>
-      <div class="how-step reveal"><div class="how-num">03</div><div class="how-content"><h3>Descargá y usá</h3><p>Exportá en PNG o SVG. Lo que ves en pantalla es exactamente lo que descargás. Sin sorpresas.</p></div></div>
+      <div class="how-step reveal"><div class="how-num">03</div><div class="how-content"><h3 data-i18n="how.s3t">Descargá y usá</h3><p data-i18n="how.s3d">Exportá en PNG o SVG. Lo que ves en pantalla es exactamente lo que descargás. Sin sorpresas.</p></div></div>
     </div>
   </div>
 </section>
 
 <section class="faq-section" id="faq">
   <div class="faq-inner">
-    <div class="section-tag">Preguntas frecuentes</div>
-    <h2 class="section-h">Lo que más nos <em>preguntan</em></h2>
+    <div class="section-tag" data-i18n="faq.tag">Preguntas frecuentes</div>
+    <h2 class="section-h" data-i18n="faq.h2">Lo que más nos <em>preguntan</em></h2>
     <div class="faq-list">
-      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)">¿Los QR generados expiran?<span class="faq-icon">+</span></button><div class="faq-a">No. Los QR de Lucky QR son estáticos y no expiran jamás. Funcionan para siempre mientras el contenido siga siendo válido.</div></div>
-      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)">¿Por qué necesito registrarme?<span class="faq-icon">+</span></button><div class="faq-a">El registro nos permite guardarte el historial y ofrecerte funciones futuras. Es completamente gratis y nunca vendemos tu información.</div></div>
-      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)">¿Qué tamaño necesito para imprimir?<span class="faq-icon">+</span></button><div class="faq-a">Para impresión recomendamos al menos 300px o usar SVG que escala sin pérdida. Para pantalla, 256px es suficiente.</div></div>
-      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)">¿Mis datos de WiFi se guardan en algún servidor?<span class="faq-icon">+</span></button><div class="faq-a">No. Todo el procesamiento ocurre en tu navegador. Tus contraseñas y cualquier dato que ingresás nunca salen de tu dispositivo.</div></div>
-      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)">¿Puedo usar Lucky QR para mi negocio?<span class="faq-icon">+</span></button><div class="faq-a">Sí, sin restricciones. Podés generar QR para menús, tarjetas, redes WiFi, catálogos y campañas. Todo gratis y sin límite.</div></div>
-      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)">¿Qué es un QR de redes sociales?<span class="faq-icon">+</span></button><div class="faq-a">Es como un Linktree pero dentro de Lucky QR. Creás un único QR que al escanearse muestra una página con todos tus perfiles — Instagram, TikTok, LinkedIn, YouTube y más — con íconos y colores de cada red. Cualquier persona que lo escanea puede seguirte en todos tus canales desde un solo lugar. Disponible para usuarios Premium.</div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq.q1">¿Los QR generados expiran?</span><span class="faq-icon">+</span></button><div class="faq-a" data-i18n="faq.a1">No. Los QR de Lucky QR son estáticos y no expiran jamás. Funcionan para siempre mientras el contenido siga siendo válido.</div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq.q2">¿Por qué necesito registrarme?</span><span class="faq-icon">+</span></button><div class="faq-a" data-i18n="faq.a2">El registro nos permite guardarte el historial y ofrecerte funciones futuras. Es completamente gratis y nunca vendemos tu información.</div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq.q3">¿Qué tamaño necesito para imprimir?</span><span class="faq-icon">+</span></button><div class="faq-a" data-i18n="faq.a3">Para impresión recomendamos al menos 300px o usar SVG que escala sin pérdida. Para pantalla, 256px es suficiente.</div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq.q4">¿Mis datos de WiFi se guardan en algún servidor?</span><span class="faq-icon">+</span></button><div class="faq-a" data-i18n="faq.a4">No. Todo el procesamiento ocurre en tu navegador. Tus contraseñas y cualquier dato que ingresás nunca salen de tu dispositivo.</div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq.q5">¿Puedo usar Lucky QR para mi negocio?</span><span class="faq-icon">+</span></button><div class="faq-a" data-i18n="faq.a5">Sí, sin restricciones. Podés generar QR para menús, tarjetas, redes WiFi, catálogos y campañas. Todo gratis y sin límite.</div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)"><span data-i18n="faq.q6">¿Qué es un QR de redes sociales?</span><span class="faq-icon">+</span></button><div class="faq-a" data-i18n="faq.a6">Es como un Linktree pero dentro de Lucky QR. Creás un único QR que al escanearse muestra una página con todos tus perfiles — Instagram, TikTok, LinkedIn, YouTube y más — con íconos y colores de cada red. Cualquier persona que lo escanea puede seguirte en todos tus canales desde un solo lugar. Disponible para usuarios Premium.</div></div>
     </div>
   </div>
 </section>
@@ -921,15 +938,15 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
   <div class="footer-inner">
     <div class="footer-brand">Lucky <span>QR</span></div>
     <div class="footer-links">
-      <a href="#">Inicio</a>
-      <a href="#generator">Generador</a>
-      <a href="#why">Por qué Lucky QR</a>
-      <a href="#faq">FAQ</a>
-      <a href="#" onclick="openModal('register');return false">Registrarse</a>
-      <a href="/privacy.html">Privacidad</a>
-      <a href="/terms.html">Términos</a>
+      <a href="#" data-i18n="footer.home">Inicio</a>
+      <a href="#generator" data-i18n="footer.generator">Generador</a>
+      <a href="#why" data-i18n="footer.why">Por qué Lucky QR</a>
+      <a href="#faq" data-i18n="footer.faq">FAQ</a>
+      <a href="#" onclick="openModal('register');return false" data-i18n="footer.register">Registrarse</a>
+      <a href="/privacy.html" data-i18n="footer.privacy">Privacidad</a>
+      <a href="/terms.html" data-i18n="footer.terms">Términos</a>
     </div>
-    <div class="footer-copy">lucky-qr.com · Sin servidores · 100% privado · 2026</div>
+    <div class="footer-copy" data-i18n="footer.copy">lucky-qr.com · Sin servidores · 100% privado · 2026</div>
   </div>
 </footer>
 <div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
@@ -940,52 +957,52 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
     </div>
     <div class="modal-body">
       <div class="auth-tabs">
-        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Iniciar sesión</button>
-        <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Registrarse</button>
+        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')" data-i18n="modal.login">Iniciar sesión</button>
+        <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')" data-i18n="modal.register">Registrarse</button>
       </div>
-      <div class="modal-title" id="modal-title">Bienvenido de vuelta</div>
-      <div class="modal-sub" id="modal-sub">Ingresá para generar tus códigos QR. <strong>Es gratis.</strong></div>
+      <div class="modal-title" id="modal-title" data-i18n="modal.titleLogin">Bienvenido de vuelta</div>
+      <div class="modal-sub" id="modal-sub" data-i18n="modal.subLogin">Ingresá para generar tus códigos QR. <strong>Es gratis.</strong></div>
       <div class="modal-error" id="modal-error"></div>
       <div class="modal-field" id="field-name" style="display:none">
-        <label>Nombre</label>
+        <label data-i18n="modal.fieldName">Nombre</label>
         <div class="input-icon-wrap">
           <svg class="field-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
-          <input type="text" id="auth-name" placeholder="Tu nombre" autocomplete="name"/>
+          <input type="text" id="auth-name" data-i18n-placeholder="modal.namePlaceholder" placeholder="Tu nombre" autocomplete="name"/>
         </div>
       </div>
       <div class="modal-field">
-        <label>Email</label>
+        <label data-i18n="modal.fieldEmail">Email</label>
         <div class="input-icon-wrap">
           <svg class="field-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-          <input type="email" id="auth-email" placeholder="tu@email.com" autocomplete="email"/>
+          <input type="email" id="auth-email" data-i18n-placeholder="modal.emailPlaceholder" placeholder="tu@email.com" autocomplete="email"/>
         </div>
       </div>
       <div class="modal-field">
-        <label>Contraseña</label>
+        <label data-i18n="modal.fieldPass">Contraseña</label>
         <div class="input-icon-wrap">
           <svg class="field-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <input type="password" id="auth-pass" placeholder="Mínimo 6 caracteres" autocomplete="current-password"/>
+          <input type="password" id="auth-pass" data-i18n-placeholder="modal.passPlaceholder" placeholder="Mínimo 6 caracteres" autocomplete="current-password"/>
         </div>
       </div>
       <div class="modal-field" id="field-confirm" style="display:none">
-        <label>Confirmá tu contraseña</label>
+        <label data-i18n="modal.fieldConfirm">Confirmá tu contraseña</label>
         <div class="input-icon-wrap">
           <svg class="field-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <input type="password" id="auth-confirm" placeholder="Repetí tu contraseña" autocomplete="new-password"/>
+          <input type="password" id="auth-confirm" data-i18n-placeholder="modal.confirmPlaceholder" placeholder="Repetí tu contraseña" autocomplete="new-password"/>
         </div>
       </div>
       <button class="btn-auth" id="btn-auth" onclick="handleAuth()">
         <div class="spinner"></div>
-        <span class="btn-text" id="btn-auth-text">Iniciar sesión</span>
+        <span class="btn-text" id="btn-auth-text" data-i18n="modal.btnLogin">Iniciar sesión</span>
       </button>
-      <div class="modal-div">o</div>
-      <div class="modal-ft" id="modal-switch-text">¿No tenés cuenta? <a onclick="switchAuthTab('register')">Registrate gratis</a></div>
+      <div class="modal-div" data-i18n="modal.or">o</div>
+      <div class="modal-ft" id="modal-switch-text" data-i18n="modal.switchLogin">¿No tenés cuenta? <a onclick="switchAuthTab('register')">Registrate gratis</a></div>
       <div class="modal-sec">
         <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       <div class="modal-ft" style="margin-top:.5rem">
-          <a onclick="resetPassword()">¿Olvidaste tu contraseña?</a>
+          <a onclick="resetPassword()" data-i18n="modal.forgotPass">¿Olvidaste tu contraseña?</a>
       </div>
-        Tus datos son privados y seguros
+        <span data-i18n="modal.security">Tus datos son privados y seguros</span>
       </div>
     </div>
   </div>
@@ -993,11 +1010,11 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
 
 <div class="edit-modal" id="edit-modal">
   <div class="edit-modal-box">
-    <h3>Editar URL destino</h3>
+    <h3 data-i18n="edit.title">Editar URL destino</h3>
     <input type="hidden" id="edit-qr-id"/>
-    <div class="field"><label>Nueva URL</label><input type="url" id="edit-qr-url" placeholder="https://nueva-url.com"/></div>
-    <button class="btn-save-url" onclick="saveEditedURL()">Guardar cambios</button>
-    <button class="btn-cancel-edit" onclick="closeEditModal()">Cancelar</button>
+    <div class="field"><label data-i18n="edit.label">Nueva URL</label><input type="url" id="edit-qr-url" data-i18n-placeholder="edit.placeholder" placeholder="https://nueva-url.com"/></div>
+    <button class="btn-save-url" onclick="saveEditedURL()" data-i18n="edit.save">Guardar cambios</button>
+    <button class="btn-cancel-edit" onclick="closeEditModal()" data-i18n="edit.cancel">Cancelar</button>
   </div>
 </div>
 <!-- RESET PASSWORD MODAL -->
@@ -1008,63 +1025,63 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
       <button class="btn-close" onclick="closeResetModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div class="modal-title">Nueva contraseña</div>
-      <div class="modal-sub">Ingresá tu nueva contraseña para acceder a tu cuenta.</div>
+      <div class="modal-title" data-i18n="reset.title">Nueva contraseña</div>
+      <div class="modal-sub" data-i18n="reset.sub">Ingresá tu nueva contraseña para acceder a tu cuenta.</div>
       <div class="modal-error" id="reset-error"></div>
       <div class="modal-field">
-        <label>Nueva contraseña</label>
+        <label data-i18n="reset.passLabel">Nueva contraseña</label>
         <div class="input-icon-wrap">
           <svg class="field-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <input type="password" id="reset-pass" placeholder="Mínimo 6 caracteres"/>
+          <input type="password" id="reset-pass" data-i18n-placeholder="reset.passPlaceholder" placeholder="Mínimo 6 caracteres"/>
         </div>
       </div>
       <div class="modal-field">
-        <label>Confirmá la contraseña</label>
+        <label data-i18n="reset.confirmLabel">Confirmá la contraseña</label>
         <div class="input-icon-wrap">
           <svg class="field-icon" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <input type="password" id="reset-pass-confirm" placeholder="Repetí tu contraseña"/>
+          <input type="password" id="reset-pass-confirm" data-i18n-placeholder="reset.confirmPlaceholder" placeholder="Repetí tu contraseña"/>
         </div>
       </div>
       <button class="btn-auth" onclick="confirmResetPassword()">
-        <span class="btn-text">Cambiar contraseña</span>
+        <span class="btn-text" data-i18n="reset.btn">Cambiar contraseña</span>
       </button>
     </div>
   </div>
 </div>
 <!-- COOKIE CONSENT -->
 <div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:700;background:#18160f;color:#faf9f7;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;box-shadow:0 -4px 20px rgba(0,0,0,.15)">
-  <p style="font-size:.8rem;line-height:1.6;max-width:600px">
-    🍪 Usamos cookies para mejorar tu experiencia y mostrar anuncios relevantes. 
+  <p style="font-size:.8rem;line-height:1.6;max-width:600px" data-i18n="cookie.text">
+    🍪 Usamos cookies para mejorar tu experiencia y mostrar anuncios relevantes.
     <a href="/privacy.html" style="color:#a3d9b8;text-decoration:underline">Ver política de privacidad</a>
   </p>
   <div style="display:flex;gap:8px;flex-shrink:0">
-    <button onclick="acceptCookies()" style="padding:.6rem 1.25rem;background:#1d6b4a;color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:.82rem;font-weight:500;cursor:pointer">Aceptar</button>
-    <button onclick="declineCookies()" style="padding:.6rem 1.25rem;background:transparent;color:#faf9f7;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-family:var(--sans);font-size:.82rem;cursor:pointer">Solo necesarias</button>
+    <button onclick="acceptCookies()" style="padding:.6rem 1.25rem;background:#1d6b4a;color:#fff;border:none;border-radius:8px;font-family:var(--sans);font-size:.82rem;font-weight:500;cursor:pointer" data-i18n="cookie.accept">Aceptar</button>
+    <button onclick="declineCookies()" style="padding:.6rem 1.25rem;background:transparent;color:#faf9f7;border:1px solid rgba(255,255,255,.3);border-radius:8px;font-family:var(--sans);font-size:.82rem;cursor:pointer" data-i18n="cookie.decline">Solo necesarias</button>
   </div>
 </div>
 <!-- FOLDER MODAL -->
 <div class="edit-modal" id="folder-modal">
   <div class="edit-modal-box">
-    <h3>Nueva carpeta</h3>
-    <div class="field" style="margin-top:1rem"><label>Nombre</label><input type="text" id="folder-name" placeholder="ej: Restaurante"/></div>
-    <div class="field" style="display:flex;align-items:center;gap:10px"><label>Color</label><input type="color" id="folder-color" value="#1d6b4a" style="width:40px;height:32px;border:1px solid var(--border);border-radius:6px;padding:2px;cursor:pointer"/></div>
-    <button class="btn-save-url" onclick="createFolder()" style="margin-top:1rem">Crear carpeta</button>
-    <button class="btn-cancel-edit" onclick="closeFolderModal()">Cancelar</button>
+    <h3 data-i18n="folder.title">Nueva carpeta</h3>
+    <div class="field" style="margin-top:1rem"><label data-i18n="folder.name">Nombre</label><input type="text" id="folder-name" data-i18n-placeholder="folder.placeholder" placeholder="ej: Restaurante"/></div>
+    <div class="field" style="display:flex;align-items:center;gap:10px"><label data-i18n="folder.color">Color</label><input type="color" id="folder-color" value="#1d6b4a" style="width:40px;height:32px;border:1px solid var(--border);border-radius:6px;padding:2px;cursor:pointer"/></div>
+    <button class="btn-save-url" onclick="createFolder()" style="margin-top:1rem" data-i18n="folder.create">Crear carpeta</button>
+    <button class="btn-cancel-edit" onclick="closeFolderModal()" data-i18n="folder.cancel">Cancelar</button>
   </div>
 </div>
 
 <!-- BULK MODAL -->
 <div class="edit-modal" id="bulk-modal">
   <div class="edit-modal-box" style="max-width:580px">
-    <h3>Generar QR en lote</h3>
-    <p style="font-size:.82rem;color:var(--muted);margin:.75rem 0 1rem">Pegá una URL por línea (máximo 50). Se generan con el estilo actual y se descargan en un ZIP.</p>
+    <h3 data-i18n="bulk.modalTitle">Generar QR en lote</h3>
+    <p style="font-size:.82rem;color:var(--muted);margin:.75rem 0 1rem" data-i18n="bulk.modalDesc">Pegá una URL por línea (máximo 50). Se generan con el estilo actual y se descargan en un ZIP.</p>
     <textarea id="bulk-urls" placeholder="https://ejemplo.com/pagina1&#10;https://ejemplo.com/pagina2&#10;https://ejemplo.com/pagina3" style="width:100%;min-height:160px;padding:.7rem .9rem;background:var(--bg);border:1px solid var(--border);border-radius:9px;font-family:monospace;font-size:.78rem;color:var(--text);outline:none;resize:vertical;margin-bottom:1rem"></textarea>
     <div id="bulk-progress" style="display:none;margin-bottom:1rem">
       <div class="progress"><div class="progress-bar" id="bulk-progress-bar"></div></div>
-      <p id="bulk-progress-text" style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:.5rem">Generando...</p>
+      <p id="bulk-progress-text" style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:.5rem" data-i18n="bulk.generating">Generando...</p>
     </div>
-    <button class="btn-save-url" id="bulk-run-btn" onclick="runBulkGeneration()">📦 Generar y descargar ZIP</button>
-    <button class="btn-cancel-edit" onclick="closeBulkModal()">Cancelar</button>
+    <button class="btn-save-url" id="bulk-run-btn" onclick="runBulkGeneration()" data-i18n="bulk.run">📦 Generar y descargar ZIP</button>
+    <button class="btn-cancel-edit" onclick="closeBulkModal()" data-i18n="bulk.cancel">Cancelar</button>
   </div>
 </div>
 

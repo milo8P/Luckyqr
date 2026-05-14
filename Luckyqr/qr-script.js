@@ -78,7 +78,7 @@ function logout() {
   if (supabase) supabase.auth.signOut();
   currentUser = null;
   showLoggedOut();
-  showToast('Sesión cerrada');
+  showToast(t('toast.loggedOut'));
 }
 
 // ── Cargar perfil desde Supabase ──
@@ -155,7 +155,7 @@ async function saveProfile() {
   document.getElementById('nav-avatar').textContent   = name.slice(0,2).toUpperCase();
   var av = document.getElementById('up-av'); if (av) av.textContent = name.slice(0,2).toUpperCase();
   var dn = document.getElementById('up-dname'); if (dn) dn.textContent = name;
-  showToast('Perfil guardado');
+  showToast(t('toast.saved'));
 }
 
 // ── Modal auth ──
@@ -211,7 +211,7 @@ function handleAuth() {
       btn.classList.remove('loading');
       if (res.error) { showModalError(res.error.message); return; }
       closeModal();
-      showToast('Cuenta creada. Bienvenido, ' + name + '!');
+      showToast(t('toast.registered'));
       fetch('/api/send-welcome', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -223,7 +223,7 @@ function handleAuth() {
       btn.classList.remove('loading');
       if (res.error) { showModalError('Email o contraseña incorrectos.'); return; }
       closeModal();
-      showToast('Bienvenido de vuelta!');
+      showToast(t('toast.welcome'));
     });
   }
 }
@@ -235,13 +235,13 @@ function showModalError(msg) {
 
 // ── Tipo de QR ──
 function tryGenerate() {
-  if (!currentUser) { openModal('login'); showToast('Iniciá sesión para generar QR'); return; }
+  if (!currentUser) { openModal('login'); showToast(t('toast.loginRequired')); return; }
   generateQR();
 }
 
 function setType(type, btn) {
   if (['app','social','landing'].indexOf(type) !== -1 && (!currentUser || currentUser.plan !== 'premium')) {
-    showToast('Necesitás Premium para usar esta función ⭐');
+    showToast(t('toast.premiumRequired'));
   }
   currentType = type;
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
@@ -410,7 +410,7 @@ function generateQR() {
     generateQRDynamic(); return;
   }
   var content = getContent();
-  if (!content) { showToast('Completá el contenido primero'); return; }
+  if (!content) { showToast(t('toast.fillContent')); return; }
   currentDark  = document.getElementById('c-dark').value;
   currentLight = document.getElementById('c-light').value;
   var btn = document.getElementById('gen-btn');
@@ -443,13 +443,13 @@ function generateQR() {
         applyShapeToCanvas();
         applyLogoToCanvas();
         applyFrameToCanvas();
-        showToast('QR generado correctamente');
+        showToast(t('toast.generated'));
       }, 150);
     } catch(e) {
       btn.classList.remove('loading');
       bar.style.width = '0%';
       document.getElementById('qr-output').innerHTML = '<p style="color:var(--danger);font-size:.82rem;text-align:center;padding:1rem">Error al generar el QR.</p>';
-      showToast('Error al generar');
+      showToast(t('toast.error'));
     }
   }, 250);
 }
@@ -479,11 +479,11 @@ async function generateQRDynamic() {
       headers: { Authorization: 'Bearer ' + jwt }
     });
   } catch (e) {
-    showToast('Error de conexión al verificar el plan'); return;
+    showToast(t('toast.connectionError')); return;
   }
   var verifyData = await verifyRes.json();
   if (!verifyData.premium) {
-    showToast('Necesitás Premium para usar esta función ⭐');
+    showToast(t('toast.premiumRequired'));
     document.getElementById('premium')?.scrollIntoView({ behavior: 'smooth' });
     return;
   }
@@ -498,17 +498,17 @@ async function generateQRDynamic() {
     var lpBtnUrl  = validateUrl((document.getElementById('lp-btn-url') || {value:''}).value);
     var lpBg      = (document.getElementById('lp-bg')     || {value:'#ffffff'}).value;
     var lpAccent  = (document.getElementById('lp-accent') || {value:'#1d6b4a'}).value;
-    if (!lpTitle) { showToast('Ingresá un título para la Landing Page'); return; }
+    if (!lpTitle) { showToast(t('toast.landing_title')); return; }
     var res = await supabase.from('landing_pages').insert({ code, user_id: currentUser.id, title: lpTitle, description: lpDesc, button_text: lpBtnText || 'Ver más', button_url: lpBtnUrl || '', bg_color: lpBg, accent_color: lpAccent });
-    if (res.error) { showToast('Error al guardar la Landing Page'); return; }
+    if (res.error) { showToast(t('toast.landing_err')); return; }
     content = 'https://lucky-qr.com/landing/' + code;
   } else if (currentType === 'app') {
     var iosUrl  = validateUrl((document.getElementById('app-ios')     || {value:''}).value);
     var andUrl  = validateUrl((document.getElementById('app-android') || {value:''}).value);
     var appName = stripHtml((document.getElementById('app-name')      || {value:''}).value);
-    if (!iosUrl && !andUrl) { showToast('Completá al menos una URL válida de la app (https://)'); return; }
+    if (!iosUrl && !andUrl) { showToast(t('toast.app_err')); return; }
     var res = await supabase.from('app_qrs').insert({ code, user_id: currentUser.id, ios_url: iosUrl, android_url: andUrl, name: appName });
-    if (res.error) { showToast('Error al guardar el QR de app'); return; }
+    if (res.error) { showToast(t('toast.app_save_err')); return; }
     content = 'https://lucky-qr.com/app/' + code;
   } else {
     var title = stripHtml((document.getElementById('soc-title') || {value:''}).value);
@@ -518,7 +518,7 @@ async function generateQRDynamic() {
     var li    = (document.getElementById('soc-li') || {value:''}).value.trim().slice(0, 500);
     var yt    = (document.getElementById('soc-yt') || {value:''}).value.trim().slice(0, 500);
     var fb    = (document.getElementById('soc-fb') || {value:''}).value.trim().slice(0, 500);
-    if (!ig && !tw && !tt && !li && !yt && !fb) { showToast('Completá al menos una red social'); return; }
+    if (!ig && !tw && !tt && !li && !yt && !fb) { showToast(t('toast.social_err')); return; }
     if (ig && !ig.startsWith('http')) ig = 'https://instagram.com/' + ig.replace('@', '');
     if (tw && !tw.startsWith('http')) tw = 'https://x.com/' + tw.replace('@', '');
     if (tt && !tt.startsWith('http')) tt = 'https://tiktok.com/@' + tt.replace('@', '');
@@ -555,13 +555,13 @@ async function generateQRDynamic() {
       applyShapeToCanvas();
       applyLogoToCanvas();
       applyFrameToCanvas();
-      showToast('QR Premium creado');
+      showToast(t('toast.generated'));
     }, 150);
   } catch(e) {
     btn.classList.remove('loading');
     bar.style.width = '0%';
     document.getElementById('qr-output').innerHTML = '<p style="color:var(--danger);font-size:.82rem;text-align:center;padding:1rem">Error al generar el QR.</p>';
-    showToast('Error al generar');
+    showToast(t('toast.error'));
   }
 }
 
@@ -594,7 +594,7 @@ function copyQR() {
   try {
     c.toBlob(function(blob){
       navigator.clipboard.write([new ClipboardItem({'image/png':blob})]).then(function(){
-        showToast('Copiado al portapapeles');
+        showToast(t('toast.copied'));
       });
     });
   } catch(e) { showToast('Tu navegador no soporta esta función'); }
@@ -648,12 +648,12 @@ function generateShortCode() {
 
 async function createDynamicQR() {
   if (!currentUser) { openModal('login'); return; }
-  if (currentUser.plan !== 'premium') { showToast('Necesitás Premium para crear QR dinámicos ⭐'); return; }
+  if (currentUser.plan !== 'premium') { showToast(t('toast.premiumDynamic')); return; }
   if (!supabase) { showToast('Error de conexión'); return; }
   var name = document.getElementById('dqr-name').value.trim();
   var url  = document.getElementById('dqr-url').value.trim();
-  if (!name) { showToast('Ingresá un nombre para el QR'); return; }
-  if (!url)  { showToast('Ingresá una URL destino'); return; }
+  if (!name) { showToast(t('toast.dqr_name_err')); return; }
+  if (!url)  { showToast(t('toast.dqr_url_err')); return; }
   if (!url.startsWith('http')) { showToast('La URL debe empezar con https://'); return; }
   var code = generateShortCode();
   var pwEnabled = document.getElementById('dqr-pw-enabled') && document.getElementById('dqr-pw-enabled').checked;
@@ -669,7 +669,7 @@ async function createDynamicQR() {
   if (document.getElementById('dqr-pw-enabled')) document.getElementById('dqr-pw-enabled').checked = false;
   if (document.getElementById('dqr-pw-field')) document.getElementById('dqr-pw-field').style.display = 'none';
   if (document.getElementById('dqr-pw')) document.getElementById('dqr-pw').value = '';
-  showToast('QR dinámico creado' + (pwEnabled && pw ? ' 🔒 con contraseña' : ''));
+  showToast(t('toast.dqrCreated') + (pwEnabled && pw ? ' 🔒' : ''));
   loadDynamicQRs();
 }
 
@@ -731,7 +731,7 @@ async function deleteDynamicQR(id) {
   if (!supabase) return;
   if (!confirm('¿Seguro que querés borrar este QR?')) return;
   await supabase.from('dynamic_qrs').delete().eq('id', id);
-  showToast('QR eliminado');
+  showToast(t('toast.dqrDeleted'));
   loadDynamicQRs();
 }
 
@@ -752,7 +752,7 @@ async function saveEditedURL() {
   if (!supabase) return;
   await supabase.from('dynamic_qrs').update({ destination_url:url, updated_at:new Date().toISOString() }).eq('id', id);
   closeEditModal();
-  showToast('URL actualizada — el QR ya redirige al nuevo destino');
+  showToast(t('toast.urlSaved'));
   loadDynamicQRs();
 }
 
@@ -803,7 +803,7 @@ async function loadReviewsSection() {
 }
 
 function toggleWriteReview() {
-  if (!currentUser) { openModal('login'); showToast('Iniciá sesión para dejar una reseña'); return; }
+  if (!currentUser) { openModal('login'); showToast(t('toast.loginReview')); return; }
   var form = document.getElementById('write-review-form');
   if (form) form.classList.toggle('open');
 }
@@ -826,7 +826,7 @@ async function sendReview() {
   document.querySelectorAll('.star-btn').forEach(function(s){ s.classList.remove('on'); });
   document.getElementById('write-review-form').classList.remove('open');
   loadReviewsSection();
-  showToast('Reseña enviada. ¡Gracias!');
+  showToast(t('toast.reviewSent'));
 }
 async function upgradeToPremium() {
   if (!currentUser) { openModal('login'); return; }
@@ -1377,7 +1377,7 @@ async function createFolder() {
   if (res.error) { showToast('Error al crear carpeta'); return; }
   document.getElementById('folder-name').value = '';
   closeFolderModal();
-  showToast('Carpeta creada');
+  showToast(t('toast.folderCreated'));
   loadFolders();
   loadDynamicQRs();
 }
@@ -1405,8 +1405,8 @@ function closeBulkModal() { document.getElementById('bulk-modal').classList.remo
 async function runBulkGeneration() {
   var raw = (document.getElementById('bulk-urls') || {value:''}).value;
   var urls = raw.split('\n').map(function(u){ return u.trim(); }).filter(function(u){ return u.startsWith('http'); });
-  if (urls.length === 0) { showToast('Pegá al menos una URL válida (https://)'); return; }
-  if (urls.length > 50) { urls = urls.slice(0, 50); showToast('Máximo 50 URLs — tomando las primeras 50'); }
+  if (urls.length === 0) { showToast(t('toast.bulk_err')); return; }
+  if (urls.length > 50) { urls = urls.slice(0, 50); showToast(t('toast.bulk_limit')); }
 
   var btn = document.getElementById('bulk-run-btn');
   var progressDiv = document.getElementById('bulk-progress');
@@ -1493,7 +1493,7 @@ async function generateApiKey() {
   var key = generateKeyString();
   var res = await supabase.from('api_keys').insert({ user_id: currentUser.id, key: key, name: name || 'API Key' });
   if (res.error) { showToast('Error al generar API key'); return; }
-  showToast('API key generada — copiala ahora');
+  showToast(t('toast.api_created'));
   navigator.clipboard.writeText(key).catch(function(){});
   loadApiKeys();
 }
