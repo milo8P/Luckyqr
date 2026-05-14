@@ -392,6 +392,7 @@ function generateQR() {
         document.getElementById('qr-info-text').textContent = label;
         document.getElementById('qr-info-meta').textContent = size + ' × ' + size + ' px';
         document.getElementById('qr-info').style.display = 'block';
+        applyLogoToCanvas();
         showToast('QR generado correctamente');
       }, 150);
     } catch(e) {
@@ -469,6 +470,8 @@ function checkPremiumStatus() {
     if (badge)  badge.textContent    = '⭐ Plan Premium';
     loadDynamicQRs();
     loadScansChart();
+    var logoField = document.getElementById('logo-field');
+    if (logoField) logoField.style.display = 'block';
   }
 }
 
@@ -790,6 +793,51 @@ async function exportScansCSV() {
   a.download = 'lucky-qr-escaneos.csv';
   a.click();
   showToast('CSV descargado');
+}
+// ── Logo en QR ──
+var logoDataUrl = null;
+
+function onLogoChange() {
+  var file = document.getElementById('qr-logo').files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    logoDataUrl = e.target.result;
+    var preview = document.getElementById('logo-preview');
+    preview.src = logoDataUrl;
+    preview.style.display = 'block';
+    document.getElementById('btn-remove-logo').style.display = 'inline-block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeLogo() {
+  logoDataUrl = null;
+  document.getElementById('qr-logo').value = '';
+  document.getElementById('logo-preview').style.display = 'none';
+  document.getElementById('btn-remove-logo').style.display = 'none';
+}
+
+function applyLogoToCanvas() {
+  if (!logoDataUrl) return;
+  var canvas = document.querySelector('#qr-output canvas');
+  if (!canvas) return;
+  var ctx  = canvas.getContext('2d');
+  var size = canvas.width;
+  var logo = new Image();
+  logo.onload = function() {
+    var logoSize = size * 0.22;
+    var x = (size - logoSize) / 2;
+    var y = (size - logoSize) / 2;
+    // fondo blanco redondeado
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(x - 6, y - 6, logoSize + 12, logoSize + 12, 8);
+    ctx.fill();
+    // logo
+    ctx.drawImage(logo, x, y, logoSize, logoSize);
+  };
+  logo.src = logoDataUrl;
 }
 function toggleFaq(btn) {
   var item = btn.closest('.faq-item');

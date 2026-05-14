@@ -479,6 +479,14 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
         </select>
       </div>
       <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+      <div class="field" id="logo-field" style="display:none">
+  <label>Logo en el centro <span class="sublabel">solo Premium</span></label>
+  <input type="file" id="qr-logo" accept="image/*" onchange="onLogoChange()" style="padding:.4rem;font-size:.78rem"/>
+  <div style="display:flex;align-items:center;gap:8px;margin-top:.5rem">
+    <img id="logo-preview" style="display:none;width:40px;height:40px;object-fit:contain;border:1px solid var(--border);border-radius:8px;padding:3px"/>
+    <button id="btn-remove-logo" onclick="removeLogo()" style="display:none;font-size:.72rem;color:var(--danger);background:none;border:none;cursor:pointer;font-family:var(--sans)">✕ Quitar logo</button>
+  </div>
+</div>
       <button class="btn-gen" id="gen-btn" onclick="tryGenerate()">
         <div class="spinner"></div><span class="btn-text">Generar QR</span>
       </button>
