@@ -17,24 +17,19 @@ var currentLight = '#ffffff';
 // ── Inicializar Supabase con ESM dinámico ──
 (async function() {
   try {
-20-48 
-
-```javascript
-    var mod = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+var mod = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
     supabase = mod.createClient(SUPABASE_URL, SUPABASE_KEY);
     // escuchar cambios de sesión
     supabase.auth.onAuthStateChange(function(event, session) {
-  if (event === 'PASSWORD_RECOVERY') {
-    document.getElementById('reset-modal').classList.add('open');
-    return;
-  }
-  if (session && session.user) {
-    loadUserProfile(session.user);
-  } else {
-    currentUser = null;
-    showLoggedOut();
-  }
-});
+      if (event === 'PASSWORD_RECOVERY') {
+        document.getElementById('reset-modal').classList.add('open');
+        return;
+      }
+      if (session && session.user) {
+        loadUserProfile(session.user);
+      } else {
+        currentUser = null;
+        showLoggedOut();
       }
     });
     // verificar sesión existente al cargar
@@ -49,8 +44,6 @@ var currentLight = '#ffffff';
     showLoggedOut();
   }
 })();
-
-```
 // ── Helpers ──
 function hEl(id) { var e = document.getElementById(id); if (e) e.style.display = 'none'; }
 function sEl(id, d) { var e = document.getElementById(id); if (e) e.style.display = d || 'block'; }
