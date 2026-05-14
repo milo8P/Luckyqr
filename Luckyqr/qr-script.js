@@ -417,6 +417,7 @@ function generateQR() {
       var size    = parseInt(document.getElementById('qr-size').value);
       var ecMap   = { L:QRCode.CorrectLevel.L, M:QRCode.CorrectLevel.M, Q:QRCode.CorrectLevel.Q, H:QRCode.CorrectLevel.H };
       var ecLevel = ecMap[document.getElementById('qr-ec').value];
+      if (currentShape !== 'square') ecLevel = QRCode.CorrectLevel.H;
       var output  = document.getElementById('qr-output');
       output.innerHTML = '';
       new QRCode(output, { text:content, width:size, height:size, colorDark:currentDark, colorLight:currentLight, correctLevel:ecLevel });
@@ -949,15 +950,6 @@ function roundedRectPath(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-function starPath(ctx, cx, cy, pts, outerR, innerR) {
-  for (var i = 0; i < pts * 2; i++) {
-    var r = i % 2 === 0 ? outerR : innerR;
-    var a = (Math.PI * i / pts) - Math.PI / 2;
-    if (i === 0) ctx.moveTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-    else ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
-  }
-  ctx.closePath();
-}
 
 // Scan rows at 10%-20% of height and return the minimum pixel run length found.
 // At those rows we're inside the finder pattern rows but individual module
@@ -1063,20 +1055,10 @@ function applyShapeToCanvas() {
       }
 
       ctx.beginPath();
-      var pad = s * 0.1;
-      var ix = bx + pad, iy = by + pad, is = s - pad * 2;
       if (currentShape === 'rounded') {
-        roundedRectPath(ctx, ix, iy, is, is, is * 0.35);
+        roundedRectPath(ctx, bx, by, s, s, s * 0.25);
       } else if (currentShape === 'dots') {
-        ctx.arc(bx + s/2, by + s/2, s/2 - pad, 0, Math.PI * 2);
-      } else if (currentShape === 'diamond') {
-        ctx.moveTo(bx + s/2, by + pad);
-        ctx.lineTo(bx + s - pad, by + s/2);
-        ctx.lineTo(bx + s/2, by + s - pad);
-        ctx.lineTo(bx + pad, by + s/2);
-        ctx.closePath();
-      } else if (currentShape === 'star') {
-        starPath(ctx, bx + s/2, by + s/2, 5, s/2 - pad, s/4);
+        ctx.arc(bx + s / 2, by + s / 2, s * 0.45, 0, Math.PI * 2);
       }
       ctx.fill();
     }
