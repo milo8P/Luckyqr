@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Allow: /blog/
 Disallow: /api/
 Sitemap: https://lucky-qr.com/sitemap.xml
