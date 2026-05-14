@@ -487,11 +487,13 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
             <div class="field"><label>Descripción <span class="sublabel">opcional</span></label><textarea id="ev-desc" placeholder="Detalles del evento..." style="min-height:56px" oninput="onInputChange()"></textarea></div>
           </div>
           <div id="app-fields" style="display:none">
+            <div class="field"><label>Nombre de la app <span class="sublabel">opcional</span></label><input type="text" id="app-name" placeholder="Mi App" oninput="onInputChange()"/></div>
             <div class="field"><label>App Store (iOS)</label><input type="url" id="app-ios" placeholder="https://apps.apple.com/..." oninput="onInputChange()"/></div>
             <div class="field"><label>Play Store (Android)</label><input type="url" id="app-android" placeholder="https://play.google.com/store/apps/..." oninput="onInputChange()"/></div>
-            <div style="font-size:.71rem;color:var(--muted2);background:var(--bg2);border-radius:8px;padding:7px 10px;margin-bottom:.5rem">El QR apunta a la App Store por defecto. La detección de plataforma requiere QR dinámico (Premium).</div>
+            <div style="font-size:.71rem;color:var(--muted2);background:var(--bg2);border-radius:8px;padding:7px 10px;margin-bottom:.5rem">⭐ Premium — el QR detecta el dispositivo y redirige a la tienda correcta automáticamente.</div>
           </div>
           <div id="social-fields" style="display:none">
+            <div class="field"><label>Nombre del perfil <span class="sublabel">opcional</span></label><input type="text" id="soc-title" placeholder="Juan García" oninput="onInputChange()"/></div>
             <div class="field"><label>Instagram</label><input type="text" id="soc-ig" placeholder="@usuario" oninput="onInputChange()"/></div>
             <div class="field"><label>Twitter / X</label><input type="text" id="soc-tw" placeholder="@usuario" oninput="onInputChange()"/></div>
             <div class="field"><label>TikTok</label><input type="text" id="soc-tt" placeholder="@usuario" oninput="onInputChange()"/></div>
@@ -737,7 +739,7 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
       <div class="why-card reveal"><div class="why-card-icon">⚡</div><h3>Instantáneo y sin registros molestos</h3><p>Podés explorar todo primero y registrarte solo cuando querés generar. Sin formularios infinitos ni tarjeta de crédito.</p><div class="why-tag">Sin fricciones</div></div>
       <div class="why-card reveal"><div class="why-card-icon">🎨</div><h3>Personalización real, no de adorno</h3><p>Elegís el color exacto con una rueda completa. Si los colores son parecidos, te avisamos antes de que el QR sea ilegible.</p><div class="why-tag">Control total</div></div>
       <div class="why-card reveal"><div class="why-card-icon">📦</div><h3>Descargás lo que ves, sin sorpresas</h3><p>El QR en pantalla es exactamente el que vas a descargar. Sin marcas de agua escondidas ni degradación de calidad.</p><div class="why-tag">Lo que ves es lo que llevás</div></div>
-      <div class="why-card reveal"><div class="why-card-icon">🌐</div><h3>12 tipos de QR en un solo lugar</h3><p>URL, WiFi, WhatsApp, vCard, geolocalización, SMS, YouTube, Instagram, PDF y más. Todo gratis sin límites.</p><div class="why-tag">Todo incluido</div></div>
+      <div class="why-card reveal"><div class="why-card-icon">🌐</div><h3>15 tipos de QR en un solo lugar</h3><p>URL, WiFi, WhatsApp, vCard, geolocalización, SMS, YouTube, Instagram, PDF, App, Redes Sociales y más. Todo sin límites.</p><div class="why-tag">Todo incluido</div></div>
       <div class="why-card reveal"><div class="why-card-icon">📴</div><h3>Funciona sin internet</h3><p>Una vez que cargaste la página, podés generar QR aunque se corte la conexión. Ideal para eventos o lugares con mala señal.</p><div class="why-tag">Offline ready</div></div>
     </div>
     <div class="compare-wrap reveal">
@@ -751,7 +753,7 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
             <tr><td>Datos privados</td><td class="col-us c-yes">✓ 100% local</td><td class="c-no">Pasan por servidor</td><td class="c-no">Pasan por servidor</td><td class="c-no">Pasan por servidor</td></tr>
             <tr><td>Funciona offline</td><td class="col-us c-yes">✓ Sí</td><td class="c-no">No</td><td class="c-no">No</td><td class="c-no">No</td></tr>
             <tr><td>SVG gratis</td><td class="col-us c-yes">✓ Incluido</td><td class="c-no">Solo premium</td><td class="c-no">Solo premium</td><td class="c-no">No</td></tr>
-            <tr><td>Tipos de QR gratis</td><td class="col-us c-yes">✓ 12 tipos</td><td class="c-mid">5 tipos</td><td class="c-mid">3 tipos</td><td class="c-mid">4 tipos</td></tr>
+            <tr><td>Tipos de QR gratis</td><td class="col-us c-yes">✓ 15 tipos</td><td class="c-mid">5 tipos</td><td class="c-mid">3 tipos</td><td class="c-mid">4 tipos</td></tr>
             <tr><td>Colores personalizados</td><td class="col-us c-yes">✓ Rueda completa</td><td class="c-yes">✓</td><td class="c-mid">Limitado</td><td class="c-no">No</td></tr>
           </tbody>
         </table>
@@ -800,6 +802,7 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
       <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)">¿Qué tamaño necesito para imprimir?<span class="faq-icon">+</span></button><div class="faq-a">Para impresión recomendamos al menos 300px o usar SVG que escala sin pérdida. Para pantalla, 256px es suficiente.</div></div>
       <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)">¿Mis datos de WiFi se guardan en algún servidor?<span class="faq-icon">+</span></button><div class="faq-a">No. Todo el procesamiento ocurre en tu navegador. Tus contraseñas y cualquier dato que ingresás nunca salen de tu dispositivo.</div></div>
       <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)">¿Puedo usar Lucky QR para mi negocio?<span class="faq-icon">+</span></button><div class="faq-a">Sí, sin restricciones. Podés generar QR para menús, tarjetas, redes WiFi, catálogos y campañas. Todo gratis y sin límite.</div></div>
+      <div class="faq-item reveal"><button class="faq-q" onclick="toggleFaq(this)">¿Qué es un QR de redes sociales?<span class="faq-icon">+</span></button><div class="faq-a">Es como un Linktree pero dentro de Lucky QR. Creás un único QR que al escanearse muestra una página con todos tus perfiles — Instagram, TikTok, LinkedIn, YouTube y más — con íconos y colores de cada red. Cualquier persona que lo escanea puede seguirte en todos tus canales desde un solo lugar. Disponible para usuarios Premium.</div></div>
     </div>
   </div>
 </section>

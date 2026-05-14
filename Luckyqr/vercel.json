@@ -3,6 +3,14 @@
     {
       "source": "/r/:code",
       "destination": "/api/r/[code]"
+    },
+    {
+      "source": "/app/:code",
+      "destination": "/api/app/[code]"
+    },
+    {
+      "source": "/social/:code",
+      "destination": "/api/social/[code]"
     }
   ],
   "cleanUrls": true

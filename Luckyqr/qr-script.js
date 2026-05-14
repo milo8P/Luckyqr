@@ -403,6 +403,12 @@ function colorSimilar(h1, h2) {
 
 // ── Generar QR ──
 function generateQR() {
+  if (currentType === 'app' || currentType === 'social') {
+    if (!currentUser || currentUser.plan !== 'premium') {
+      showToast('Necesitás Premium'); return;
+    }
+    generateQRDynamic(); return;
+  }
   var content = getContent();
   if (!content) { showToast('Completá el contenido primero'); return; }
   currentDark  = document.getElementById('c-dark').value;
@@ -446,6 +452,72 @@ function generateQR() {
       showToast('Error al generar');
     }
   }, 250);
+}
+
+async function generateQRDynamic() {
+  if (!supabase) { showToast('Error de conexión'); return; }
+  var code = generateShortCode();
+  var content;
+
+  if (currentType === 'app') {
+    var iosUrl  = (document.getElementById('app-ios')     || {value:''}).value.trim();
+    var andUrl  = (document.getElementById('app-android') || {value:''}).value.trim();
+    var appName = (document.getElementById('app-name')    || {value:''}).value.trim();
+    if (!iosUrl && !andUrl) { showToast('Completá al menos una URL de la app'); return; }
+    var res = await supabase.from('app_qrs').insert({ code, user_id: currentUser.id, ios_url: iosUrl, android_url: andUrl, name: appName });
+    if (res.error) { showToast('Error al guardar el QR de app'); return; }
+    content = 'https://lucky-qr.com/app/' + code;
+  } else {
+    var title = (document.getElementById('soc-title') || {value:''}).value.trim();
+    var ig    = (document.getElementById('soc-ig')    || {value:''}).value.trim();
+    var tw    = (document.getElementById('soc-tw')    || {value:''}).value.trim();
+    var tt    = (document.getElementById('soc-tt')    || {value:''}).value.trim();
+    var li    = (document.getElementById('soc-li')    || {value:''}).value.trim();
+    var yt    = (document.getElementById('soc-yt')    || {value:''}).value.trim();
+    var fb    = (document.getElementById('soc-fb')    || {value:''}).value.trim();
+    if (!ig && !tw && !tt && !li && !yt && !fb) { showToast('Completá al menos una red social'); return; }
+    if (ig && !ig.startsWith('http')) ig = 'https://instagram.com/' + ig.replace('@', '');
+    if (tw && !tw.startsWith('http')) tw = 'https://x.com/' + tw.replace('@', '');
+    if (tt && !tt.startsWith('http')) tt = 'https://tiktok.com/@' + tt.replace('@', '');
+    var res = await supabase.from('social_qrs').insert({ code, user_id: currentUser.id, title, instagram: ig, twitter: tw, tiktok: tt, linkedin: li, youtube: yt, facebook: fb });
+    if (res.error) { showToast('Error al guardar el QR social'); return; }
+    content = 'https://lucky-qr.com/social/' + code;
+  }
+
+  currentDark  = document.getElementById('c-dark').value;
+  currentLight = document.getElementById('c-light').value;
+  var btn = document.getElementById('gen-btn');
+  btn.classList.add('loading');
+  var bar = document.getElementById('progress-bar');
+  bar.style.width = '60%';
+  try {
+    var size   = parseInt(document.getElementById('qr-size').value);
+    var output = document.getElementById('qr-output');
+    output.innerHTML = '';
+    new QRCode(output, { text: content, width: size, height: size, colorDark: currentDark, colorLight: currentLight, correctLevel: QRCode.CorrectLevel.H });
+    setTimeout(function() {
+      bar.style.width = '100%';
+      setTimeout(function() { bar.style.width = '0%'; }, 500);
+      btn.classList.remove('loading');
+      ['btn-copy','btn-dl','btn-share','btn-print','btn-svg'].forEach(function(id) {
+        var e = document.getElementById(id); if (e) e.disabled = false;
+      });
+      var st = document.getElementById('qr-status');
+      st.textContent = 'Listo ✓'; st.style.color = 'var(--accent)';
+      document.getElementById('qr-info-text').textContent = content;
+      document.getElementById('qr-info-meta').textContent = size + ' × ' + size + ' px · Premium';
+      document.getElementById('qr-info').style.display = 'block';
+      applyShapeToCanvas();
+      applyLogoToCanvas();
+      applyFrameToCanvas();
+      showToast('QR Premium creado');
+    }, 150);
+  } catch(e) {
+    btn.classList.remove('loading');
+    bar.style.width = '0%';
+    document.getElementById('qr-output').innerHTML = '<p style="color:var(--danger);font-size:.82rem;text-align:center;padding:1rem">Error al generar el QR.</p>';
+    showToast('Error al generar');
+  }
 }
 
 // ── Descargas ──
