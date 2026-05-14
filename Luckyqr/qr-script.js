@@ -850,22 +850,25 @@ async function upgradeToPremium() {
   if (!currentUser) { openModal('login'); return; }
   showToast('Redirigiendo al pago...');
   try {
-    var sessionRes = await supabase.auth.getSession();
-    var jwt = sessionRes?.data?.session?.access_token;
-    if (!jwt) { openModal('login'); return; }
-    var res = await fetch('/api/create-checkout', {
+    var session = await supabase.auth.getSession();
+    var res = await fetch('/api/paddle-checkout', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + jwt },
-      body: JSON.stringify({ email: currentUser.email })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: currentUser.id,
+        email: currentUser.email
+      })
     });
     var data = await res.json();
     if (data.url) {
       window.location.href = data.url;
     } else {
       showToast('Error al iniciar el pago');
+      console.error('Paddle error:', data);
     }
   } catch(e) {
     showToast('Error de conexión');
+    console.error(e);
   }
 }
 async function resetPassword() {
