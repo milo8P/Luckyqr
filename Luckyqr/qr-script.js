@@ -691,11 +691,13 @@ async function confirmResetPassword() {
 // ── Reset password handler ──
 window.addEventListener('load', function() {
   setTimeout(function() {
-    var hash = window.location.hash;
-    if (hash.includes('type=recovery')) {
-      document.getElementById('reset-modal').classList.add('open');
-    }
-  }, 1000);
+    if (!supabase) return;
+    supabase.auth.onAuthStateChange(function(event, session) {
+      if (event === 'PASSWORD_RECOVERY') {
+        document.getElementById('reset-modal').classList.add('open');
+      }
+    });
+  }, 1500);
 });
 // ── FAQ ──
 function toggleFaq(btn) {
