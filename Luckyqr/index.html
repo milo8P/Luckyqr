@@ -572,6 +572,9 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
         </div>
         <div class="dqr-body">
           <canvas id="scans-chart" height="120"></canvas>
+          <button onclick="exportScansCSV()" style="margin-top:1rem;width:100%;padding:.65rem;background:transparent;color:var(--accent);border:1px solid var(--accent-l2);border-radius:9px;font-family:var(--sans);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .18s" onmouseover="this.style.background='var(--accent-l)'" onmouseout="this.style.background='transparent'">
+  📥 Exportar escaneos CSV
+</button>
         </div>
       </div>
 

@@ -768,6 +768,29 @@ async function loadScansChart() {
     }
   });
 }
+// ── Export CSV ──
+async function exportScansCSV() {
+  if (!currentUser || !supabase) return;
+  var qrRes = await supabase.from('dynamic_qrs').select('id, name, short_code').eq('user_id', currentUser.id);
+  if (!qrRes.data || qrRes.data.length === 0) { showToast('No tenés QR dinámicos'); return; }
+  var qrIds = qrRes.data.map(function(q){ return q.id; });
+  var qrMap = {};
+  qrRes.data.forEach(function(q){ qrMap[q.id] = q.name + ' (' + q.short_code + ')'; });
+  var scanRes = await supabase.from('qr_scans').select('*').in('qr_id', qrIds).order('scanned_at', { ascending: false });
+  var scans = scanRes.data || [];
+  if (scans.length === 0) { showToast('Todavía no hay escaneos'); return; }
+  var csv = 'QR,Código,Fecha,Dispositivo,País\n';
+  scans.forEach(function(s){
+    var fecha = new Date(s.scanned_at).toLocaleString('es-AR');
+    csv += '"' + (qrMap[s.qr_id] || s.qr_id) + '","' + fecha + '","' + (s.device||'') + '","' + (s.country||'') + '"\n';
+  });
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'lucky-qr-escaneos.csv';
+  a.click();
+  showToast('CSV descargado');
+}
 function toggleFaq(btn) {
   var item = btn.closest('.faq-item');
   item.classList.toggle('open');
