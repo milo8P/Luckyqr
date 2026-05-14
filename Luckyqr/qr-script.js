@@ -959,7 +959,34 @@ function starPath(ctx, cx, cy, pts, outerR, innerR) {
   ctx.closePath();
 }
 
+// Scan rows at 10%-20% of height and return the minimum pixel run length found.
+// At those rows we're inside the finder pattern rows but individual module
+// boundaries (e.g. the light inner ring) create runs exactly 1 module wide —
+// so the minimum run correctly equals the module pixel size.
+function detectModuleSize(data, w, h) {
+  var minRun = w + 1;
+  var yStart = Math.floor(h * 0.10);
+  var yEnd   = Math.floor(h * 0.20);
+  for (var py = yStart; py <= yEnd; py++) {
+    var runLen = 0, prevDark = null;
+    for (var x = 0; x < w; x++) {
+      var idx = (py * w + x) * 4;
+      var isDark = data[idx] + data[idx+1] + data[idx+2] < 384;
+      if (prevDark === null) { prevDark = isDark; runLen = 1; continue; }
+      if (isDark === prevDark) {
+        runLen++;
+      } else {
+        if (runLen < minRun) minRun = runLen;
+        prevDark = isDark; runLen = 1;
+      }
+    }
+    if (runLen > 0 && runLen < minRun) minRun = runLen;
+  }
+  return minRun > w ? 0 : minRun;
+}
+
 function applyShapeToCanvas() {
+  // square with no gradient: nothing to post-process
   if (currentShape === 'square' && !currentGradient) return;
   var canvas = document.querySelector('#qr-output canvas');
   if (!canvas) return;
@@ -968,38 +995,42 @@ function applyShapeToCanvas() {
   var imageData = ctx.getImageData(0, 0, w, w);
   var data = imageData.data;
 
-  // find first dark pixel in row 0 to handle any quiet-zone margin
-  var startX = 0;
-  while (startX < w && data[startX*4]+data[startX*4+1]+data[startX*4+2] >= 384) startX++;
+  // detect module size by finding minimum pixel run in 10-20% rows
+  var moduleSize = detectModuleSize(data, w, w);
 
-  // measure first dark run = one cell width
-  var cellSize = 0;
-  for (var x = startX; x < w; x++) {
-    if (data[x*4]+data[x*4+1]+data[x*4+2] < 384) cellSize++;
-    else break;
+  // validate; fall back to a reasonable estimate if detection failed
+  if (moduleSize < 4 || moduleSize > 30) {
+    moduleSize = Math.round(w / 33);
   }
-  if (cellSize < 2) return;
+  if (moduleSize < 2) return;
 
-  var margin = startX;
-  var N = Math.round((w - margin * 2) / cellSize);
+  // find the left edge of the QR (first dark pixel in a middle row)
+  var midY = Math.floor(w * 0.5);
+  var margin = 0;
+  while (margin < w && data[(midY * w + margin) * 4] + data[(midY * w + margin) * 4 + 1] + data[(midY * w + margin) * 4 + 2] >= 384) margin++;
+  // snap margin to nearest module boundary
+  margin = Math.round(margin / moduleSize) * moduleSize;
 
-  // build boolean module grid by sampling center of each cell
+  var N = Math.round((w - margin * 2) / moduleSize);
+  if (N < 10 || N > 200) return; // sanity check
+
+  // build boolean module grid by sampling the centre of each cell
   var grid = [];
   for (var row = 0; row < N; row++) {
     grid[row] = [];
     for (var col = 0; col < N; col++) {
-      var px = Math.min(w-1, Math.floor(margin + col * cellSize + cellSize / 2));
-      var py = Math.min(w-1, Math.floor(margin + row * cellSize + cellSize / 2));
-      var idx = (py * w + px) * 4;
-      grid[row][col] = data[idx]+data[idx+1]+data[idx+2] < 384;
+      var px = Math.min(w - 1, Math.floor(margin + col * moduleSize + moduleSize / 2));
+      var py = Math.min(w - 1, Math.floor(margin + row * moduleSize + moduleSize / 2));
+      var idx2 = (py * w + px) * 4;
+      grid[row][col] = data[idx2] + data[idx2+1] + data[idx2+2] < 384;
     }
   }
 
-  // clear canvas with background
+  // clear canvas with background colour
   ctx.fillStyle = currentLight;
   ctx.fillRect(0, 0, w, w);
 
-  // build fill style (gradient or solid)
+  // fill style: gradient or solid
   var fStyle;
   if (currentGradient) {
     var grad = ctx.createLinearGradient(0, 0, 0, w);
@@ -1011,24 +1042,26 @@ function applyShapeToCanvas() {
   }
   ctx.fillStyle = fStyle;
 
-  // finder pattern regions (always square to preserve scannability)
+  // finder pattern + separator zones — always drawn as squares
   function isFinder(r, c) {
-    if (r < 8 && c < 8) return true;
-    if (r < 8 && c >= N - 8) return true;
-    if (r >= N - 8 && c < 8) return true;
+    if (r <= 8 && c <= 8) return true;           // top-left
+    if (r <= 8 && c >= N - 8) return true;       // top-right
+    if (r >= N - 8 && c <= 8) return true;       // bottom-left
     return false;
   }
 
   for (var row = 0; row < N; row++) {
     for (var col = 0; col < N; col++) {
       if (!grid[row][col]) continue;
-      var bx = margin + col * cellSize;
-      var by = margin + row * cellSize;
-      var s  = cellSize;
+      var bx = margin + col * moduleSize;
+      var by = margin + row * moduleSize;
+      var s  = moduleSize;
+
       if (isFinder(row, col) || currentShape === 'square') {
         ctx.fillRect(bx, by, s, s);
         continue;
       }
+
       ctx.beginPath();
       var pad = s * 0.1;
       var ix = bx + pad, iy = by + pad, is = s - pad * 2;
@@ -1037,7 +1070,6 @@ function applyShapeToCanvas() {
       } else if (currentShape === 'dots') {
         ctx.arc(bx + s/2, by + s/2, s/2 - pad, 0, Math.PI * 2);
       } else if (currentShape === 'diamond') {
-        var hr = s/2 - pad;
         ctx.moveTo(bx + s/2, by + pad);
         ctx.lineTo(bx + s - pad, by + s/2);
         ctx.lineTo(bx + s/2, by + s - pad);
