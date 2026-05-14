@@ -92,6 +92,7 @@ async function loadUserProfile(authUser) {
     currentUser = { id: authUser.id, email: authUser.email, name: name, plan: 'free' };
   } else {
     currentUser = res.data;
+    console.log('loadUserProfile plan:', currentUser?.plan);
   }
   showLoggedIn();
 }
@@ -236,12 +237,19 @@ function showModalError(msg) {
 // ── Tipo de QR ──
 function tryGenerate() {
   if (!currentUser) { openModal('login'); showToast(t('toast.loginRequired')); return; }
+  console.log('currentUser plan:', currentUser?.plan);
+  if (['app','social','landing'].indexOf(currentType) !== -1 && currentUser.plan !== 'premium') {
+    showToast(t('toast.premiumRequired') || 'Necesitás Premium ⭐');
+    document.getElementById('premium-locked')?.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
   generateQR();
 }
 
 function setType(type, btn) {
-  if (['app','social','landing'].indexOf(type) !== -1 && (!currentUser || currentUser.plan !== 'premium')) {
+  if (['app','social','landing'].indexOf(type) !== -1 && currentUser && currentUser.plan !== 'premium') {
     showToast(t('toast.premiumRequired'));
+    document.getElementById('premium-locked')?.scrollIntoView({ behavior: 'smooth' });
   }
   currentType = type;
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
@@ -484,7 +492,7 @@ async function generateQRDynamic() {
   var verifyData = await verifyRes.json();
   if (!verifyData.premium) {
     showToast(t('toast.premiumRequired'));
-    document.getElementById('premium')?.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('premium-locked')?.scrollIntoView({ behavior: 'smooth' });
     return;
   }
 
