@@ -117,7 +117,8 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem);marg
 function setStatus(name, ok) {
   var dot = document.getElementById('dot-' + name);
   var badge = document.getElementById('badge-' + name);
-  if (ok) {
+  var isOk = ok === true || ok === 'operational';
+  if (isOk) {
     dot.className = 'status-dot ok';
     badge.className = 'status-badge badge-ok';
     badge.textContent = 'Operacional';
@@ -126,6 +127,7 @@ function setStatus(name, ok) {
     badge.className = 'status-badge badge-warn';
     badge.textContent = 'Degradado';
   }
+  return isOk;
 }
 
 async function checkFrontend() {
@@ -135,13 +137,17 @@ async function checkFrontend() {
 
 async function checkApi() {
   try {
-    var r = await fetch('/r/test-status-check', { signal: AbortSignal.timeout(6000) });
-    var ok = r.status === 404;
-    setStatus('api', ok);
-    return ok;
+    const r = await fetch('/r/status-check-xyz', {
+      method: 'GET',
+      cache: 'no-store'
+    });
+    if (r.status > 0) {
+      return setStatus('api', 'operational');
+    } else {
+      return setStatus('api', 'degraded');
+    }
   } catch(e) {
-    setStatus('api', false);
-    return false;
+    return setStatus('api', 'degraded');
   }
 }
 
