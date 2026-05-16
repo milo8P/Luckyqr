@@ -1,100 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=1200"/>
-<title>Lucky QR OG Image</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:1200px;height:630px;overflow:hidden}
-body{
-  background:#1d6b4a;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  font-family:'DM Sans',system-ui,sans-serif;
-  position:relative;
-}
-.bg-pattern{
-  position:absolute;inset:0;
-  background-image:
-    radial-gradient(circle at 15% 50%, rgba(255,255,255,.06) 0%, transparent 50%),
-    radial-gradient(circle at 85% 30%, rgba(255,255,255,.04) 0%, transparent 40%);
-  pointer-events:none;
-}
-.qr-deco{
-  position:absolute;
-  opacity:.08;
-  font-size:280px;
-  right:-20px;
-  bottom:-40px;
-  line-height:1;
-  transform:rotate(-8deg);
-}
-.content{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:28px;
-  z-index:1;
-}
-.logo-row{
-  display:flex;
-  align-items:center;
-  gap:18px;
-}
-.clover{
-  font-size:72px;
-  line-height:1;
-  filter:drop-shadow(0 4px 12px rgba(0,0,0,.25));
-}
-.brand{
-  font-family:Georgia,serif;
-  font-size:72px;
-  font-weight:700;
-  color:#fff;
-  letter-spacing:-1px;
-  font-style:italic;
-}
-.tagline{
-  font-size:38px;
-  font-weight:400;
-  color:rgba(255,255,255,.92);
-  letter-spacing:.5px;
-}
-.sub{
-  font-size:24px;
-  color:rgba(255,255,255,.65);
-  letter-spacing:1.5px;
-  text-transform:uppercase;
-}
-.badge{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  background:rgba(255,255,255,.12);
-  border:1px solid rgba(255,255,255,.2);
-  border-radius:100px;
-  padding:10px 28px;
-  color:rgba(255,255,255,.85);
-  font-size:20px;
-  letter-spacing:.3px;
-}
+body{width:1200px;height:630px;background:#1d6b4a;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;overflow:hidden}
+.card{text-align:center;color:#fff}
+.emoji{font-size:80px;margin-bottom:20px;line-height:1}
+.title{font-size:72px;font-weight:700;letter-spacing:-2px;margin-bottom:12px}
+.title span{color:#a3d9b8}
+.sub{font-size:28px;font-weight:300;opacity:.85;margin-bottom:32px}
+.badges{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:100px;padding:8px 20px;font-size:18px;font-weight:500}
+.url{margin-top:32px;font-size:22px;opacity:.6;letter-spacing:1px}
 </style>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
 </head>
 <body>
-<div class="bg-pattern"></div>
-<div class="qr-deco">▣</div>
-<div class="content">
-  <div class="logo-row">
-    <span class="clover">🍀</span>
-    <span class="brand">Lucky QR</span>
+<div class="card">
+  <div class="emoji">🍀</div>
+  <div class="title">Lucky <span>QR</span></div>
+  <div class="sub">Free QR Code Generator</div>
+  <div class="badges">
+    <div class="badge">✓ No watermarks</div>
+    <div class="badge">✓ Works offline</div>
+    <div class="badge">✓ 100% Private</div>
+    <div class="badge">✓ 15 QR types</div>
   </div>
-  <p class="tagline">Free QR Code Generator</p>
-  <p class="sub">No watermarks &nbsp;·&nbsp; Works offline &nbsp;·&nbsp; 100% Private</p>
-  <div class="badge">✓ lucky-qr.com — Completely free, forever</div>
+  <div class="url">lucky-qr.com</div>
 </div>
 </body>
 </html>

@@ -40,19 +40,6 @@ var mod = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+es
     var res = await supabase.auth.getSession();
     if (res.data && res.data.session) {
       await loadUserProfile(res.data.session.user);
-      var urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('_ptxn')) {
-        showToast('¡Pago procesado! Activando Premium...');
-        setTimeout(async function() {
-          await loadUserProfile(res.data.session.user);
-          if (currentUser && currentUser.plan === 'premium') {
-            showToast('¡Bienvenido a Premium! 🎉');
-          }
-          urlParams.delete('_ptxn');
-          var remaining = urlParams.toString();
-          history.replaceState({}, '', window.location.pathname + (remaining ? '?' + remaining : ''));
-        }, 3000);
-      }
     } else {
       showLoggedOut();
     }
@@ -108,6 +95,30 @@ async function loadUserProfile(authUser) {
     console.log('loadUserProfile plan:', currentUser?.plan);
   }
   showLoggedIn();
+  checkPaddleReturn();
+}
+
+async function checkPaddleReturn() {
+  var urlParams = new URLSearchParams(window.location.search);
+  var ptxn = urlParams.get('_ptxn');
+  if (!ptxn) return;
+
+  window.history.replaceState({}, '', window.location.pathname);
+
+  showToast('Procesando pago...');
+
+  await new Promise(function(resolve) { setTimeout(resolve, 3000); });
+
+  if (supabase && currentUser) {
+    var res = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
+    if (res.data) {
+      currentUser = res.data;
+      if (currentUser.plan === 'premium') {
+        showToast('¡Bienvenido a Premium! 🎉');
+        checkPremiumStatus();
+      }
+    }
+  }
 }
 
 // ── Panel usuario ──
