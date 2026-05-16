@@ -2,7 +2,7 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
   const { userId, email } = req.body
   try {
-    const response = await fetch('https://api.paddle.com/subscriptions?status=active&per_page=50', {
+    const response = await fetch('https://api.paddle.com/subscriptions?status=active,trialing&per_page=50', {
       headers: {
         'Authorization': `Bearer ${process.env.PADDLE_API_KEY}`,
       }
