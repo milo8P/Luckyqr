@@ -161,9 +161,10 @@ async function checkDb() {
 
 async function checkPayments() {
   try {
-    await fetch('https://api.paddle.com/', { mode: 'no-cors', signal: AbortSignal.timeout(6000) });
-    setStatus('payments', true);
-    return true;
+    var r = await fetch('/api/paddle-checkout', { method: 'GET', signal: AbortSignal.timeout(6000) });
+    var ok = r.status === 405;
+    setStatus('payments', ok);
+    return ok;
   } catch(e) {
     setStatus('payments', false);
     return false;
