@@ -850,7 +850,7 @@ async function upgradeToPremium() {
   if (!currentUser) { openModal('login'); return; }
 
   Paddle.Initialize({
-    token: 'live_7d279f61a3499fed520f7cd8c08'
+    token: 'live_f715046d1f14b46d5c8ddca1ffd'
   });
 
   Paddle.Checkout.open({
