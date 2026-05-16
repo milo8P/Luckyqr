@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Estado del sistema — Lucky QR</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231d6b4a'/><rect x='6' y='6' width='8' height='8' rx='1' fill='white'/><rect x='7' y='7' width='6' height='6' rx='0.5' fill='%231d6b4a'/><rect x='8' y='8' width='4' height='4' fill='white'/><rect x='18' y='6' width='8' height='8' rx='1' fill='white'/><rect x='19' y='7' width='6' height='6' rx='0.5' fill='%231d6b4a'/><rect x='20' y='8' width='4' height='4' fill='white'/><rect x='6' y='18' width='8' height='8' rx='1' fill='white'/><rect x='7' y='19' width='6' height='6' rx='0.5' fill='%231d6b4a'/><rect x='8' y='20' width='4' height='4' fill='white'/><rect x='18' y='18' width='4' height='4' fill='white'/><rect x='24' y='18' width='2' height='2' fill='white'/><rect x='18' y='22' width='2' height='2' fill='white'/><rect x='22' y='22' width='4' height='4' fill='white'/></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#faf9f7;--surface:#fff;--border:#e8e4de;--text:#18160f;--muted:#7a756c;--muted2:#b0a99e;--accent:#1d6b4a;--accent-h:#155638;--accent-l:#eaf4ee;--accent-l2:#d2eadb;--ok:#16a34a;--ok-l:#f0fdf4;--warn:#d97706;--warn-l:#fffbeb;--danger:#dc2626;--danger-l:#fef2f2;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--r:12px}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(250,249,247,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 clamp(1rem,5vw,3rem);height:60px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-dot{width:8px;height:8px;background:var(--accent);border-radius:50%}
+.nav-back{font-size:.8rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--accent)}
+main{max-width:680px;margin:3rem auto;padding:0 clamp(1rem,5vw,2rem)}
+.hero{text-align:center;margin-bottom:2.5rem}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);background:var(--accent-l);border:1px solid var(--accent-l2);padding:5px 14px;border-radius:100px;margin-bottom:1rem}
+h1{font-family:var(--serif);font-size:2.2rem;font-weight:600;letter-spacing:-.5px;margin-bottom:.5rem}
+.hero-sub{font-size:.88rem;color:var(--muted2)}
+.overall{text-align:center;padding:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:2rem}
+.overall-label{font-size:.78rem;color:var(--muted);margin-bottom:.4rem}
+.overall-status{font-family:var(--serif);font-size:1.6rem;font-weight:600}
+.status-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem 1.25rem;margin-bottom:.6rem;display:flex;align-items:center;gap:1rem}
+.status-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;transition:background .3s}
+.status-dot.ok{background:var(--ok)}
+.status-dot.warn{background:var(--warn)}
+.status-dot.down{background:var(--danger)}
+.status-dot.checking{background:var(--muted2);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.status-info{flex:1}
+.status-name{font-size:.9rem;font-weight:500}
+.status-desc{font-size:.75rem;color:var(--muted);margin-top:2px}
+.status-badge{font-size:.72rem;font-weight:500;padding:3px 10px;border-radius:100px}
+.badge-ok{background:var(--ok-l);color:var(--ok)}
+.badge-warn{background:var(--warn-l);color:var(--warn)}
+.badge-down{background:var(--danger-l);color:var(--danger)}
+.badge-checking{background:var(--bg);color:var(--muted2)}
+.last-check{text-align:center;font-size:.72rem;color:var(--muted2);margin-top:1.5rem}
+footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem);margin-top:4rem}
+.footer-inner{max-width:680px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.footer-brand{font-family:var(--serif);font-size:1rem;font-weight:600}.footer-brand span{color:var(--accent)}
+.footer-links{display:flex;gap:1.25rem;flex-wrap:wrap}
+.footer-links a{font-size:.75rem;color:var(--muted);text-decoration:none}.footer-links a:hover{color:var(--text)}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-brand" href="/"><div class="nav-dot"></div>Lucky QR</a>
+  <a class="nav-back" href="/">← Volver</a>
+</nav>
+<main>
+  <div class="hero">
+    <div class="hero-tag">🟢 Estado del sistema</div>
+    <h1>Servicios de Lucky QR</h1>
+    <p class="hero-sub">Estado en tiempo real de todos los componentes</p>
+  </div>
+
+  <div class="overall" id="overall-box">
+    <div class="overall-label">Estado general</div>
+    <div class="overall-status" id="overall-text">Verificando...</div>
+  </div>
+
+  <div class="status-card" id="card-frontend">
+    <div class="status-dot checking" id="dot-frontend"></div>
+    <div class="status-info">
+      <div class="status-name">Lucky QR — Frontend</div>
+      <div class="status-desc">lucky-qr.com · Generador de QR</div>
+    </div>
+    <span class="status-badge badge-checking" id="badge-frontend">Verificando</span>
+  </div>
+
+  <div class="status-card" id="card-api">
+    <div class="status-dot checking" id="dot-api"></div>
+    <div class="status-info">
+      <div class="status-name">API de redirección</div>
+      <div class="status-desc">Códigos QR dinámicos · /r/ /app/ /social/</div>
+    </div>
+    <span class="status-badge badge-checking" id="badge-api">Verificando</span>
+  </div>
+
+  <div class="status-card" id="card-db">
+    <div class="status-dot checking" id="dot-db"></div>
+    <div class="status-info">
+      <div class="status-name">Base de datos</div>
+      <div class="status-desc">Supabase · Perfiles, QRs dinámicos, estadísticas</div>
+    </div>
+    <span class="status-badge badge-checking" id="badge-db">Verificando</span>
+  </div>
+
+  <div class="status-card" id="card-payments">
+    <div class="status-dot checking" id="dot-payments"></div>
+    <div class="status-info">
+      <div class="status-name">Pagos</div>
+      <div class="status-desc">Paddle · Suscripciones Premium</div>
+    </div>
+    <span class="status-badge badge-checking" id="badge-payments">Verificando</span>
+  </div>
+
+  <div class="last-check" id="last-check">Última verificación: —</div>
+</main>
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Lucky <span>QR</span></div>
+    <div class="footer-links">
+      <a href="/">Inicio</a>
+      <a href="/pricing.html">Precios</a>
+      <a href="/help.html">Ayuda</a>
+      <a href="/changelog.html">Changelog</a>
+      <a href="/privacy.html">Privacidad</a>
+    </div>
+  </div>
+</footer>
+<script>
+async function checkService(name, url, expectStatus) {
+  var dot = document.getElementById('dot-' + name);
+  var badge = document.getElementById('badge-' + name);
+  try {
+    var r = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(6000) });
+    var ok = expectStatus ? r.status === expectStatus : (r.status >= 200 && r.status < 500);
+    if (ok) {
+      dot.className = 'status-dot ok';
+      badge.className = 'status-badge badge-ok';
+      badge.textContent = 'Operacional';
+    } else {
+      dot.className = 'status-dot warn';
+      badge.className = 'status-badge badge-warn';
+      badge.textContent = 'Degradado';
+    }
+    return ok;
+  } catch(e) {
+    dot.className = 'status-dot down';
+    badge.className = 'status-badge badge-down';
+    badge.textContent = 'Sin respuesta';
+    return false;
+  }
+}
+
+async function runChecks() {
+  var results = await Promise.all([
+    checkService('frontend', 'https://lucky-qr.com/', 200),
+    checkService('api', 'https://lucky-qr.com/r/probe-status-check', 404),
+    checkService('db', 'https://lucky-qr.com/api/verify-premium', 401),
+    checkService('payments', 'https://lucky-qr.com/api/paddle-checkout', 405),
+  ]);
+  var allOk = results.every(Boolean);
+  var anyDown = results.some(function(r){ return !r; });
+  var overall = document.getElementById('overall-text');
+  overall.style.color = allOk ? '#16a34a' : '#dc2626';
+  overall.textContent = allOk ? '✅ Todos los sistemas operacionales' : (anyDown ? '⚠️ Algunos servicios degradados' : '✅ Todos los sistemas operacionales');
+  document.getElementById('last-check').textContent = 'Última verificación: ' + new Date().toLocaleTimeString('es-AR');
+}
+
+runChecks();
+</script>
+</body>
+</html>

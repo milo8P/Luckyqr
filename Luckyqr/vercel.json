@@ -4,7 +4,9 @@
     { "source": "/r/:code", "destination": "/api/r/[code]" },
     { "source": "/app/:code", "destination": "/api/app/[code]" },
     { "source": "/social/:code", "destination": "/api/social/[code]" },
-    { "source": "/landing/:code", "destination": "/api/landing/[code]" }
+    { "source": "/landing/:code", "destination": "/api/landing/[code]" },
+    { "source": "/gallery/:code", "destination": "/api/gallery/[code]" },
+    { "source": "/video/:code", "destination": "/api/video/[code]" }
   ],
   "headers": [
     {

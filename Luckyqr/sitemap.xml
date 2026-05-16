@@ -21,6 +21,10 @@
   <url><loc>https://lucky-qr.com/pricing.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://lucky-qr.com/privacy.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://lucky-qr.com/terms.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://lucky-qr.com/help.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://lucky-qr.com/status.html</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://lucky-qr.com/changelog.html</loc><changefreq>weekly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://lucky-qr.com/refund.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <!-- Blog -->
   <url>
     <loc>https://lucky-qr.com/blog/</loc>

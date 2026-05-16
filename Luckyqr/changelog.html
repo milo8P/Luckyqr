@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Changelog — Lucky QR</title>
+<meta name="description" content="Historial de cambios y novedades de Lucky QR."/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231d6b4a'/><rect x='6' y='6' width='8' height='8' rx='1' fill='white'/><rect x='7' y='7' width='6' height='6' rx='0.5' fill='%231d6b4a'/><rect x='8' y='8' width='4' height='4' fill='white'/><rect x='18' y='6' width='8' height='8' rx='1' fill='white'/><rect x='19' y='7' width='6' height='6' rx='0.5' fill='%231d6b4a'/><rect x='20' y='8' width='4' height='4' fill='white'/><rect x='6' y='18' width='8' height='8' rx='1' fill='white'/><rect x='7' y='19' width='6' height='6' rx='0.5' fill='%231d6b4a'/><rect x='8' y='20' width='4' height='4' fill='white'/><rect x='18' y='18' width='4' height='4' fill='white'/><rect x='24' y='18' width='2' height='2' fill='white'/><rect x='18' y='22' width='2' height='2' fill='white'/><rect x='22' y='22' width='4' height='4' fill='white'/></svg>"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#faf9f7;--surface:#fff;--border:#e8e4de;--text:#18160f;--muted:#7a756c;--muted2:#b0a99e;--accent:#1d6b4a;--accent-h:#155638;--accent-l:#eaf4ee;--accent-l2:#d2eadb;--serif:'Fraunces',serif;--sans:'DM Sans',sans-serif;--r:12px}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(250,249,247,.93);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 clamp(1rem,5vw,3rem);height:60px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{font-family:var(--serif);font-size:1.2rem;font-weight:600;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-dot{width:8px;height:8px;background:var(--accent);border-radius:50%}
+.nav-back{font-size:.8rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-back:hover{color:var(--accent)}
+main{max-width:720px;margin:3rem auto;padding:0 clamp(1rem,5vw,2rem)}
+.hero{text-align:center;margin-bottom:3rem}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);background:var(--accent-l);border:1px solid var(--accent-l2);padding:5px 14px;border-radius:100px;margin-bottom:1rem}
+h1{font-family:var(--serif);font-size:2.2rem;font-weight:600;letter-spacing:-.5px;margin-bottom:.5rem}
+.hero-sub{font-size:.88rem;color:var(--muted2)}
+.timeline{position:relative;padding-left:2rem}
+.timeline::before{content:'';position:absolute;left:.45rem;top:0;bottom:0;width:2px;background:var(--accent-l2)}
+.entry{position:relative;margin-bottom:2.5rem}
+.entry::before{content:'';position:absolute;left:-1.63rem;top:.45rem;width:10px;height:10px;border-radius:50%;background:var(--accent);border:2px solid var(--bg)}
+.entry-date{font-size:.72rem;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:.3rem}
+.entry-title{font-family:var(--serif);font-size:1.3rem;font-weight:600;letter-spacing:-.3px;margin-bottom:.6rem}
+.entry-body{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem 1.25rem}
+.entry-body ul{list-style:none;display:flex;flex-direction:column;gap:.4rem}
+.entry-body li{font-size:.85rem;color:var(--muted);display:flex;gap:.5rem}
+.entry-body li::before{content:'→';color:var(--accent);flex-shrink:0}
+.tag{display:inline-block;font-size:.62rem;font-weight:600;letter-spacing:.8px;text-transform:uppercase;padding:2px 8px;border-radius:100px;margin-right:4px}
+.tag-new{background:var(--accent-l);color:var(--accent)}
+.tag-fix{background:#fef9c3;color:#854d0e}
+.tag-imp{background:#ede9fe;color:#6d28d9}
+footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem);margin-top:4rem}
+.footer-inner{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.footer-brand{font-family:var(--serif);font-size:1rem;font-weight:600}.footer-brand span{color:var(--accent)}
+.footer-links{display:flex;gap:1.25rem;flex-wrap:wrap}
+.footer-links a{font-size:.75rem;color:var(--muted);text-decoration:none}.footer-links a:hover{color:var(--text)}
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-brand" href="/"><div class="nav-dot"></div>Lucky QR</a>
+  <a class="nav-back" href="/">← Volver</a>
+</nav>
+<main>
+  <div class="hero">
+    <div class="hero-tag">📋 Changelog</div>
+    <h1>Historial de cambios</h1>
+    <p class="hero-sub">Todas las novedades, mejoras y correcciones de Lucky QR.</p>
+  </div>
+
+  <div class="timeline">
+
+    <div class="entry">
+      <div class="entry-date">Mayo 2026</div>
+      <div class="entry-title">Galería, Video, Logos predefinidos y más</div>
+      <div class="entry-body">
+        <ul>
+          <li><span class="tag tag-new">nuevo</span>QR de Galería de imágenes — hasta 5 URLs, página con grilla responsive (Premium)</li>
+          <li><span class="tag tag-new">nuevo</span>QR de Video — YouTube, Vimeo o link directo, con embed responsive (Premium)</li>
+          <li><span class="tag tag-new">nuevo</span>Logos predefinidos — WhatsApp, Instagram, YouTube, WiFi, Email, Bitcoin, Facebook, Twitter/X, TikTok, LinkedIn</li>
+          <li><span class="tag tag-new">nuevo</span>Fondo transparente en descarga PNG</li>
+          <li><span class="tag tag-new">nuevo</span>Selector de fuente para marcos (Sans-Serif, Serif, Monospace)</li>
+          <li><span class="tag tag-new">nuevo</span>Auto-activación de Premium al volver del checkout de Paddle</li>
+          <li><span class="tag tag-new">nuevo</span>Páginas: Ayuda, Estado del sistema, Changelog, Política de reembolso</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="entry">
+      <div class="entry-date">Mayo 2026 — Lanzamiento</div>
+      <div class="entry-title">Lucky QR v1.0 — Lanzamiento oficial</div>
+      <div class="entry-body">
+        <ul>
+          <li><span class="tag tag-new">nuevo</span>16 tipos de QR: URL, Texto, Email, Teléfono, WiFi, SMS, vCard, Ubicación, WhatsApp, YouTube, Instagram, PDF, Evento, App Store, Social y Landing page</li>
+          <li><span class="tag tag-new">nuevo</span>6 idiomas: Español, Inglés, Portugués, Ruso, Chino, Alemán</li>
+          <li><span class="tag tag-new">nuevo</span>Plan Premium con Paddle — suscripción mensual</li>
+          <li><span class="tag tag-new">nuevo</span>Estadísticas detalladas: escaneos, país, sistema operativo, hora</li>
+          <li><span class="tag tag-new">nuevo</span>Carpetas para organizar QR dinámicos</li>
+          <li><span class="tag tag-new">nuevo</span>API pública — generación programática de QRs</li>
+          <li><span class="tag tag-new">nuevo</span>Generación en lote (hasta 50 QRs, descarga ZIP)</li>
+          <li><span class="tag tag-new">nuevo</span>Protección por contraseña en QR dinámicos</li>
+          <li><span class="tag tag-new">nuevo</span>Personalización: formas de módulos, marcos con texto, gradientes, logos</li>
+          <li><span class="tag tag-new">nuevo</span>Blog con artículos SEO sobre QR</li>
+          <li><span class="tag tag-new">nuevo</span>Generación 100% offline para QR estáticos</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</main>
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Lucky <span>QR</span></div>
+    <div class="footer-links">
+      <a href="/">Inicio</a>
+      <a href="/pricing.html">Precios</a>
+      <a href="/help.html">Ayuda</a>
+      <a href="/status.html">Estado</a>
+      <a href="/privacy.html">Privacidad</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

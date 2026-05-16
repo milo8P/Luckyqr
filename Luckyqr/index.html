@@ -489,6 +489,8 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
               <button class="tab tab-premium" onclick="setType('app',this)" data-i18n-title="premium.tag">⭐ App</button>
               <button class="tab tab-premium" onclick="setType('social',this)" data-i18n-title="premium.tag">⭐ Social</button>
               <button class="tab tab-premium" onclick="setType('landing',this)" data-i18n-title="premium.tag">⭐ Landing</button>
+              <button class="tab tab-premium" onclick="setType('gallery',this)">⭐ Galería</button>
+              <button class="tab tab-premium" onclick="setType('video',this)">⭐ Video</button>
             </div>
           </div>
           <div id="input-area" class="field">
@@ -555,6 +557,20 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
             <div class="field"><label>YouTube</label><input type="url" id="soc-yt" placeholder="https://youtube.com/@..." oninput="onInputChange()"/></div>
             <div class="field"><label>Facebook</label><input type="url" id="soc-fb" placeholder="https://facebook.com/..." oninput="onInputChange()"/></div>
           </div>
+          <div id="gallery-fields" style="display:none">
+            <div style="font-size:.71rem;color:var(--muted2);background:var(--accent-l);border:1px solid var(--accent-l2);border-radius:8px;padding:7px 10px;margin-bottom:.75rem">⭐ Premium — Galería de imágenes en una página personalizada.</div>
+            <div class="field"><label>Título de la galería</label><input type="text" id="gal-title" placeholder="Mi galería de fotos" oninput="onInputChange()"/></div>
+            <div class="field"><label>Imagen 1 <span class="sublabel">URL (Imgur, Google Drive...)</span></label><input type="url" id="gal-img1" placeholder="https://imgur.com/..." oninput="onInputChange()"/></div>
+            <div class="field"><label>Imagen 2</label><input type="url" id="gal-img2" placeholder="https://imgur.com/..." oninput="onInputChange()"/></div>
+            <div class="field"><label>Imagen 3</label><input type="url" id="gal-img3" placeholder="https://imgur.com/..." oninput="onInputChange()"/></div>
+            <div class="field"><label>Imagen 4 <span class="sublabel">opcional</span></label><input type="url" id="gal-img4" placeholder="https://imgur.com/..." oninput="onInputChange()"/></div>
+            <div class="field"><label>Imagen 5 <span class="sublabel">opcional</span></label><input type="url" id="gal-img5" placeholder="https://imgur.com/..." oninput="onInputChange()"/></div>
+          </div>
+          <div id="video-fields" style="display:none">
+            <div style="font-size:.71rem;color:var(--muted2);background:var(--accent-l);border:1px solid var(--accent-l2);border-radius:8px;padding:7px 10px;margin-bottom:.75rem">⭐ Premium — Página con video embebido responsive.</div>
+            <div class="field"><label>Título <span class="sublabel">opcional</span></label><input type="text" id="vid-title" placeholder="Mi video" oninput="onInputChange()"/></div>
+            <div class="field"><label>URL del video <span class="sublabel">YouTube, Vimeo o link directo</span></label><input type="url" id="vid-url" placeholder="https://youtube.com/watch?v=..." oninput="onInputChange()"/></div>
+          </div>
           <div id="landing-fields" style="display:none">
             <div style="font-size:.71rem;color:var(--muted2);background:var(--accent-l);border:1px solid var(--accent-l2);border-radius:8px;padding:7px 10px;margin-bottom:.75rem" data-i18n="lp.info">⭐ Premium — the QR points to a custom page with your title, description and button.</div>
             <div class="field"><label data-i18n="lp.title">Title</label><input type="text" id="lp-title" placeholder="My Product or Service" oninput="onInputChange()"/></div>
@@ -581,11 +597,14 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
                 <div class="color-wheel-btn" id="swatch-dark" style="background:#18160f"><input type="color" id="c-dark" value="#18160f" oninput="onColorChange()"/></div>
                 <span class="color-hex-label" id="hex-dark">#18160f</span>
               </div>
-              <div class="color-picker-wrap">
+              <div class="color-picker-wrap" id="bg-color-picker">
                 <label data-i18n="gen.bg">Background</label>
                 <div class="color-wheel-btn" id="swatch-light" style="background:#ffffff"><input type="color" id="c-light" value="#ffffff" oninput="onColorChange()"/></div>
                 <span class="color-hex-label" id="hex-light">#ffffff</span>
               </div>
+            </div>
+            <div style="margin-top:6px">
+              <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;cursor:pointer;color:var(--text)"><input type="checkbox" id="transparent-bg" onchange="onTransparentBgChange()"/> Fondo transparente</label>
             </div>
             <div class="color-warning" id="color-warning" data-i18n="gen.colorWarning">⚠ Colors are very similar — the QR may not scan correctly</div>
           </div>
@@ -622,6 +641,14 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
               <button class="frame-btn" onclick="setFrame('simple',this)" data-i18n="gen.frameSimple">Simple</button>
             </div>
           </div>
+          <div class="field" id="frame-font-field" style="display:none">
+            <label>Fuente del marco</label>
+            <select id="frame-font">
+              <option value="DM Sans,sans-serif">Sans-Serif (default)</option>
+              <option value="Georgia,serif">Serif</option>
+              <option value="monospace">Monospace</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -651,6 +678,21 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
             <div style="display:flex;align-items:center;gap:8px;margin-top:.5rem">
               <img id="logo-preview" style="display:none;width:40px;height:40px;object-fit:contain;border:1px solid var(--border);border-radius:8px;padding:3px"/>
               <button id="btn-remove-logo" onclick="removeLogo()" style="display:none;font-size:.72rem;color:var(--danger);background:none;border:none;cursor:pointer;font-family:var(--sans)" data-i18n="gen.logoRemove">✕ Remove logo</button>
+            </div>
+            <div id="preset-logos" style="display:none;margin-top:.85rem">
+              <div style="font-size:.72rem;color:var(--muted2);margin-bottom:6px">Logos predefinidos:</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <button onclick="applyPresetLogo('whatsapp')" title="WhatsApp" style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:#25D366;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0"><svg viewBox="0 0 32 32" width="22" height="22"><path fill="#fff" d="M16 3C8.8 3 3 8.8 3 16c0 2.3.6 4.5 1.8 6.4L3 29l6.8-1.8A13 13 0 0016 29c7.2 0 13-5.8 13-13S23.2 3 16 3zm6.8 17.8c-.3.8-1.6 1.5-2.2 1.6-.6.1-1.3.1-4.2-1.4-3.5-1.8-5.8-5.4-6-5.7-.2-.3-1.4-1.9-1.4-3.6 0-1.7.9-2.5 1.2-2.9.3-.4.7-.4.9-.4h.7c.2 0 .5 0 .7.5l1 2.5c.1.3.1.6-.1.9l-.5.7c-.2.2-.3.4-.1.8.5.9 1.3 2 2.2 2.7.9.7 1.9 1.2 2.6 1.4.4.2.6.1.9-.1l.7-.8c.2-.3.5-.4.8-.3l2.4 1.1c.5.2.5.4.5.7l-.1 1.3z"/></svg></button>
+                <button onclick="applyPresetLogo('instagram')" title="Instagram" style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0"><svg viewBox="0 0 32 32" width="22" height="22"><rect x="7" y="7" width="18" height="18" rx="5" fill="none" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="4" fill="none" stroke="#fff" stroke-width="2"/><circle cx="22" cy="10" r="1.2" fill="#fff"/></svg></button>
+                <button onclick="applyPresetLogo('youtube')" title="YouTube" style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:#FF0000;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0"><svg viewBox="0 0 32 32" width="22" height="22"><rect x="3" y="8" width="26" height="16" rx="4" fill="#FF0000"/><polygon points="13,11 22,16 13,21" fill="#fff"/></svg></button>
+                <button onclick="applyPresetLogo('wifi')" title="WiFi" style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:#2563EB;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0"><svg viewBox="0 0 32 32" width="22" height="22"><path d="M16 22a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" fill="#fff"/><path d="M10.3 18.3a8 8 0 0 1 11.4 0" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><path d="M6.3 14.3a14 14 0 0 1 19.4 0" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+                <button onclick="applyPresetLogo('email')" title="Email" style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:#6B7280;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0"><svg viewBox="0 0 32 32" width="22" height="22"><rect x="4" y="8" width="24" height="16" rx="3" fill="none" stroke="#fff" stroke-width="2"/><path d="M4 10l12 8 12-8" fill="none" stroke="#fff" stroke-width="2"/></svg></button>
+                <button onclick="applyPresetLogo('bitcoin')" title="Bitcoin" style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:#F7931A;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0"><svg viewBox="0 0 32 32" width="22" height="22"><text x="16" y="23" text-anchor="middle" font-family="serif" font-size="20" font-weight="bold" fill="#fff">₿</text></svg></button>
+                <button onclick="applyPresetLogo('facebook')" title="Facebook" style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:#1877F2;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0"><svg viewBox="0 0 32 32" width="22" height="22"><text x="16" y="24" text-anchor="middle" font-family="serif" font-size="22" font-weight="bold" fill="#fff">f</text></svg></button>
+                <button onclick="applyPresetLogo('twitter')" title="Twitter/X" style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0"><svg viewBox="0 0 32 32" width="22" height="22"><path fill="#fff" d="M17.75 14.6L24.5 7h-1.6l-5.87 6.82L12.3 7H7l7.07 10.29L7 25h1.6l6.18-7.18L19.7 25H25L17.75 14.6zm-2.19 2.54l-.72-1.02-5.7-8.15h2.45l4.6 6.58.72 1.02 5.98 8.55h-2.45l-4.88-6.98z"/></svg></button>
+                <button onclick="applyPresetLogo('tiktok')" title="TikTok" style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:#010101;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0"><svg viewBox="0 0 32 32" width="22" height="22"><path fill="#fff" d="M22 7h-3v12a3 3 0 1 1-3-3v-3a6 6 0 1 0 6 6V10.5A9.5 9.5 0 0 0 22 7z" opacity=".9"/><path fill="#69C9D0" d="M20 6h-3v12a3 3 0 1 1-3-3v-3a6 6 0 1 0 6 6V9.5A9.5 9.5 0 0 0 20 6z"/></svg></button>
+                <button onclick="applyPresetLogo('linkedin')" title="LinkedIn" style="width:36px;height:36px;border:1px solid var(--border);border-radius:8px;background:#0A66C2;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0"><svg viewBox="0 0 32 32" width="22" height="22"><text x="16" y="24" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="bold" fill="#fff">in</text></svg></button>
+              </div>
             </div>
           </div>
         </div>
@@ -984,6 +1026,10 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
       <a href="/pricing.html">Precios</a>
       <a href="/privacy.html" data-i18n="footer.privacy">Privacidad</a>
       <a href="/terms.html" data-i18n="footer.terms">Términos</a>
+      <a href="/help.html">Ayuda</a>
+      <a href="/status.html">Estado</a>
+      <a href="/changelog.html">Changelog</a>
+      <a href="/refund.html">Reembolsos</a>
     </div>
     <div class="footer-copy" data-i18n="footer.copy">lucky-qr.com · Sin servidores · 100% privado · 2026</div>
   </div>

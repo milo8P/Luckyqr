@@ -262,7 +262,7 @@ function showModalError(msg) {
 async function tryGenerate() {
   if (!currentUser) { openModal('login'); showToast(t('toast.loginRequired')); return; }
   console.log('currentUser plan:', currentUser?.plan);
-  if (['app','social','landing'].indexOf(currentType) !== -1 && currentUser.plan !== 'premium') {
+  if (['app','social','landing','gallery','video'].indexOf(currentType) !== -1 && currentUser.plan !== 'premium') {
     showToast(t('toast.premiumRequired') || 'Necesitás Premium ⭐');
     document.getElementById('premium-locked')?.scrollIntoView({ behavior: 'smooth' });
     return;
@@ -271,14 +271,14 @@ async function tryGenerate() {
 }
 
 function setType(type, btn) {
-  if (['app','social','landing'].indexOf(type) !== -1 && currentUser && currentUser.plan !== 'premium') {
+  if (['app','social','landing','gallery','video'].indexOf(type) !== -1 && currentUser && currentUser.plan !== 'premium') {
     showToast(t('toast.premiumRequired'));
     document.getElementById('premium-locked')?.scrollIntoView({ behavior: 'smooth' });
   }
   currentType = type;
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
   btn.classList.add('active');
-  var ids = ['input-area','wifi-fields','sms-fields','vcard-fields','geo-fields','whatsapp-fields','youtube-fields','instagram-fields','pdf-fields','event-fields','app-fields','social-fields'];
+  var ids = ['input-area','wifi-fields','sms-fields','vcard-fields','geo-fields','whatsapp-fields','youtube-fields','instagram-fields','pdf-fields','event-fields','app-fields','social-fields','landing-fields','gallery-fields','video-fields'];
   ids.forEach(function(id){ var e = document.getElementById(id); if (e) e.style.display = 'none'; });
   var cfg = {
     url:   { l:'URL',      s:'ej: https://mi-sitio.com', p:'https://',            t:'url'   },
@@ -286,7 +286,7 @@ function setType(type, btn) {
     email: { l:'Email',    s:'dirección de correo',       p:'nombre@ejemplo.com',  t:'email' },
     tel:   { l:'Teléfono', s:'con código de país',        p:'+54 9 11 1234 5678',  t:'tel'   },
   };
-  var specials = { wifi:'wifi-fields', sms:'sms-fields', vcard:'vcard-fields', geo:'geo-fields', whatsapp:'whatsapp-fields', youtube:'youtube-fields', instagram:'instagram-fields', pdf:'pdf-fields', event:'event-fields', app:'app-fields', social:'social-fields', landing:'landing-fields' };
+  var specials = { wifi:'wifi-fields', sms:'sms-fields', vcard:'vcard-fields', geo:'geo-fields', whatsapp:'whatsapp-fields', youtube:'youtube-fields', instagram:'instagram-fields', pdf:'pdf-fields', event:'event-fields', app:'app-fields', social:'social-fields', landing:'landing-fields', gallery:'gallery-fields', video:'video-fields' };
   if (specials[type]) {
     var el = document.getElementById(specials[type]); if (el) el.style.display = 'block';
   } else {
@@ -440,7 +440,7 @@ function colorSimilar(h1, h2) {
 
 // ── Generar QR ──
 async function generateQR() {
-  if (currentType === 'app' || currentType === 'social' || currentType === 'landing') {
+  if (currentType === 'app' || currentType === 'social' || currentType === 'landing' || currentType === 'gallery' || currentType === 'video') {
     var isPremium = await verifyPremiumServer();
     if (!isPremium) {
       showToast('Necesitás Premium ⭐');
@@ -556,6 +556,24 @@ async function generateQRDynamic() {
     var res = await supabase.from('app_qrs').insert({ code, user_id: currentUser.id, ios_url: iosUrl, android_url: andUrl, name: appName });
     if (res.error) { btn.classList.remove('loading'); showToast(t('toast.app_save_err')); return; }
     content = 'https://lucky-qr.com/app/' + code;
+  } else if (currentType === 'gallery') {
+    var galTitle = stripHtml((document.getElementById('gal-title') || {value:''}).value) || 'Mi galería';
+    var images = [];
+    for (var gi = 1; gi <= 5; gi++) {
+      var imgUrl = validateUrl((document.getElementById('gal-img' + gi) || {value:''}).value);
+      if (imgUrl) images.push(imgUrl);
+    }
+    if (images.length === 0) { btn.classList.remove('loading'); showToast('Agregá al menos una imagen'); return; }
+    var res = await supabase.from('gallery_qrs').insert({ code, user_id: currentUser.id, title: galTitle, images: images });
+    if (res.error) { btn.classList.remove('loading'); showToast('Error al guardar la galería'); return; }
+    content = 'https://lucky-qr.com/gallery/' + code;
+  } else if (currentType === 'video') {
+    var vidTitle = stripHtml((document.getElementById('vid-title') || {value:''}).value) || 'Mi video';
+    var vidUrl = validateUrl((document.getElementById('vid-url') || {value:''}).value);
+    if (!vidUrl) { btn.classList.remove('loading'); showToast('Agregá la URL del video'); return; }
+    var res = await supabase.from('video_qrs').insert({ code, user_id: currentUser.id, title: vidTitle, video_url: vidUrl });
+    if (res.error) { btn.classList.remove('loading'); showToast('Error al guardar el video'); return; }
+    content = 'https://lucky-qr.com/video/' + code;
   } else {
     var title = stripHtml((document.getElementById('soc-title') || {value:''}).value);
     var ig    = (document.getElementById('soc-ig') || {value:''}).value.trim().slice(0, 500);
@@ -613,11 +631,34 @@ async function generateQRDynamic() {
 function downloadQR() {
   var c = document.querySelector('#qr-output canvas');
   if (!c) return;
+  var transparentCb = document.getElementById('transparent-bg');
+  var canvas = c;
+  if (transparentCb && transparentCb.checked) {
+    var nc = document.createElement('canvas');
+    nc.width = c.width; nc.height = c.height;
+    var ctx = nc.getContext('2d');
+    ctx.drawImage(c, 0, 0);
+    var imgData = ctx.getImageData(0, 0, nc.width, nc.height);
+    var d = imgData.data;
+    for (var i = 0; i < d.length; i += 4) {
+      if (d[i] > 240 && d[i+1] > 240 && d[i+2] > 240) d[i+3] = 0;
+    }
+    ctx.putImageData(imgData, 0, 0);
+    canvas = nc;
+  }
   var a = document.createElement('a');
   a.download = 'lucky-qr-' + currentType + '.png';
-  a.href = c.toDataURL('image/png');
+  a.href = canvas.toDataURL('image/png');
   a.click();
   showToast('Descargando PNG...');
+}
+
+function onTransparentBgChange() {
+  var checked = document.getElementById('transparent-bg').checked;
+  var bgPicker = document.getElementById('bg-color-picker');
+  if (bgPicker) bgPicker.style.opacity = checked ? '.35' : '1';
+  var cLight = document.getElementById('c-light');
+  if (cLight) cLight.disabled = checked;
 }
 
 function downloadSVG() {
@@ -682,6 +723,8 @@ function checkPremiumStatus() {
     loadLandingQRs();
     var logoField = document.getElementById('logo-field');
     if (logoField) logoField.style.display = 'block';
+    var presetLogos = document.getElementById('preset-logos');
+    if (presetLogos) presetLogos.style.display = 'block';
   }
 }
 
@@ -1258,6 +1301,40 @@ function removeLogo() {
   document.getElementById('btn-remove-logo').style.display = 'none';
 }
 
+var presetLogoSvgs = {
+  whatsapp: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill="#fff" d="M16 5C9.9 5 5 9.9 5 16c0 2 .5 3.9 1.5 5.5L5 27l5.7-1.5A11 11 0 0016 27c6.1 0 11-4.9 11-11S22.1 5 16 5zm5.7 15c-.2.7-1.3 1.3-1.9 1.4-.5.1-1.1.1-3.5-1.2-2.9-1.5-4.8-4.5-5-4.7-.2-.2-1.2-1.6-1.2-3 0-1.4.7-2.1 1-2.4.3-.3.6-.4.8-.4h.6c.2 0 .4 0 .6.4l.8 2.1c.1.2.1.5-.1.7l-.4.6c-.1.2-.3.3-.1.6.4.8 1.1 1.7 1.8 2.3.8.6 1.6 1 2.2 1.2.3.1.5.1.7-.1l.6-.7c.2-.2.4-.3.7-.2l2 .9c.4.2.4.4.4.6l-.1 1.1z"/></svg>',
+  instagram: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><linearGradient id="ig" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f09433"/><stop offset="25%" stop-color="#e6683c"/><stop offset="50%" stop-color="#dc2743"/><stop offset="75%" stop-color="#cc2366"/><stop offset="100%" stop-color="#bc1888"/></linearGradient></defs><rect width="32" height="32" rx="8" fill="url(#ig)"/><rect x="7" y="7" width="18" height="18" rx="5" fill="none" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="4" fill="none" stroke="#fff" stroke-width="2"/><circle cx="22.5" cy="9.5" r="1.3" fill="#fff"/></svg>',
+  youtube: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#FF0000"/><path fill="#fff" d="M26 11.5s-.3-1.9-1.1-2.7c-1.1-1.1-2.3-1.1-2.8-1.2C19.2 7.5 16 7.5 16 7.5s-3.2 0-6.1.2c-.5.1-1.7.1-2.8 1.2-.8.8-1.1 2.7-1.1 2.7S5.7 13.7 5.7 16v2.2c0 2.3.3 4.5.3 4.5s.3 1.9 1.1 2.7c1.1 1.1 2.5 1 3.1 1.1C12.3 26.8 16 26.8 16 26.8s3.2 0 6.1-.3c.5-.1 1.7-.1 2.8-1.2.8-.8 1.1-2.7 1.1-2.7s.3-2.2.3-4.5V16c0-2.3-.3-4.5-.3-4.5zM13.4 20v-7.8l7.6 3.9-7.6 3.9z"/></svg>',
+  wifi: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#2563EB"/><path fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" d="M7 13a13 13 0 0118 0"/><path fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" d="M10.5 17a8 8 0 0111 0"/><path fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" d="M14 21a3 3 0 014 0"/><circle cx="16" cy="25" r="1.8" fill="#fff"/></svg>',
+  email: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#6B7280"/><rect x="5" y="9" width="22" height="14" rx="2" fill="none" stroke="#fff" stroke-width="2"/><path d="M5 11l11 8 11-8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>',
+  bitcoin: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="16" fill="#F7931A"/><text x="16" y="23" text-anchor="middle" font-family="serif" font-size="20" font-weight="bold" fill="#fff">₿</text></svg>',
+  facebook: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#1877F2"/><path fill="#fff" d="M18.5 7h-2.5C13.5 7 12 8.5 12 11v2h-2v3h2v9h3.5v-9h2.5l.5-3h-3v-1.5c0-.8.4-1.5 1.5-1.5h1.5V7z"/></svg>',
+  twitter: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#000"/><path fill="#fff" d="M18.2 14.2L24 8h-1.4l-5.1 5.9L13.1 8H8l6.1 8.9L8 24h1.4l5.4-6.2 4.3 6.2H24L18.2 14.2zm-1.9 2.2l-.6-.9-5-7.1h2.1l4 5.7.6.9 5.2 7.4H20.5l-4.2-6z"/></svg>',
+  tiktok: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#010101"/><path fill="#69C9D0" d="M14.5 6h3.2v13.3a3.3 3.3 0 103.3-3.3v-3.2a6.5 6.5 0 11-6.5 6.5V6z"/><path fill="#fff" d="M15.7 6h3.2v13.3a3.3 3.3 0 103.3-3.3v-3.2a6.5 6.5 0 11-6.5 6.5V6z" opacity=".8"/></svg>',
+  linkedin: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#0A66C2"/><path fill="#fff" d="M10 13h3v12h-3zm1.5-5a1.75 1.75 0 110 3.5A1.75 1.75 0 0111.5 8zM15 13h3v1.7c.5-.9 1.7-2 3.5-2 3.7 0 4.5 2.4 4.5 5.5V25h-3v-6c0-1.4 0-3.2-2-3.2s-2.3 1.6-2.3 3.1V25h-3V13z"/></svg>'
+};
+
+function applyPresetLogo(name) {
+  var svg = presetLogoSvgs[name];
+  if (!svg) return;
+  var blob = new Blob([svg], {type:'image/svg+xml'});
+  var url = URL.createObjectURL(blob);
+  var img = new Image();
+  img.onload = function() {
+    var nc = document.createElement('canvas');
+    nc.width = 64; nc.height = 64;
+    nc.getContext('2d').drawImage(img, 0, 0, 64, 64);
+    logoDataUrl = nc.toDataURL('image/png');
+    URL.revokeObjectURL(url);
+    var preview = document.getElementById('logo-preview');
+    if (preview) { preview.src = logoDataUrl; preview.style.display = 'block'; }
+    var rem = document.getElementById('btn-remove-logo');
+    if (rem) rem.style.display = 'inline-block';
+    applyLogoToCanvas();
+  };
+  img.src = url;
+}
+
 function applyLogoToCanvas() {
   if (!logoDataUrl) return;
   var canvas = document.querySelector('#qr-output canvas');
@@ -1321,6 +1398,8 @@ function setFrame(frame, btn) {
   currentFrame = frame;
   document.querySelectorAll('.frame-btn').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
+  var ff = document.getElementById('frame-font-field');
+  if (ff) ff.style.display = frame !== 'none' ? 'block' : 'none';
 }
 
 function onGradientChange() {
@@ -1490,7 +1569,9 @@ function applyFrameToCanvas() {
   // text label below border
   if (text) {
     ctx.fillStyle = currentDark;
-    ctx.font = 'bold ' + fontSize + 'px DM Sans,sans-serif';
+    var frameFontEl = document.getElementById('frame-font');
+    var frameFont = frameFontEl ? frameFontEl.value : 'DM Sans,sans-serif';
+    ctx.font = 'bold ' + fontSize + 'px ' + frameFont;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(text, tw / 2, th - textArea / 2);
