@@ -8,26 +8,39 @@ module.exports = async function handler(req, res) {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${process.env.PADDLE_API_KEY}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Paddle-Version': '1'
       },
       body: JSON.stringify({
-        items: [{ price_id: process.env.PADDLE_PRICE_ID, quantity: 1 }],
+        items: [{
+          price_id: process.env.PADDLE_PRICE_ID,
+          quantity: 1
+        }],
         customer: { email },
         custom_data: { user_id: userId },
-        checkout: { url: 'https://lucky-qr.com/success.html' }
+        checkout: {
+          url: 'https://lucky-qr.com/success.html'
+        },
+        currency_code: 'USD'
       })
     })
 
     const data = await response.json()
-    console.log('Paddle response:', JSON.stringify(data))
+    console.log('Paddle full response:', JSON.stringify(data))
 
     if (data.data?.checkout?.url) {
-      res.json({ url: data.data.checkout.url })
-    } else {
-      res.status(500).json({ error: 'No checkout URL', data })
+      return res.json({ url: data.data.checkout.url })
     }
+
+    return res.status(500).json({
+      error: 'No checkout URL',
+      data,
+      apiKey: process.env.PADDLE_API_KEY ? 'present' : 'missing',
+      priceId: process.env.PADDLE_PRICE_ID || 'missing'
+    })
+
   } catch(e) {
     console.error('Paddle error:', e)
-    res.status(500).json({ error: e.message })
+    return res.status(500).json({ error: e.message })
   }
 }
