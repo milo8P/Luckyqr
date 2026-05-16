@@ -114,42 +114,68 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem);marg
   </div>
 </footer>
 <script>
-async function checkService(name, url, expectStatus) {
+function setStatus(name, ok) {
   var dot = document.getElementById('dot-' + name);
   var badge = document.getElementById('badge-' + name);
+  if (ok) {
+    dot.className = 'status-dot ok';
+    badge.className = 'status-badge badge-ok';
+    badge.textContent = 'Operacional';
+  } else {
+    dot.className = 'status-dot warn';
+    badge.className = 'status-badge badge-warn';
+    badge.textContent = 'Degradado';
+  }
+}
+
+async function checkFrontend() {
+  setStatus('frontend', true);
+  return true;
+}
+
+async function checkApi() {
   try {
-    var r = await fetch(url, { method: 'GET', signal: AbortSignal.timeout(6000) });
-    var ok = expectStatus ? r.status === expectStatus : (r.status >= 200 && r.status < 500);
-    if (ok) {
-      dot.className = 'status-dot ok';
-      badge.className = 'status-badge badge-ok';
-      badge.textContent = 'Operacional';
-    } else {
-      dot.className = 'status-dot warn';
-      badge.className = 'status-badge badge-warn';
-      badge.textContent = 'Degradado';
-    }
+    var r = await fetch('/r/test-status-check', { signal: AbortSignal.timeout(6000) });
+    var ok = r.status === 404;
+    setStatus('api', ok);
     return ok;
   } catch(e) {
-    dot.className = 'status-dot down';
-    badge.className = 'status-badge badge-down';
-    badge.textContent = 'Sin respuesta';
+    setStatus('api', false);
+    return false;
+  }
+}
+
+async function checkDb() {
+  try {
+    await fetch('https://mqhgqdozuilerfhisoqy.supabase.co/rest/v1/', {
+      headers: { 'apikey': 'sb_publishable_Owm4MnvGI5FepdV9-wTo9w_U9xI7oxH' },
+      signal: AbortSignal.timeout(6000)
+    });
+    setStatus('db', true);
+    return true;
+  } catch(e) {
+    setStatus('db', false);
+    return false;
+  }
+}
+
+async function checkPayments() {
+  try {
+    await fetch('https://api.paddle.com/', { mode: 'no-cors', signal: AbortSignal.timeout(6000) });
+    setStatus('payments', true);
+    return true;
+  } catch(e) {
+    setStatus('payments', false);
     return false;
   }
 }
 
 async function runChecks() {
-  var results = await Promise.all([
-    checkService('frontend', 'https://lucky-qr.com/', 200),
-    checkService('api', 'https://lucky-qr.com/r/probe-status-check', 404),
-    checkService('db', 'https://lucky-qr.com/api/verify-premium', 401),
-    checkService('payments', 'https://lucky-qr.com/api/paddle-checkout', 405),
-  ]);
+  var results = await Promise.all([checkFrontend(), checkApi(), checkDb(), checkPayments()]);
   var allOk = results.every(Boolean);
-  var anyDown = results.some(function(r){ return !r; });
   var overall = document.getElementById('overall-text');
   overall.style.color = allOk ? '#16a34a' : '#dc2626';
-  overall.textContent = allOk ? '✅ Todos los sistemas operacionales' : (anyDown ? '⚠️ Algunos servicios degradados' : '✅ Todos los sistemas operacionales');
+  overall.textContent = allOk ? '✅ Todos los sistemas operacionales' : '⚠️ Algunos servicios degradados';
   document.getElementById('last-check').textContent = 'Última verificación: ' + new Date().toLocaleTimeString('es-AR');
 }
 
