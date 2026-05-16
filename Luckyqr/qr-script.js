@@ -898,7 +898,7 @@ async function cancelPremium() {
   var res = await fetch('/api/cancel-subscription', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId: currentUser.id })
+    body: JSON.stringify({ userId: currentUser.id, email: currentUser.email })
   });
   var data = await res.json();
   if (data.success) {
