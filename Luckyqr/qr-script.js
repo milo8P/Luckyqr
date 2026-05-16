@@ -18,6 +18,13 @@ var currentFrame = 'none';
 var currentGradient = false;
 var currentGradientColor = '#1d6b4a';
 
+// ── Modo oscuro: aplicar tema antes del primer paint ──
+(function() {
+  var t = localStorage.getItem('lucky_qr_theme')
+    || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+})();
+
 // ── Inicializar Supabase con ESM dinámico ──
 (async function() {
   try {
@@ -1784,3 +1791,25 @@ async function deleteApiKey(id) {
 window.addEventListener('load', function(){
   setTimeout(loadReviewsSection, 1000);
 });
+
+// ── Modo oscuro ──
+function toggleDarkMode() {
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  var next = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('lucky_qr_theme', next);
+  var btn = document.getElementById('dark-mode-btn');
+  if (btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
+}
+
+window.addEventListener('DOMContentLoaded', function() {
+  var btn = document.getElementById('dark-mode-btn');
+  if (btn && document.documentElement.getAttribute('data-theme') === 'dark') btn.textContent = '☀️';
+});
+
+// ── Service Worker ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}

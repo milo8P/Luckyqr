@@ -166,6 +166,39 @@ async function post(path, body) {
     expect(r.status).toBe(200)
   })
 
+  // ── PÁGINAS NUEVAS ──
+  console.log('\n📋 Páginas nuevas')
+  await test('Help Center carga (200)', async () => {
+    const r = await get('/help'); expect(r.status).toBe(200)
+  })
+  await test('Status page carga (200)', async () => {
+    const r = await get('/status'); expect(r.status).toBe(200)
+  })
+  await test('Changelog carga (200)', async () => {
+    const r = await get('/changelog'); expect(r.status).toBe(200)
+  })
+  await test('Refund policy carga (200)', async () => {
+    const r = await get('/refund'); expect(r.status).toBe(200)
+  })
+  await test('OG Image carga (200)', async () => {
+    const r = await get('/og-image.html'); expect(r.status).toBe(200)
+  })
+
+  // ── APIS NUEVAS ──
+  console.log('\n🆕 APIs nuevas')
+  await test('/gallery/codigo-invalido devuelve 404', async () => {
+    const r = await get('/gallery/codigoinvalidoxyz123')
+    expect(r.status).toBe(404)
+  })
+  await test('/video/codigo-invalido devuelve 404', async () => {
+    const r = await get('/video/codigoinvalidoxyz123')
+    expect(r.status).toBe(404)
+  })
+  await test('verify-premium rechaza sin token (401)', async () => {
+    const r = await post('/api/verify-premium', {})
+    expect(r.status).toBe(401)
+  })
+
   // ── RESUMEN ──
   const total = passed + failed
   console.log(`\n${'─'.repeat(40)}`)
