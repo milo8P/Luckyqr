@@ -39,7 +39,20 @@ var mod = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+es
     // verificar sesión existente al cargar
     var res = await supabase.auth.getSession();
     if (res.data && res.data.session) {
-      loadUserProfile(res.data.session.user);
+      await loadUserProfile(res.data.session.user);
+      var urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('_ptxn')) {
+        showToast('¡Pago procesado! Activando Premium...');
+        setTimeout(async function() {
+          await loadUserProfile(res.data.session.user);
+          if (currentUser && currentUser.plan === 'premium') {
+            showToast('¡Bienvenido a Premium! 🎉');
+          }
+          urlParams.delete('_ptxn');
+          var remaining = urlParams.toString();
+          history.replaceState({}, '', window.location.pathname + (remaining ? '?' + remaining : ''));
+        }, 3000);
+      }
     } else {
       showLoggedOut();
     }
@@ -506,6 +519,10 @@ async function generateQRDynamic() {
   if (!supabase) { showToast('Error de conexión'); return; }
   if (!currentUser) { openModal('login'); return; }
 
+  var btn = document.getElementById('gen-btn');
+  btn.classList.add('loading');
+  showToast('Generando QR dinámico...');
+
   var code = generateShortCode();
   var content;
 
@@ -516,17 +533,17 @@ async function generateQRDynamic() {
     var lpBtnUrl  = validateUrl((document.getElementById('lp-btn-url') || {value:''}).value);
     var lpBg      = (document.getElementById('lp-bg')     || {value:'#ffffff'}).value;
     var lpAccent  = (document.getElementById('lp-accent') || {value:'#1d6b4a'}).value;
-    if (!lpTitle) { showToast(t('toast.landing_title')); return; }
+    if (!lpTitle) { btn.classList.remove('loading'); showToast(t('toast.landing_title')); return; }
     var res = await supabase.from('landing_pages').insert({ code, user_id: currentUser.id, title: lpTitle, description: lpDesc, button_text: lpBtnText || 'Ver más', button_url: lpBtnUrl || '', bg_color: lpBg, accent_color: lpAccent });
-    if (res.error) { showToast(t('toast.landing_err')); return; }
+    if (res.error) { btn.classList.remove('loading'); showToast(t('toast.landing_err')); return; }
     content = 'https://lucky-qr.com/landing/' + code;
   } else if (currentType === 'app') {
     var iosUrl  = validateUrl((document.getElementById('app-ios')     || {value:''}).value);
     var andUrl  = validateUrl((document.getElementById('app-android') || {value:''}).value);
     var appName = stripHtml((document.getElementById('app-name')      || {value:''}).value);
-    if (!iosUrl && !andUrl) { showToast(t('toast.app_err')); return; }
+    if (!iosUrl && !andUrl) { btn.classList.remove('loading'); showToast(t('toast.app_err')); return; }
     var res = await supabase.from('app_qrs').insert({ code, user_id: currentUser.id, ios_url: iosUrl, android_url: andUrl, name: appName });
-    if (res.error) { showToast(t('toast.app_save_err')); return; }
+    if (res.error) { btn.classList.remove('loading'); showToast(t('toast.app_save_err')); return; }
     content = 'https://lucky-qr.com/app/' + code;
   } else {
     var title = stripHtml((document.getElementById('soc-title') || {value:''}).value);
@@ -536,21 +553,19 @@ async function generateQRDynamic() {
     var li    = (document.getElementById('soc-li') || {value:''}).value.trim().slice(0, 500);
     var yt    = (document.getElementById('soc-yt') || {value:''}).value.trim().slice(0, 500);
     var fb    = (document.getElementById('soc-fb') || {value:''}).value.trim().slice(0, 500);
-    if (!ig && !tw && !tt && !li && !yt && !fb) { showToast(t('toast.social_err')); return; }
+    if (!ig && !tw && !tt && !li && !yt && !fb) { btn.classList.remove('loading'); showToast(t('toast.social_err')); return; }
     if (ig && !ig.startsWith('http')) ig = 'https://instagram.com/' + ig.replace('@', '');
     if (tw && !tw.startsWith('http')) tw = 'https://x.com/' + tw.replace('@', '');
     if (tt && !tt.startsWith('http')) tt = 'https://tiktok.com/@' + tt.replace('@', '');
     ig = validateUrl(ig) || ''; tw = validateUrl(tw) || ''; tt = validateUrl(tt) || '';
     li = validateUrl(li) || ''; yt = validateUrl(yt) || ''; fb = validateUrl(fb) || '';
     var res = await supabase.from('social_qrs').insert({ code, user_id: currentUser.id, title, instagram: ig, twitter: tw, tiktok: tt, linkedin: li, youtube: yt, facebook: fb });
-    if (res.error) { showToast('Error al guardar el QR social'); return; }
+    if (res.error) { btn.classList.remove('loading'); showToast('Error al guardar el QR social'); return; }
     content = 'https://lucky-qr.com/social/' + code;
   }
 
   currentDark  = document.getElementById('c-dark').value;
   currentLight = document.getElementById('c-light').value;
-  var btn = document.getElementById('gen-btn');
-  btn.classList.add('loading');
   var bar = document.getElementById('progress-bar');
   bar.style.width = '60%';
   try {
@@ -883,7 +898,7 @@ async function cancelPremium() {
   var res = await fetch('/api/cancel-subscription', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ customerId: currentUser.stripe_customer_id })
+    body: JSON.stringify({ userId: currentUser.id })
   });
   var data = await res.json();
   if (data.success) {
