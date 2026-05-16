@@ -815,6 +815,36 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
         </div>
       </div>
 
+      <!-- QR de App -->
+      <div class="dqr-panel" style="margin-top:1.5rem">
+        <div class="dqr-panel-hdr">
+          <span class="dqr-panel-title">Mis QR de App</span>
+        </div>
+        <div class="dqr-body">
+          <div id="app-qr-list"></div>
+        </div>
+      </div>
+
+      <!-- QR de Redes -->
+      <div class="dqr-panel" style="margin-top:1.5rem">
+        <div class="dqr-panel-hdr">
+          <span class="dqr-panel-title">Mis QR de Redes Sociales</span>
+        </div>
+        <div class="dqr-body">
+          <div id="social-qr-list"></div>
+        </div>
+      </div>
+
+      <!-- QR de Landing -->
+      <div class="dqr-panel" style="margin-top:1.5rem">
+        <div class="dqr-panel-hdr">
+          <span class="dqr-panel-title">Mis Landing Pages</span>
+        </div>
+        <div class="dqr-body">
+          <div id="landing-qr-list"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -1087,6 +1117,49 @@ footer{border-top:1px solid var(--border);padding:2rem clamp(1rem,5vw,3rem)}
     </div>
     <button class="btn-save-url" id="bulk-run-btn" onclick="runBulkGeneration()" data-i18n="bulk.run">📦 Generar y descargar ZIP</button>
     <button class="btn-cancel-edit" onclick="closeBulkModal()" data-i18n="bulk.cancel">Cancelar</button>
+  </div>
+</div>
+
+<!-- Edit App Modal -->
+<div class="edit-modal" id="edit-app-modal">
+  <div class="edit-modal-box">
+    <h3>Editar QR de App</h3>
+    <input type="hidden" id="edit-app-id"/>
+    <div class="field"><label>URL App Store (iOS)</label><input type="url" id="edit-app-ios" placeholder="https://apps.apple.com/..."/></div>
+    <div class="field"><label>URL Google Play (Android)</label><input type="url" id="edit-app-android" placeholder="https://play.google.com/..."/></div>
+    <button class="btn-save-url" onclick="saveEditedApp()">Guardar</button>
+    <button class="btn-cancel-edit" onclick="document.getElementById('edit-app-modal').classList.remove('open')">Cancelar</button>
+  </div>
+</div>
+
+<!-- Edit Social Modal -->
+<div class="edit-modal" id="edit-social-modal">
+  <div class="edit-modal-box">
+    <h3>Editar QR de Redes</h3>
+    <input type="hidden" id="edit-social-id"/>
+    <div class="field"><label>Título</label><input type="text" id="edit-social-title"/></div>
+    <div class="field"><label>Instagram</label><input type="url" id="edit-social-instagram" placeholder="https://instagram.com/..."/></div>
+    <div class="field"><label>Twitter/X</label><input type="url" id="edit-social-twitter" placeholder="https://twitter.com/..."/></div>
+    <div class="field"><label>TikTok</label><input type="url" id="edit-social-tiktok" placeholder="https://tiktok.com/..."/></div>
+    <div class="field"><label>LinkedIn</label><input type="url" id="edit-social-linkedin" placeholder="https://linkedin.com/..."/></div>
+    <div class="field"><label>YouTube</label><input type="url" id="edit-social-youtube" placeholder="https://youtube.com/..."/></div>
+    <div class="field"><label>Facebook</label><input type="url" id="edit-social-facebook" placeholder="https://facebook.com/..."/></div>
+    <button class="btn-save-url" onclick="saveEditedSocial()">Guardar</button>
+    <button class="btn-cancel-edit" onclick="document.getElementById('edit-social-modal').classList.remove('open')">Cancelar</button>
+  </div>
+</div>
+
+<!-- Edit Landing Modal -->
+<div class="edit-modal" id="edit-landing-modal">
+  <div class="edit-modal-box">
+    <h3>Editar Landing Page</h3>
+    <input type="hidden" id="edit-landing-id"/>
+    <div class="field"><label>Título</label><input type="text" id="edit-landing-title"/></div>
+    <div class="field"><label>Descripción</label><textarea id="edit-landing-desc" style="min-height:80px"></textarea></div>
+    <div class="field"><label>Texto del botón</label><input type="text" id="edit-landing-btn-text"/></div>
+    <div class="field"><label>URL del botón</label><input type="url" id="edit-landing-btn-url"/></div>
+    <button class="btn-save-url" onclick="saveEditedLanding()">Guardar</button>
+    <button class="btn-cancel-edit" onclick="document.getElementById('edit-landing-modal').classList.remove('open')">Cancelar</button>
   </div>
 </div>
 

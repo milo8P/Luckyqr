@@ -666,9 +666,162 @@ function checkPremiumStatus() {
     loadScansChart();
     loadFolders();
     loadApiKeys();
+    loadAppQRs();
+    loadSocialQRs();
+    loadLandingQRs();
     var logoField = document.getElementById('logo-field');
     if (logoField) logoField.style.display = 'block';
   }
+}
+
+// ── App / Social / Landing QRs ──
+async function loadAppQRs() {
+  if (!currentUser || !supabase) return;
+  var res = await supabase.from('app_qrs').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  var list = document.getElementById('app-qr-list');
+  if (!list) return;
+  var qrs = res.data || [];
+  if (qrs.length === 0) {
+    list.innerHTML = '<p style="font-size:.82rem;color:var(--muted2);text-align:center;padding:.5rem 0">No tenés QR de App todavía.</p>';
+    return;
+  }
+  list.innerHTML = qrs.map(function(qr) {
+    return '<div class="dqr-item">'
+      + '<div class="dqr-item-head"><span class="dqr-item-name">' + (qr.name || 'App QR') + '</span><span class="dqr-item-code">' + qr.code + '</span></div>'
+      + '<div class="dqr-item-url">iOS: ' + (qr.ios_url || '-') + '</div>'
+      + '<div class="dqr-item-url">Android: ' + (qr.android_url || '-') + '</div>'
+      + '<div class="dqr-item-actions">'
+      + '<button class="btn-dqr-action" onclick="openEditAppModal(\'' + qr.id + '\',\'' + (qr.ios_url||'').replace(/'/g,"\\'") + '\',\'' + (qr.android_url||'').replace(/'/g,"\\'") + '\')">Editar</button>'
+      + '<button class="btn-dqr-action" onclick="copyText(\'https://lucky-qr.com/app/' + qr.code + '\')">Copiar link</button>'
+      + '<button class="btn-dqr-action danger" onclick="deleteAppQR(\'' + qr.id + '\')">Borrar</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function loadSocialQRs() {
+  if (!currentUser || !supabase) return;
+  var res = await supabase.from('social_qrs').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  var list = document.getElementById('social-qr-list');
+  if (!list) return;
+  var qrs = res.data || [];
+  if (qrs.length === 0) {
+    list.innerHTML = '<p style="font-size:.82rem;color:var(--muted2);text-align:center;padding:.5rem 0">No tenés QR de Redes todavía.</p>';
+    return;
+  }
+  list.innerHTML = qrs.map(function(qr) {
+    return '<div class="dqr-item">'
+      + '<div class="dqr-item-head"><span class="dqr-item-name">' + (qr.title || 'Social QR') + '</span><span class="dqr-item-code">' + qr.code + '</span></div>'
+      + '<div class="dqr-item-actions">'
+      + '<button class="btn-dqr-action" onclick="openEditSocialModal(\'' + qr.id + '\',' + JSON.stringify(qr).replace(/'/g,"\\'") + ')">Editar</button>'
+      + '<button class="btn-dqr-action" onclick="copyText(\'https://lucky-qr.com/social/' + qr.code + '\')">Copiar link</button>'
+      + '<button class="btn-dqr-action danger" onclick="deleteSocialQR(\'' + qr.id + '\')">Borrar</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function loadLandingQRs() {
+  if (!currentUser || !supabase) return;
+  var res = await supabase.from('landing_pages').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
+  var list = document.getElementById('landing-qr-list');
+  if (!list) return;
+  var qrs = res.data || [];
+  if (qrs.length === 0) {
+    list.innerHTML = '<p style="font-size:.82rem;color:var(--muted2);text-align:center;padding:.5rem 0">No tenés Landing Pages todavía.</p>';
+    return;
+  }
+  list.innerHTML = qrs.map(function(qr) {
+    return '<div class="dqr-item">'
+      + '<div class="dqr-item-head"><span class="dqr-item-name">' + (qr.title || 'Landing QR') + '</span><span class="dqr-item-code">' + qr.code + '</span></div>'
+      + '<div class="dqr-item-url">' + (qr.description || '') + '</div>'
+      + '<div class="dqr-item-actions">'
+      + '<button class="btn-dqr-action" onclick="openEditLandingModal(\'' + qr.id + '\',' + JSON.stringify(qr).replace(/'/g,"\\'") + ')">Editar</button>'
+      + '<button class="btn-dqr-action" onclick="copyText(\'https://lucky-qr.com/landing/' + qr.code + '\')">Copiar link</button>'
+      + '<button class="btn-dqr-action danger" onclick="deleteLandingQR(\'' + qr.id + '\')">Borrar</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+function openEditAppModal(id, iosUrl, androidUrl) {
+  document.getElementById('edit-app-id').value = id;
+  document.getElementById('edit-app-ios').value = iosUrl;
+  document.getElementById('edit-app-android').value = androidUrl;
+  document.getElementById('edit-app-modal').classList.add('open');
+}
+async function saveEditedApp() {
+  var id = document.getElementById('edit-app-id').value;
+  var ios = document.getElementById('edit-app-ios').value.trim();
+  var android = document.getElementById('edit-app-android').value.trim();
+  await supabase.from('app_qrs').update({ ios_url: ios, android_url: android }).eq('id', id);
+  document.getElementById('edit-app-modal').classList.remove('open');
+  showToast('App QR actualizado');
+  loadAppQRs();
+}
+async function deleteAppQR(id) {
+  if (!confirm('¿Borrar este QR?')) return;
+  await supabase.from('app_qrs').delete().eq('id', id);
+  showToast('QR eliminado');
+  loadAppQRs();
+}
+
+function openEditSocialModal(id, qr) {
+  document.getElementById('edit-social-id').value = id;
+  document.getElementById('edit-social-title').value = qr.title || '';
+  document.getElementById('edit-social-instagram').value = qr.instagram || '';
+  document.getElementById('edit-social-twitter').value = qr.twitter || '';
+  document.getElementById('edit-social-tiktok').value = qr.tiktok || '';
+  document.getElementById('edit-social-linkedin').value = qr.linkedin || '';
+  document.getElementById('edit-social-youtube').value = qr.youtube || '';
+  document.getElementById('edit-social-facebook').value = qr.facebook || '';
+  document.getElementById('edit-social-modal').classList.add('open');
+}
+async function saveEditedSocial() {
+  var id = document.getElementById('edit-social-id').value;
+  await supabase.from('social_qrs').update({
+    title: document.getElementById('edit-social-title').value,
+    instagram: document.getElementById('edit-social-instagram').value,
+    twitter: document.getElementById('edit-social-twitter').value,
+    tiktok: document.getElementById('edit-social-tiktok').value,
+    linkedin: document.getElementById('edit-social-linkedin').value,
+    youtube: document.getElementById('edit-social-youtube').value,
+    facebook: document.getElementById('edit-social-facebook').value
+  }).eq('id', id);
+  document.getElementById('edit-social-modal').classList.remove('open');
+  showToast('QR de Redes actualizado');
+  loadSocialQRs();
+}
+async function deleteSocialQR(id) {
+  if (!confirm('¿Borrar este QR?')) return;
+  await supabase.from('social_qrs').delete().eq('id', id);
+  showToast('QR eliminado');
+  loadSocialQRs();
+}
+
+function openEditLandingModal(id, qr) {
+  document.getElementById('edit-landing-id').value = id;
+  document.getElementById('edit-landing-title').value = qr.title || '';
+  document.getElementById('edit-landing-desc').value = qr.description || '';
+  document.getElementById('edit-landing-btn-text').value = qr.button_text || '';
+  document.getElementById('edit-landing-btn-url').value = qr.button_url || '';
+  document.getElementById('edit-landing-modal').classList.add('open');
+}
+async function saveEditedLanding() {
+  var id = document.getElementById('edit-landing-id').value;
+  await supabase.from('landing_pages').update({
+    title: document.getElementById('edit-landing-title').value,
+    description: document.getElementById('edit-landing-desc').value,
+    button_text: document.getElementById('edit-landing-btn-text').value,
+    button_url: document.getElementById('edit-landing-btn-url').value,
+    updated_at: new Date().toISOString()
+  }).eq('id', id);
+  document.getElementById('edit-landing-modal').classList.remove('open');
+  showToast('Landing Page actualizada');
+  loadLandingQRs();
+}
+async function deleteLandingQR(id) {
+  if (!confirm('¿Borrar este QR?')) return;
+  await supabase.from('landing_pages').delete().eq('id', id);
+  showToast('QR eliminado');
+  loadLandingQRs();
 }
 
 // ── QR Dinámicos ──
