@@ -848,28 +848,22 @@ async function sendReview() {
 }
 async function upgradeToPremium() {
   if (!currentUser) { openModal('login'); return; }
-  showToast('Redirigiendo al pago...');
-  try {
-    var session = await supabase.auth.getSession();
-    var res = await fetch('/api/paddle-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: currentUser.id,
-        email: currentUser.email
-      })
-    });
-    var data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      showToast('Error al iniciar el pago');
-      console.error('Paddle error:', data);
+
+  Paddle.Initialize({
+    token: 'live_7d279f61a3499fed520f7cd8c08'
+  });
+
+  Paddle.Checkout.open({
+    items: [{ priceId: 'pri_01krm73abr82gjsgehg43yrz69', quantity: 1 }],
+    customer: { email: currentUser.email },
+    customData: { user_id: currentUser.id },
+    settings: {
+      successUrl: 'https://lucky-qr.com/success.html',
+      displayMode: 'overlay',
+      theme: 'light',
+      locale: 'es'
     }
-  } catch(e) {
-    showToast('Error de conexión');
-    console.error(e);
-  }
+  });
 }
 async function resetPassword() {
   var email = document.getElementById('auth-email').value.trim();
